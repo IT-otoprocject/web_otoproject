@@ -16,6 +16,17 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- User Level -->
+        <div class="form-group">
+            <label for="level">Level User</label>
+            <select name="level" id="level" class="form-control">
+                <option value="admin" {{ old('level') == 'admin' ? 'selected' : '' }}>Admin</option>
+                <option value="kasir" {{ old('level') == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                <option value="mekanik" {{ old('level') == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
+            </select>
+        </div>
+
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

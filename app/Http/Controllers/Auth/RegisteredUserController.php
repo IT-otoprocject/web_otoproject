@@ -33,12 +33,14 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'level' => ['required', 'string', 'in:admin,kasir,mekanik'], // Validasi level
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'level' => $request['level'], // Simpan level
         ]);
 
         event(new Registered($user));

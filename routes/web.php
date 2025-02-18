@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeDashboardController;
+use App\Http\Controllers\AdminController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
@@ -34,6 +35,11 @@ Route::get('/kasir', function () {
 Route::get('/mekanik', function () {
     return view('mekanik.dashboard');
 })->middleware('level:mekanik');
+
+
+// Rute untuk dashboard admin
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
 
 
 

@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+
 
 class RegisterController extends Controller
 {
@@ -52,7 +54,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'level' => ['required', 'in:admin,kasir,mekanik'], // Validasi level
+            'level' => ['required', 'string', 'in:admin,kasir,mekanik'], // Validasi level
         ]);
     }
 
@@ -64,6 +66,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        dd($data); // Ini akan menampilkan semua data yang diterima
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],

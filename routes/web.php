@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SpkController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
@@ -40,6 +41,25 @@ Route::get('/mekanik', function () {
 // Rute untuk dashboard admin
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
+// rute untuk SPK  
+// Route::get('/spk/create', function () {
+//     return view('spk.create');
+// })->middleware('level:kasir');
+
+// Route::post('/spk', function () {
+//     return view('spk.store');
+// })->middleware('level:kasir');
+
+// rute untuk SPK  
+Route::middleware(['auth', 'level:kasir'])->group(function () {
+    Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
+    Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
+});
+
+Route::middleware(['auth', 'level:mekanik'])->group(function () {
+    Route::get('/mekanik/spk', [SpkController::class, 'index'])->name('mekanik.spk.index');
+    Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
+});
 
 
 

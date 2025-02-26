@@ -40,6 +40,7 @@ Route::get('/mekanik', function () {
 
 // Rute untuk dashboard admin
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
 // rute untuk SPK  
 // Route::get('/spk/create', function () {
@@ -50,16 +51,20 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('adm
 //     return view('spk.store');
 // })->middleware('level:kasir');
 
-// rute untuk SPK  
-Route::middleware(['auth', 'level:kasir'])->group(function () {
-    Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
-    Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
-});
+// rute untuk SPK
+Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
+Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
+Route::get('/spk', [SpkController::class, 'index'])->name('spk.index');
 
-Route::middleware(['auth', 'level:mekanik'])->group(function () {
-    Route::get('/mekanik/spk', [SpkController::class, 'index'])->name('mekanik.spk.index');
-    Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
-});
+// Route::middleware(['auth', 'level:kasir'])->group(function () {
+//     Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
+//     Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
+// });
+
+// Route::middleware(['auth', 'level:mekanik'])->group(function () {
+//     Route::get('/mekanik/spk', [SpkController::class, 'index'])->name('mekanik.spk.index');
+//     Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
+// });
 
 
 

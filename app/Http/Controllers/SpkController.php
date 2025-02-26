@@ -48,7 +48,12 @@ class SpkController extends Controller
     // menampilkan daftar SPK yang baru diterbitkan untuk mekanik.
     public function index()
     {
-        $spks = Spk::where('status', 'baru diterbitkan')->get();
-        return view('mekanik.spk.index', compact('spks'));
+        $spks = Spk::all(); // Ambil semua data SPK
+        return view('spk.index', compact('spks'));
     }
+    // public function index()
+    // {
+    //     $spks = Spk::where('status', 'baru diterbitkan')->get();
+    //     return view('mekanik.spk.index', compact('spks'));
+    // }
 }

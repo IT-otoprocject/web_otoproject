@@ -14,10 +14,4 @@ class Controller extends BaseController
 }
 
 
-class AdminController extends Controller
-{
-    public function dashboard()
-    {
-        return view('admin.dashboard'); // Pastikan Anda memiliki view ini
-    }
-}
+

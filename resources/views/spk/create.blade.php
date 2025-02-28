@@ -8,18 +8,15 @@
         <h1>Buat SPK</h1>
         <form action="{{ route('spk.store') }}" method="POST">
             @csrf
-            <div class="form-group">
+            <div class="form-group" >
                 <label for="no_spk">No. SPK</label>
-                <input type="text" class="form-control" id="no_spk" name="no_spk" required>
+                <input style="color: black;" type="text" class="form-control" id="no_spk" name="no_spk" required>
             </div>
             <div class="form-group">
                 <label for="tanggal">Tanggal</label>
                 <input type="date" class="form-control" id="tanggal" name="tanggal" required>
             </div>
-            <div class="form-group">
-                <label for="no_so">No. SO</label>
-                <input type="text" class="form-control" id="no_so" name="no_so" required>
-            </div>
+
             <div class="form-group">
                 <label for="teknisi_1">Teknisi 1</label>
                 <input type="text" class="form-control" id="teknisi_1" name="teknisi_1" required>
@@ -49,12 +46,16 @@
                 <input type="text" class="form-control" id="no_plat" name="no_plat" required>
             </div>
             <div class="form-group">
-                <label for="nama_barang">Nama Barang</label>
-                <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
+                <!-- <label for="nama_barang">Nama Barang</label>
+                <input type="text" class="form-control" id="nama_barang" name="nama_barang" required> -->
+                <label for="nama_barang[]">Nama Barang:</label>
+                <input type="text" name="nama_barang[]" required>
             </div>
             <div class="form-group">
-                <label for="qty">Qty</label>
-                <input type="number" class="form-control" id="qty" name="qty" required>
+                <!-- <label for="qty">Qty</label>
+                <input type="number" class="form-control" id="qty" name="qty" required> -->
+                <label for="qty[]">Quantity:</label>
+                <input type="number" name="qty[]" required>
             </div>
             <div class="form-group">
                 <label for="catatan">Catatan</label>

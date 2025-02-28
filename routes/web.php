@@ -56,6 +56,9 @@ Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
 Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
 Route::get('/spk', [SpkController::class, 'index'])->name('spk.index');
 
+// Rute untuk mekanik.spk.show (detail SPK)
+Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
+
 // Route::middleware(['auth', 'level:kasir'])->group(function () {
 //     Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
 //     Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');

@@ -12,4 +12,10 @@ class SpkItem extends Model
     protected $fillable = [
         'spk_id', 'nama_barang', 'qty'
     ];
+
+    // Definisikan relasi dengan model Spk
+    public function spk()
+    {
+        return $this->belongsTo(Spk::class, 'spk_id'); // Ganti 'spk_id' dengan nama kolom foreign key yang sesuai
+    }
 }

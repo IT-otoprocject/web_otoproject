@@ -18,9 +18,13 @@
         <p><strong>Catatan:</strong> {{ $spk->catatan }}</p>
         <h2>Barang</h2>
         <ul>
+            @if ($spk->items && $spk->items->isNotEmpty()) <!-- Memeriksa apakah items tidak null dan tidak kosong -->
             @foreach ($spk->items as $item)
-                <li>{{ $item->nama_barang }} - {{ $item->qty }}</li>
+            <li>{{ $item->nama_barang }} - {{ $item->qty }}</li>
             @endforeach
+            @else
+            <li>Tidak ada barang ditemukan.</li>
+            @endif
         </ul>
     </div>
 </x-app-layout>

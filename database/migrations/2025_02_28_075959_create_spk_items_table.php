@@ -15,7 +15,7 @@ class CreateSpkItemsTable extends Migration
     {
         Schema::create('spk_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('spk_id')->constrained('spks')->onDelete('cascade');
+            $table->foreignId('spk_id')->constrained('spks')->onDelete('cascade'); // Menghubungkan dengan tabel spks
             $table->string('nama_barang');
             $table->integer('qty');
             $table->timestamps();

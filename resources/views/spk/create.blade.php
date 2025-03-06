@@ -8,7 +8,7 @@
         <h1>Buat SPK</h1>
         <form action="{{ route('spk.store') }}" method="POST">
             @csrf
-            <div class="form-group" >
+            <div class="form-group">
                 <label for="no_spk">No. SPK</label>
                 <input style="color: black;" type="text" class="form-control" id="no_spk" name="no_spk" required>
             </div>
@@ -45,22 +45,24 @@
                 <label for="no_plat">No. Plat</label>
                 <input type="text" class="form-control" id="no_plat" name="no_plat" required>
             </div>
-            <div class="form-group">
-                <!-- <label for="nama_barang">Nama Barang</label>
-                <input type="text" class="form-control" id="nama_barang" name="nama_barang" required> -->
-                <label for="nama_barang[]">Nama Barang:</label>
-                <input type="text" name="nama_barang[]" required>
-            </div>
-            <div class="form-group">
-                <!-- <label for="qty">Qty</label>
-                <input type="number" class="form-control" id="qty" name="qty" required> -->
-                <label for="qty[]">Quantity:</label>
-                <input type="number" name="qty[]" required>
-            </div>
+
             <div class="form-group">
                 <label for="catatan">Catatan</label>
                 <textarea class="form-control" id="catatan" name="catatan"></textarea>
             </div>
+
+            <div id="itemContainer">
+                <div class="form-group">
+                    <label for="nama_barang[]">Nama Barang:</label>
+                    <input type="text" name="nama_barang[]" required>
+                </div>
+                <div class="form-group">
+                    <label for="qty[]">Quantity:</label>
+                    <input type="number" name="qty[]" required>
+                </div>
+            </div>
+            <button type="button" id="addItem" class="btn btn-secondary">Add Item</button>
+
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>

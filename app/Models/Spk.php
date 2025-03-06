@@ -14,8 +14,22 @@ class Spk extends Model
     
 
     protected $fillable = [
-        'no_spk', 'tanggal', 'teknisi_1', 'teknisi_2', 'customer', 'alamat', 'no_hp', 'jenis_mobil', 'no_plat', 'catatan'
+        'no_spk',
+        'tanggal',
+        'teknisi_1',
+        'teknisi_2',
+        'customer',
+        'alamat',
+        'no_hp',
+        'jenis_mobil',
+        'no_plat',
+        'catatan',
+        'status',
+        'waktu_kerja',
+        'catatan_kerja',
+        'teknisi_selesai',
     ];
+    
 
       // Definisikan relasi dengan model Item
       public function items()

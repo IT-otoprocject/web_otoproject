@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SpkController;
+use App\Http\Controllers\KerjaMekanikController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
@@ -68,6 +69,10 @@ Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.s
 //     Route::get('/mekanik/spk', [SpkController::class, 'index'])->name('mekanik.spk.index');
 //     Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
 // });
+
+// Rute untuk kerja mekanik
+Route::get('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class, 'show'])->name('kerja.mekanik');
+Route::post('mekanik/spk/kerja-selesai/{spk_id}', [KerjaMekanikController::class, 'selesai'])->name('kerja.selesai');
 
 
 

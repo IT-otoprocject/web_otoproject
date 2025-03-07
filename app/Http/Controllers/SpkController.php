@@ -16,7 +16,7 @@ class SpkController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'no_spk' => 'required|string|unique:spks',
+            'garage' => 'required|string',
             'tanggal' => 'required|date',
             'teknisi_1' => 'required|string',
             'teknisi_2' => 'nullable|string',
@@ -32,9 +32,22 @@ class SpkController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        // Format the date to 'dmy' (e.g., 311225 for 31 December 2025)
+        $formattedDate = \Carbon\Carbon::parse($validatedData['tanggal'])->format('dmy');
+
+        // Get the count of existing SPK for the same date
+        $existingCount = Spk::whereDate('tanggal', $validatedData['tanggal'])->count();
+
+        // Generate the next sequence number
+        $nextNumber = $existingCount + 1;
+
+        // Create the no_spk in the desired format
+        $no_spk = "SPK/{$formattedDate}/{$nextNumber}";
+
         // Simpan data SPK
         $spk = Spk::create([
-            'no_spk' => $validatedData['no_spk'],
+            'no_spk' => $no_spk,
+            'garage' => $validatedData['garage'],
             'tanggal' => $validatedData['tanggal'],
             'teknisi_1' => $validatedData['teknisi_1'],
             'teknisi_2' => $validatedData['teknisi_2'],
@@ -45,6 +58,8 @@ class SpkController extends Controller
             'no_plat' => $validatedData['no_plat'],
             'catatan' => $validatedData['catatan'] ?? null,
         ]);
+
+
 
         // Loop untuk menyimpan setiap item ke database
         foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
@@ -70,8 +85,8 @@ class SpkController extends Controller
     //     return view('mekanik.spk.show', compact('spk'));
     // }
 
-    
-    
+
+
 
     // menampilkan daftar SPK yang baru diterbitkan untuk mekanik.
     public function index()
@@ -79,7 +94,7 @@ class SpkController extends Controller
         // Mengambil semua data SPK dari database
         $spks = Spk::all();
 
-         // Debugging: Periksa apakah $spks adalah array atau objek
+        // Debugging: Periksa apakah $spks adalah array atau objek
         //  dd($spks);
         // dd($spks->toArray());
 

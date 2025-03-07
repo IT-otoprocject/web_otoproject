@@ -39,17 +39,26 @@
                         </x-dropdown-link>
 
                         @if (Auth::user()->level == 'admin')
-                            <x-dropdown-link :href="route('admin.dashboard')">
-                                {{ __('Admin Dashboard') }}
-                            </x-dropdown-link>
+                        <x-dropdown-link :href="route('admin.dashboard')">
+                            {{ __('Admin Dashboard') }}
+                        </x-dropdown-link>
                         @endif
+
+                        <!-- akses kasir  -->
+                        @if (in_array(Auth::user()->level, ['admin', 'kasir']))
+                        <x-dropdown-link :href="route('spk.index')">
+                            {{ __('Daftar SPK') }}
+                        </x-dropdown-link>
+                        @endif
+
+
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -95,7 +104,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

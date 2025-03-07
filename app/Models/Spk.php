@@ -28,6 +28,7 @@ class Spk extends Model
         'waktu_kerja',
         'catatan_kerja',
         'teknisi_selesai',
+        'garage',
     ];
     
 

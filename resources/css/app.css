@@ -13,3 +13,10 @@ textarea {
 .container{
     color: white;
 }
+
+option{
+    color: black;
+}
+select{
+    color: black;
+}

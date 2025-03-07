@@ -16,6 +16,7 @@ class CreateSpksTable extends Migration
         Schema::create('spks', function (Blueprint $table) {
             $table->id();
             $table->string('no_spk')->unique();
+            $table->string('garage');
             $table->date('tanggal');
             $table->string('teknisi_1');
             $table->string('teknisi_2')->nullable();
@@ -25,6 +26,7 @@ class CreateSpksTable extends Migration
             $table->string('jenis_mobil');
             $table->string('no_plat');
             $table->text('catatan')->nullable();
+            $table->string('status')->default('Baru Diterbitkan');
             $table->timestamps();
         });
     }

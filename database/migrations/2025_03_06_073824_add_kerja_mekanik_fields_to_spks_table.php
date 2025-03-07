@@ -12,7 +12,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('spks', function (Blueprint $table) {
-            // $table->string('status')->default('Belum Selesai');
+            // $table->string('status')->default('Belum Selesai')->change();
             $table->string('waktu_kerja')->nullable();
             $table->text('catatan_kerja')->nullable();
             $table->string('teknisi_selesai')->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('spks', function (Blueprint $table) {
-            $table->dropColumn(['status', 'waktu_kerja', 'catatan_kerja', 'teknisi_selesai']);
+            $table->dropColumn(['waktu_kerja', 'catatan_kerja', 'teknisi_selesai']);
         });
     }
 };

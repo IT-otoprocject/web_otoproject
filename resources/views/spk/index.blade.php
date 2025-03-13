@@ -2,8 +2,10 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Daftar SPK') }}
+            <a href="{{ route('spk.create') }}" class="btn btn-primary float-end">Buat SPK Baru</a>
         </h2>
     </x-slot>
+
     <div class="container">
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -13,18 +15,72 @@
                         @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
-                        @if ($spks->isNotEmpty()) <!-- Memeriksa apakah koleksi tidak kosong -->
+
+                        <!-- Tombol Filter -->
+                        <button type="button" id="openFilter" class="btn btn-secondary mb-4">Filter Data</button>
+
+                        <!-- Popup Filter -->
+                        <div id="filterPopup" class="filter-popup d-none">
+                            <div class="filter-content">
+                                <!-- Tombol "X" untuk menutup popup -->
+                                <button type="button" id="closePopup" class="close-button">X</button>
+                                
+                                <h5 class="mb-3">Filter Data SPK</h5>
+                                <form method="GET" action="{{ route('spk.index') }}">
+                                    <!-- Dropdown Garage -->
+                                    <div class="form-group">
+                                        <label for="garage">Garage:</label>
+                                        <select name="garage" id="garage" class="form-control">
+                                            <option value="" selected>-- Pilih Garage --</option>
+                                            <option value="Bandung" {{ request('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
+                                            <option value="Bekasi" {{ request('garage') == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
+                                            <option value="Bintaro" {{ request('garage') == 'Bintaro' ? 'selected' : '' }}>Bintaro</option>
+                                            <option value="Cengkareng" {{ request('garage') == 'Cengkareng' ? 'selected' : '' }}>Cengkareng</option>
+                                            <option value="Cibubur" {{ request('garage') == 'Cibubur' ? 'selected' : '' }}>Cibubur</option>
+                                            <option value="Surabaya" {{ request('garage') == 'Surabaya' ? 'selected' : '' }}>Surabaya</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Input Tanggal -->
+                                    <div class="form-group mt-3">
+                                        <label for="tanggal">Tanggal:</label>
+                                        <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ request('tanggal') }}">
+                                    </div>
+
+                                    <!-- Dropdown Status -->
+                                    <div class="form-group mt-3">
+                                        <label for="status">Status:</label>
+                                        <select name="status" id="status" class="form-control">
+                                            <option value="" selected>-- Pilih Status --</option>
+                                            <option value="Baru Diterbitkan" {{ request('status') == 'Baru Diterbitkan' ? 'selected' : '' }}>Baru Diterbitkan</option>
+                                            <option value="Dalam Proses" {{ request('status') == 'Dalam Proses' ? 'selected' : '' }}>Dalam Proses</option>
+                                            <option value="Sudah Selesai" {{ request('status') == 'Sudah Selesai' ? 'selected' : '' }}>Sudah Selesai</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Tombol Aksi -->
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary">Apply Filter</button>
+                                        <a href="{{ route('spk.index') }}" class="btn btn-secondary">Reset</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Data SPK -->
+                        @if ($spks->isNotEmpty())
                         <table class="table">
-                            <a href="{{ route('spk.create') }}" class="btn btn-primary">Buat SPK Baru</a>
                             <thead>
                                 <tr>
                                     <th>No. SPK</th>
                                     <th>Garage</th>
                                     <th>Tanggal</th>
                                     <th>Customer</th>
+                                    <th>No. HP</th>
                                     <th>No. Plat</th>
                                     <th>Status</th>
                                     <th>Durasi Pengerjaan</th>
+                                    <th>Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,6 +90,7 @@
                                     <td>{{ $spk->garage }}</td>
                                     <td>{{ $spk->tanggal }}</td>
                                     <td>{{ $spk->customer }}</td>
+                                    <td>{{ $spk->no_hp }}</td>
                                     <td>{{ $spk->no_plat }}</td>
                                     <td>{{ $spk->status }}</td>
                                     <td>{{ $spk->waktu_kerja }}</td>
@@ -51,4 +108,57 @@
             </div>
         </div>
     </div>
+
+    <!-- CSS -->
+    <style>
+        .filter-popup {
+            background: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-content {
+            background: #1f2937;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;   
+            position: relative;
+        }
+
+        .close-button {
+            background: red;
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .d-none {
+            display: none;
+        }
+    </style>
+
+    <!-- Script -->
+    <script>
+        document.getElementById('openFilter').addEventListener('click', function () {
+            document.getElementById('filterPopup').classList.remove('d-none');
+        });
+
+        document.getElementById('closePopup').addEventListener('click', function () {
+            document.getElementById('filterPopup').classList.add('d-none');
+        });
+    </script>
 </x-app-layout>

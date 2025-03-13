@@ -6,42 +6,33 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
-// menambahkan fungsi untuk tombol "add item"
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('addItem').addEventListener('click', function() {
-        const itemContainer = document.getElementById('itemContainer');
-        
-        const itemGroup = document.createElement('div');
-        itemGroup.className = 'item-group';
-        
-        const namaBarangGroup = document.createElement('div');
-        namaBarangGroup.className = 'form-group';
-        const namaBarangLabel = document.createElement('label');
-        namaBarangLabel.textContent = 'Nama Barang:';
-        const namaBarangInput = document.createElement('input');
-        namaBarangInput.type = 'text';
-        namaBarangInput.name = 'nama_barang[]';
-        namaBarangInput.required = true;
-        
-        namaBarangGroup.appendChild(namaBarangLabel);
-        namaBarangGroup.appendChild(namaBarangInput);
-        
-        const qtyGroup = document.createElement('div');
-        qtyGroup.className = 'form-group';
-        const qtyLabel = document.createElement('label');
-        qtyLabel.textContent = 'Quantity:';
-        const qtyInput = document.createElement('input');
-        qtyInput.type = 'number';
-        qtyInput.name = 'qty[]';
-        qtyInput.required = true;
-        
-        qtyGroup.appendChild(qtyLabel);
-        qtyGroup.appendChild(qtyInput);
-        
-        itemGroup.appendChild(namaBarangGroup);
-        itemGroup.appendChild(qtyGroup);
-        
-        itemContainer.appendChild(itemGroup);
+document.addEventListener('DOMContentLoaded', function () {
+    const addItemButton = document.getElementById('addItem');
+    const itemContainer = document.getElementById('itemContainer');
+
+    addItemButton.addEventListener('click', function () {
+        const newRow = document.createElement('tr');
+
+        newRow.innerHTML = `
+            <td class="border px-4 py-2">
+                <input type="text" name="nama_barang[]" class="form-control w-full" required>
+            </td>
+            <td class="border px-4 py-2">
+                <input type="number" name="qty[]" class="form-control w-full" required>
+            </td>
+            <td class="border px-4 py-2 text-center">
+                <button type="button" class="btn btn-outline-danger removeItem">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+
+        itemContainer.appendChild(newRow);
+    });
+
+    itemContainer.addEventListener('click', function (event) {
+        if (event.target.closest('.removeItem')) {
+            event.target.closest('tr').remove();
+        }
     });
 });
-

@@ -28,14 +28,22 @@
     <script>
         // Function to start the timer
         function startTimer() {
+            let currentSPKId = "{{ $spk->id }}"; // Ambil SPK ID dari server
+            let storedSPKId = localStorage.getItem('currentSPKId');
+
+            // Jika SPK ID berubah, reset timer
+            if (storedSPKId !== currentSPKId) {
+                localStorage.setItem('currentSPKId', currentSPKId);
+                localStorage.removeItem('startTime'); // Hapus waktu mulai sebelumnya
+            }
+
             // Check if start time is already in localStorage
             let startTime = localStorage.getItem('startTime');
             if (!startTime) {
-                // If not, set the current time as the start time
+                // Set the current time as the start time
                 startTime = new Date().getTime();
                 localStorage.setItem('startTime', startTime);
             } else {
-                // If it is, convert it to a number
                 startTime = parseInt(startTime, 10);
             }
 
@@ -51,6 +59,7 @@
                     seconds.toString().padStart(2, '0');
             }, 1000);
         }
+
 
         // Function to handle form submission
         function handleFormSubmit(event) {

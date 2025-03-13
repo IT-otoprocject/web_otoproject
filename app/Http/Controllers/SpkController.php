@@ -89,27 +89,52 @@ class SpkController extends Controller
 
 
     // menampilkan daftar SPK yang baru diterbitkan untuk mekanik.
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua data SPK dari database
-        $spks = Spk::all();
+        // Query awal untuk mengambil semua SPK
+        $query = SPK::query();
 
-        // Debugging: Periksa apakah $spks adalah array atau objek
-        //  dd($spks);
-        // dd($spks->toArray());
-
-
-        // Pastikan $spks adalah array atau objek
-        if ($spks->isEmpty()) {
-            // Jika kosong, Anda bisa mengatur pesan atau tindakan lain
-            return view('spk.index', ['spks' => []]);
+        // Filter Garage (jika diisi)
+        if ($request->filled('garage')) {
+            $query->where('garage', $request->garage);
         }
 
-        return view('spk.index', ['spks' => $spks]);
+        // Filter Tanggal (jika diisi)
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        // Filter Status (jika diisi)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Ambil data setelah filter diterapkan
+        $spks = $query->get();
+
+        // Kirim data ke Blade
+        return view('spk.index', compact('spks'));
     }
+
+
     // public function index()
     // {
     //     $spks = Spk::where('status', 'baru diterbitkan')->get();
     //     return view('mekanik.spk.index', compact('spks'));
     // }
+
+    // controller untuk tombol cancel (detail SPK)
+    public function cancel($spk_id)
+    {
+        $spk = Spk::findOrFail($spk_id);
+
+        if ($spk->status !== 'Baru Diterbitkan') {
+            return redirect()->back()->with('error', 'SPK tidak bisa dibatalkan!');
+        }
+
+        $spk->status = 'Cancel';
+        $spk->save();
+
+        return redirect()->route('mekanik.spk.show', $spk_id)->with('success', 'SPK berhasil dibatalkan.');
+    }
 }

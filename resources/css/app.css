@@ -2,11 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-input {
-    color: black;
-}
-
-textarea {
+option, select, input, textarea {
     color: black;
 }
 
@@ -14,9 +10,199 @@ textarea {
     color: white;
 }
 
-option{
-    color: black;
+
+
+
+/* Tabel utama */
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Hilangkan jarak antar border */
+    margin-bottom: 20px; /* Tambahkan jarak di bawah tabel */
 }
-select{
-    color: black;
+
+/* Border tabel */
+.table th, .table td {
+    border: 1px solid #ddd; /* Warna border ringan */
+    padding: 12px; /* Tambahkan padding untuk tampilan rapi */
+    text-align: left; /* Rata kiri isi sel */
 }
+
+/* Header tabel */
+.table th {
+    background-color: #f8f9fa; /* Warna abu terang untuk header */
+    font-weight: bold; /* Buat teks lebih tebal */
+    color: #333; /* Warna teks gelap */
+}
+
+/* Baris ganjil untuk tampilan zebra */
+.table tr:nth-child(odd) {
+    /* background-color: #f9f9f9; Warna background untuk baris ganjil */
+}
+
+/* Hover efek */
+.table tr:hover {
+    background-color: #333; /* Warna abu terang saat hover */
+}
+
+/* Rounded border untuk tabel */
+.table {
+    border-radius: 8px; /* Melengkungkan sudut border */
+    overflow: hidden; /* Menghindari border sudut keluar */
+}
+
+/* Tombol */
+.btn-primary {
+    display: inline-block;
+    padding: 10px 20px; /* Ukuran padding tombol */
+    color: white;
+    background-color: #007bff; /* Warna biru */
+    text-decoration: none;
+    border-radius: 5px; /* Melengkungkan tombol */
+    border: none; /* Hilangkan border */
+    font-size: 14px; /* Ukuran font */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Warna hover untuk tombol */
+    cursor: pointer;
+}
+
+/* Responsivitas */
+@media screen and (max-width: 768px) {
+    .table td, .table th {
+        font-size: 14px; /* Ukuran font lebih kecil untuk layar kecil */
+        padding: 8px; /* Kurangi padding */
+    }
+
+    .btn-primary {
+        font-size: 12px; /* Ukuran font tombol lebih kecil */
+        padding: 8px 16px;
+    }
+}
+
+/* Umum */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ddd; /* gray-700 */
+}
+
+.content-wrapper {
+    padding-top: 3rem;
+}
+
+.card {
+    background-color: #1f2937; /* gray-800 */
+    border-radius: 0.75rem; /* rounded-lg */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    color: #f9fafb; /* text-gray-50 */
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Tabel Umum */
+.table-container {
+    overflow-x: auto;
+}
+
+.detail-table,
+.barang-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: rgb(17, 22, 31); /* gray-900 */
+}
+
+.detail-table td,
+.barang-table th,
+.barang-table td {
+    border: 1px solid #ddd; /* gray-700 */
+    padding: 0.75rem;
+    color: #d1d5db; /* gray-300 */
+}
+
+.detail-table td.label {
+    width: 150px; /* kasih batas biar kolom label gak melar */
+    font-weight: 600;
+    background-color: #1f2937; /* gray-800 */
+    color: #f9fafb; /* gray-50 */
+    padding-right: 1rem; /* jarak ke isi */
+}
+.detail-table td.label-header {
+    background-color: #f8f9fa; /* Warna abu terang untuk header */
+    font-weight: bold; /* Buat teks lebih tebal */
+    color: #333; /* Warna teks gelap */
+    
+}
+
+.barang-table thead tr {
+    background-color: #1f2937; /* gray-800 */
+}
+
+.barang-table th {
+    font-weight: 600;
+    text-align: left;
+    color: #f9fafb; /* gray-50 */
+    background-color: #1f2937;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Tombol */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2563eb; /* blue-600 */
+    color: #f9fafb; /* gray-50 */
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8; /* blue-700 */
+}
+
+.btn-danger{
+    background-color: #ff6347; /* blue-600 */
+    color: #f9fafb; /* gray-50 */
+}
+
+/* Judul Bagian */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #f9fafb; /* gray-50 */
+}
+
+
+/* icon sampah/trash  */
+button.removeItem {
+    border: none;
+    background: transparent;
+    color: #ff6347;
+  }
+  
+  button.removeItem:hover {
+    color: darkred;
+  }
+  

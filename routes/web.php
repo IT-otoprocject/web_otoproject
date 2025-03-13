@@ -59,6 +59,9 @@ Route::get('/spk', [SpkController::class, 'index'])->name('spk.index');
 
 // Rute untuk mekanik.spk.show (detail SPK)
 Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
+// rute untuk tombol cancel (detail SPK)
+Route::put('/spk/{spk_id}/cancel', [SpkController::class, 'cancel'])->name('spk.cancel');
+
 
 // Route::middleware(['auth', 'level:kasir'])->group(function () {
 //     Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');

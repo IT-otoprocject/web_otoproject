@@ -16,20 +16,34 @@
                         <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
 
-                        <!-- Tombol Filter -->
-                        <button type="button" id="openFilter" class="btn btn-secondary mb-4">Filter Data</button>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <!-- Tombol Filter -->
+                            <button type="button" id="openFilter" class="btn btn-secondary">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+
+
+                            <!-- Search Bar -->
+                            <form method="GET" action="{{ route('spk.index') }}" class="search-bar">
+                                <input type="text" name="search" class="form-control" placeholder="Cari Customer, No. HP, atau No. Plat" value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-primary">Cari</button>
+                            </form>
+                        </div>
+
+
 
                         <!-- Popup Filter -->
                         <div id="filterPopup" class="filter-popup d-none">
                             <div class="filter-content">
                                 <!-- Tombol "X" untuk menutup popup -->
                                 <button type="button" id="closePopup" class="close-button">X</button>
-                                
-                                <h5 class="mb-3">Filter Data SPK</h5>
+
+                                <h5 class="mb-3"><i class="fas fa-filter"></i> Filter SPK</h5>
                                 <form method="GET" action="{{ route('spk.index') }}">
                                     <!-- Dropdown Garage -->
                                     <div class="form-group">
                                         <label for="garage">Garage:</label>
+                                        <br>
                                         <select name="garage" id="garage" class="form-control">
                                             <option value="" selected>-- Pilih Garage --</option>
                                             <option value="Bandung" {{ request('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
@@ -43,13 +57,22 @@
 
                                     <!-- Input Tanggal -->
                                     <div class="form-group mt-3">
-                                        <label for="tanggal">Tanggal:</label>
-                                        <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ request('tanggal') }}">
+                                        <label for="tanggal_mulai">Tanggal Mulai:</label>
+                                        <br>
+                                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control" value="{{ request('tanggal_mulai') }}">
                                     </div>
+
+                                    <div class="form-group mt-3">
+                                        <label for="tanggal_selesai">Tanggal Selesai:</label>
+                                        <br>
+                                        <input type="date" name="tanggal_selesai" id="tanggal_selesai" class="form-control" value="{{ request('tanggal_selesai') }}">
+                                    </div>
+
 
                                     <!-- Dropdown Status -->
                                     <div class="form-group mt-3">
                                         <label for="status">Status:</label>
+                                        <br>
                                         <select name="status" id="status" class="form-control">
                                             <option value="" selected>-- Pilih Status --</option>
                                             <option value="Baru Diterbitkan" {{ request('status') == 'Baru Diterbitkan' ? 'selected' : '' }}>Baru Diterbitkan</option>
@@ -79,7 +102,7 @@
                                     <th>No. HP</th>
                                     <th>No. Plat</th>
                                     <th>Status</th>
-                                    <th>Durasi Pengerjaan</th>
+                                    <th>Durasi</th>
                                     <th>Detail</th>
                                 </tr>
                             </thead>
@@ -92,15 +115,21 @@
                                     <td>{{ $spk->customer }}</td>
                                     <td>{{ $spk->no_hp }}</td>
                                     <td>{{ $spk->no_plat }}</td>
-                                    <td>{{ $spk->status }}</td>
+                                    <td class="status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
+                                        style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px; border: 1px solid #ccc;">
+                                        {{ $spk->status }}
+                                    </td>
+
+
                                     <td>{{ $spk->waktu_kerja }}</td>
                                     <td><a href="{{ route('mekanik.spk.show', $spk->id) }}">Lihat Detail</a></td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+
                         @else
-                        <p>Tidak ada data SPK ditemukan.</p>
+                        <p class="text-center">Tidak ada data yang sesuai dengan pencarian.</p>
                         @endif
 
                     </div>
@@ -111,53 +140,16 @@
 
     <!-- CSS -->
     <style>
-        .filter-popup {
-            background: rgba(0, 0, 0, 0.7);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
 
-        .filter-content {
-            background: #1f2937;
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;   
-            position: relative;
-        }
-
-        .close-button {
-            background: red;
-            color: white;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 50%;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-
-        .d-none {
-            display: none;
-        }
     </style>
 
     <!-- Script -->
     <script>
-        document.getElementById('openFilter').addEventListener('click', function () {
+        document.getElementById('openFilter').addEventListener('click', function() {
             document.getElementById('filterPopup').classList.remove('d-none');
         });
 
-        document.getElementById('closePopup').addEventListener('click', function () {
+        document.getElementById('closePopup').addEventListener('click', function() {
             document.getElementById('filterPopup').classList.add('d-none');
         });
     </script>

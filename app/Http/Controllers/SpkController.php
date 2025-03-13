@@ -91,30 +91,52 @@ class SpkController extends Controller
     // menampilkan daftar SPK yang baru diterbitkan untuk mekanik.
     public function index(Request $request)
     {
-        // Query awal untuk mengambil semua SPK
+        // Query awal untuk semua data SPK
         $query = SPK::query();
 
-        // Filter Garage (jika diisi)
+        // Filter pencarian (opsional)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('customer', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%")
+                    ->orWhere('no_plat', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter tambahan berdasarkan garage, status, dan range tanggal
         if ($request->filled('garage')) {
             $query->where('garage', $request->garage);
         }
 
-        // Filter Tanggal (jika diisi)
-        if ($request->filled('tanggal')) {
-            $query->whereDate('tanggal', $request->tanggal);
+        if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
+            $query->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai]);
         }
 
-        // Filter Status (jika diisi)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Ambil data setelah filter diterapkan
+        // Sorting berdasarkan tanggal dan status
+        $query->orderBy('tanggal', 'desc') // Sorting tanggal terbaru ke terlama
+            ->orderByRaw("
+        CASE
+            WHEN status = 'Baru Diterbitkan' THEN 1
+            WHEN status = 'Dalam Pengerjaan' THEN 2
+            WHEN status = 'Cancel' THEN 3
+            WHEN status = 'Sudah Selesai' THEN 4
+            ELSE 5
+        END ASC
+    ");
+
+        // Ambil hasil query
         $spks = $query->get();
 
-        // Kirim data ke Blade
         return view('spk.index', compact('spks'));
     }
+
+
+
 
 
     // public function index()

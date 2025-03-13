@@ -2,11 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-option, select, input, textarea {
+option,
+select,
+input,
+textarea {
     color: black;
 }
 
-.container{
+.container {
     color: white;
 }
 
@@ -16,22 +19,33 @@ option, select, input, textarea {
 /* Tabel utama */
 .table {
     width: 100%;
-    border-collapse: collapse; /* Hilangkan jarak antar border */
-    margin-bottom: 20px; /* Tambahkan jarak di bawah tabel */
+    border-collapse: collapse;
+    /* Hilangkan jarak antar border */
+    margin-bottom: 20px;
+    /* Tambahkan jarak di bawah tabel */
 }
 
 /* Border tabel */
-.table th, .table td {
-    border: 1px solid #ddd; /* Warna border ringan */
-    padding: 12px; /* Tambahkan padding untuk tampilan rapi */
-    text-align: left; /* Rata kiri isi sel */
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    /* Warna border ringan */
+    /* padding: 12px; */
+    padding: 4px 10px;
+    /* Tambahkan padding untuk tampilan rapi */
+    
+    /* Rata kiri isi sel */
 }
-
+/*  */
 /* Header tabel */
 .table th {
-    background-color: #f8f9fa; /* Warna abu terang untuk header */
-    font-weight: bold; /* Buat teks lebih tebal */
-    color: #333; /* Warna teks gelap */
+    background-color: #f8f9fa;
+    /* Warna abu terang untuk header */
+    font-weight: bold;
+    /* Buat teks lebih tebal */
+    color: #333;
+    /* Warna teks gelap */
+    text-align: Center;
 }
 
 /* Baris ganjil untuk tampilan zebra */
@@ -41,41 +55,55 @@ option, select, input, textarea {
 
 /* Hover efek */
 .table tr:hover {
-    background-color: #333; /* Warna abu terang saat hover */
+    background-color: #333;
+    /* Warna abu terang saat hover */
 }
 
 /* Rounded border untuk tabel */
 .table {
-    border-radius: 8px; /* Melengkungkan sudut border */
-    overflow: hidden; /* Menghindari border sudut keluar */
+    border-radius: 8px;
+    /* Melengkungkan sudut border */
+    overflow: hidden;
+    /* Menghindari border sudut keluar */
 }
 
 /* Tombol */
 .btn-primary {
     display: inline-block;
-    padding: 10px 20px; /* Ukuran padding tombol */
+    padding: 10px 20px;
+    /* Ukuran padding tombol */
     color: white;
-    background-color: #007bff; /* Warna biru */
+    background-color: #007bff;
+    /* Warna biru */
     text-decoration: none;
-    border-radius: 5px; /* Melengkungkan tombol */
-    border: none; /* Hilangkan border */
-    font-size: 14px; /* Ukuran font */
+    border-radius: 5px;
+    /* Melengkungkan tombol */
+    border: none;
+    /* Hilangkan border */
+    font-size: 14px;
+    /* Ukuran font */
 }
 
 .btn-primary:hover {
-    background-color: #0056b3; /* Warna hover untuk tombol */
+    background-color: #0056b3;
+    /* Warna hover untuk tombol */
     cursor: pointer;
 }
 
 /* Responsivitas */
 @media screen and (max-width: 768px) {
-    .table td, .table th {
-        font-size: 14px; /* Ukuran font lebih kecil untuk layar kecil */
-        padding: 8px; /* Kurangi padding */
+
+    .table td,
+    .table th {
+        font-size: 14px;
+        /* Ukuran font lebih kecil untuk layar kecil */
+        padding: 8px;
+        /* Kurangi padding */
     }
 
     .btn-primary {
-        font-size: 12px; /* Ukuran font tombol lebih kecil */
+        font-size: 12px;
+        /* Ukuran font tombol lebih kecil */
         padding: 8px 16px;
     }
 }
@@ -90,7 +118,8 @@ option, select, input, textarea {
 .page-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #ddd; /* gray-700 */
+    color: #ddd;
+    /* gray-700 */
 }
 
 .content-wrapper {
@@ -98,11 +127,14 @@ option, select, input, textarea {
 }
 
 .card {
-    background-color: #1f2937; /* gray-800 */
-    border-radius: 0.75rem; /* rounded-lg */
+    background-color: #1f2937;
+    /* gray-800 */
+    border-radius: 0.75rem;
+    /* rounded-lg */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    color: #f9fafb; /* text-gray-50 */
+    color: #f9fafb;
+    /* text-gray-50 */
 }
 
 .card-body {
@@ -120,39 +152,52 @@ option, select, input, textarea {
     border-collapse: collapse;
     border-radius: 0.5rem;
     overflow: hidden;
-    background-color: rgb(17, 22, 31); /* gray-900 */
+    background-color: rgb(17, 22, 31);
+    /* gray-900 */
 }
 
 .detail-table td,
 .barang-table th,
 .barang-table td {
-    border: 1px solid #ddd; /* gray-700 */
+    border: 1px solid #ddd;
+    /* gray-700 */
     padding: 0.75rem;
-    color: #d1d5db; /* gray-300 */
+    color: #d1d5db;
+    /* gray-300 */
 }
 
 .detail-table td.label {
-    width: 150px; /* kasih batas biar kolom label gak melar */
+    width: 150px;
+    /* kasih batas biar kolom label gak melar */
     font-weight: 600;
-    background-color: #1f2937; /* gray-800 */
-    color: #f9fafb; /* gray-50 */
-    padding-right: 1rem; /* jarak ke isi */
+    background-color: #1f2937;
+    /* gray-800 */
+    color: #f9fafb;
+    /* gray-50 */
+    padding-right: 1rem;
+    /* jarak ke isi */
 }
+
 .detail-table td.label-header {
-    background-color: #f8f9fa; /* Warna abu terang untuk header */
-    font-weight: bold; /* Buat teks lebih tebal */
-    color: #333; /* Warna teks gelap */
-    
+    background-color: #f8f9fa;
+    /* Warna abu terang untuk header */
+    font-weight: bold;
+    /* Buat teks lebih tebal */
+    color: #333;
+    /* Warna teks gelap */
+
 }
 
 .barang-table thead tr {
-    background-color: #1f2937; /* gray-800 */
+    background-color: #1f2937;
+    /* gray-800 */
 }
 
 .barang-table th {
     font-weight: 600;
     text-align: left;
-    color: #f9fafb; /* gray-50 */
+    color: #f9fafb;
+    /* gray-50 */
     background-color: #1f2937;
 }
 
@@ -173,17 +218,22 @@ option, select, input, textarea {
 }
 
 .btn-primary {
-    background-color: #2563eb; /* blue-600 */
-    color: #f9fafb; /* gray-50 */
+    background-color: #2563eb;
+    /* blue-600 */
+    color: #f9fafb;
+    /* gray-50 */
 }
 
 .btn-primary:hover {
-    background-color: #1d4ed8; /* blue-700 */
+    background-color: #1d4ed8;
+    /* blue-700 */
 }
 
-.btn-danger{
-    background-color: #ff6347; /* blue-600 */
-    color: #f9fafb; /* gray-50 */
+.btn-danger {
+    background-color: #ff6347;
+    /* blue-600 */
+    color: #f9fafb;
+    /* gray-50 */
 }
 
 /* Judul Bagian */
@@ -191,7 +241,8 @@ option, select, input, textarea {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
-    color: #f9fafb; /* gray-50 */
+    color: #f9fafb;
+    /* gray-50 */
 }
 
 
@@ -200,9 +251,129 @@ button.removeItem {
     border: none;
     background: transparent;
     color: #ff6347;
-  }
-  
-  button.removeItem:hover {
+}
+
+button.removeItem:hover {
     color: darkred;
-  }
-  
+}
+
+
+/* pencarian  */
+.d-flex {
+    display: flex;
+    flex-direction: row;
+    /* Ensure horizontal alignment */
+}
+
+.justify-content-between {
+    justify-content: space-between;
+    /* Space between filter and search bar */
+}
+
+.align-items-center {
+    align-items: center;
+    /* Vertically center the elements */
+}
+
+
+/* Pencarian  */
+.search-bar {
+    display: flex;
+    align-items: center;
+    /* Align elements inside search bar vertically */
+    gap: 10px;
+    /* Add spacing between input and button */
+    margin-left: auto;
+    /* Push search bar to the right */
+}
+
+.search-bar input {
+    border-radius: 20px;
+    /* Rounded search input */
+    padding: 8px 15px;
+    /* Comfortable padding for input */
+    width: 300px;
+}
+
+.search-bar button {
+    border-radius: 20px;
+    /* Rounded search button */
+}
+
+
+/* warna setiap Status  */
+/* Status Baru Diterbitkan: Abu-abu gelap */
+.status-cell.baru-diterbitkan {
+    background-color: #2F3A4D; /* Gelap abu-abu kebiruan */
+    color: white;
+    font-weight: bold;
+}
+
+/* Status Dalam Pengerjaan: Kuning keemasan */
+.status-cell.dalam-pengerjaan {
+    background-color: #FFB732; /* Kuning lembut dengan kesan modern */
+    color: white;
+    font-weight: bold;
+}
+
+/* Status Cancel: Oranye gelap */
+.status-cell.cancel {
+    background-color: #FF7644; /* Oranye dengan sentuhan netral */
+    color: white;
+    font-weight: bold;
+}
+
+/* Status Sudah Selesai: Hijau tua */
+.status-cell.sudah-selesai {
+    background-color: #3FA85A; /* Hijau terang namun tetap lembut */
+    color: white;
+    font-weight: bold;
+}
+
+/* Optional: Tambahkan padding agar lebih rapi */
+.status-cell {
+    
+    padding: 8px;
+    text-align: center;
+    border-radius: 60px; /* Opsional: Membuat sudut lebih halus */
+}
+
+/* pop up filter */
+.filter-popup {
+    background: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-content {
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 8px;
+    width: 350px;
+    position: relative;
+}
+
+.close-button {
+    background: red;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.d-none {
+    display: none;
+}

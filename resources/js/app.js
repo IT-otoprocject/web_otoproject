@@ -14,13 +14,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const newRow = document.createElement('tr');
 
         newRow.innerHTML = `
-            <td class="border px-4 py-2">
+            <td class="custom-td">
                 <input type="text" name="nama_barang[]" class="form-control w-full" required>
             </td>
-            <td class="border px-4 py-2">
+            <td class="custom-td">
                 <input type="number" name="qty[]" class="form-control w-full" required>
             </td>
-            <td class="border px-4 py-2 text-center">
+            <td class="custom-td text-center">
                 <button type="button" class="btn btn-outline-danger removeItem">
                     <i class="fas fa-trash"></i>
                 </button>

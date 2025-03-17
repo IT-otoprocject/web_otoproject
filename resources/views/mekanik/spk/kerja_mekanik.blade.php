@@ -4,27 +4,42 @@
             {{ __('Kerja Mekanik') }}
         </h2>
     </x-slot>
-    <div class="container">
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h1>Durasi Kerja Mekanik</h1>
-                        <div id="timer">00:00:00</div>
-                        <form id="kerjaForm" action="{{ route('kerja.selesai', ['spk_id' => $spk->id]) }}" method="POST">
-                            @csrf
-                            <label for="notes">Catatan (Opsional):</label>
+    <div class="py-12 flex justify-center items-center">
+        <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-8 text-gray-900 dark:text-gray-100 text-center">
+                    <!-- Judul -->
+                    <h1 class="text-3xl font-bold mb-6">Durasi Kerja Mekanik</h1>
+
+                    <!-- Timer -->
+                    <div id="timer" class="text-4xl font-semibold mb-8">00:00:00</div>
+
+                    <!-- Form -->
+                    <form id="kerjaForm" action="{{ route('kerja.selesai', ['spk_id' => $spk->id]) }}" method="POST" class="space-y-6">
+                        @csrf
+                        <!-- Catatan -->
+                        <div>
+                            <label for="notes" class="text-lg font-medium">Catatan (Opsional):</label>
                             <br>
-                            <textarea id="notes" name="notes" rows="4" cols="50"></textarea>
-                            <input type="hidden" name="worked_time" id="worked_time">
-                            <br>
-                            <button type="submit">Selesai Kerja</button>
-                        </form>
-                    </div>
+                            <textarea id="notes" name="notes" rows="10" cols="100" class="mt-2 w-full max-w-3xl p-6 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300"></textarea>
+
+                        </div>
+
+                        <!-- Hidden Input -->
+                        <input type="hidden" name="worked_time" id="worked_time">
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-center">
+                            <button type="submit" class="btn btn-primary text-lg px-6 py-3">
+                                Selesai Kerja
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         // Function to start the timer
         function startTimer() {

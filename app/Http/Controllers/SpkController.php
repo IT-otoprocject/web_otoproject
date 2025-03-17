@@ -135,7 +135,66 @@ class SpkController extends Controller
         return view('spk.index', compact('spks'));
     }
 
+    // edit SPK 
+    public function edit($spk_id)
+    {
+        // Ambil data SPK berdasarkan ID
+        $spk = Spk::findOrFail($spk_id);
 
+        // Kirim data ke view edit
+        return view('spk.edit', compact('spk'));
+    }
+
+    public function update(Request $request, $spk_id)
+    {
+        // Validasi input dan simpan hasil ke variabel $validatedData
+        $validatedData = $request->validate([
+            'garage' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'teknisi_1' => 'nullable|string|max:255',
+            'teknisi_2' => 'nullable|string|max:255',
+            'customer' => 'required|string|max:255',
+            'alamat' => 'nullable|string|max:500',
+            'no_hp' => 'required|string|max:20',
+            'jenis_mobil' => 'nullable|string|max:255',
+            'no_plat' => 'nullable|string|max:20',
+            'catatan' => 'nullable|string|max:1000',
+            'nama_barang' => 'required|array', // Pastikan array barang harus ada
+            'nama_barang.*' => 'required|string|max:255', // Validasi setiap elemen array nama_barang
+            'qty' => 'required|array', // Pastikan array qty harus ada
+            'qty.*' => 'required|integer|min:1', // Validasi setiap elemen array qty
+        ]);
+
+        // Update data utama SPK
+        $spk = Spk::findOrFail($spk_id);
+        $spk->update([
+            'garage' => $validatedData['garage'],
+            'tanggal' => $validatedData['tanggal'],
+            'teknisi_1' => $validatedData['teknisi_1'],
+            'teknisi_2' => $validatedData['teknisi_2'],
+            'customer' => $validatedData['customer'],
+            'alamat' => $validatedData['alamat'],
+            'no_hp' => $validatedData['no_hp'],
+            'jenis_mobil' => $validatedData['jenis_mobil'],
+            'no_plat' => $validatedData['no_plat'],
+            'catatan' => $validatedData['catatan'],
+        ]);
+
+        // Hapus barang lama yang terkait dengan SPK
+        $spk->items()->delete();
+
+        // Tambahkan barang baru
+        foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
+            SpkItem::create([
+                'spk_id' => $spk->id,
+                'nama_barang' => $nama_barang,
+                'qty' => $validatedData['qty'][$index],
+            ]);
+        }
+
+        // Redirect ke halaman detail dengan pesan sukses
+        return redirect()->route('mekanik.spk.show', ['id' => $spk->id])->with('success', 'SPK berhasil diperbarui.');
+    }
 
 
 

@@ -12,6 +12,9 @@ class KerjaMekanikController extends Controller
     {
         $spk = Spk::findOrFail($spk_id);
 
+        // Set session flash message
+        session()->flash('message', 'Pekerjaan Dimulai Semangat 🔥');
+
         // Mengubah status menjadi "Dalam Pengerjaan"
         $spk->status = "Dalam Pengerjaan";
         $spk->save(); // Simpan perubahan ke database
@@ -29,6 +32,11 @@ class KerjaMekanikController extends Controller
         $spk->teknisi_selesai = Auth::user()->name;
         $spk->save();
 
+        // Set session flash message
+        session()->flash('message', 'Pekerjaan Telah Direcord, Kerja Bagus 🕺');
+
         return redirect()->route('spk.index', ['spk' => $spk_id])->with('success');
     }
+
+   
 }

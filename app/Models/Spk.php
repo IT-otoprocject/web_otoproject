@@ -29,6 +29,7 @@ class Spk extends Model
         'catatan_kerja',
         'teknisi_selesai',
         'garage',
+        'cancel_reason',
     ];
     
 

@@ -4,6 +4,12 @@
             {{ __('Detail SPK') }}
         </h2>
     </x-slot>
+    <!-- Popup Notification -->
+    @if (session('message'))
+    <div id="notifPopup" class="notif-popup">
+        <p>{{ session('message') }}</p>
+    </div>
+    @endif
 
     <div class="py-12">
         <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
@@ -13,24 +19,51 @@
                     {{-- Tombol Aksi --}}
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         @if ($spk->status === 'Baru Diterbitkan')
-                        <form action="{{ route('spk.cancel', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return confirm('Apakah yakin ingin membatalkan SPK ini?')">
-                            @csrf
-                            @method('PUT') {{-- Jika pakai update, atau POST sesuai route yang dibuat --}}
-                            <button type="submit" class="btn btn-danger mb-4">Cancel</button>
-                        </form>
+                        <button type="button" class="btn btn-danger mb-4" onclick="showCancelPopup()">Cancel</button>
                         @endif
 
+                        <!-- Popup Alasan Cancel -->
+                        <div id="cancelPopup" class="popup d-none">
+                            <div class="popup-content">
+                                <h5>Alasan Pembatalan</h5>
+                                <form id="cancelForm" action="{{ route('spk.cancel', ['spk_id' => $spk->id]) }}" method="POST">
+                                    @csrf
+                                    @method('PUT') {{-- Jika route menggunakan update --}}
+
+                                    <!-- Input Alasan -->
+                                    <div class="form-group mb-3">
+                                        <label for="cancelReason" class="form-label">Alasan:</label>
+                                        <textarea id="cancelReason" name="reason" class="form-control w-full" rows="3" required></textarea>
+                                    </div>
+
+                                    <!-- Tombol Konfirmasi dan Batal -->
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-secondary" onclick="closeCancelPopup()">Batal</button>
+                                        <button type="submit" class="btn btn-danger">Konfirmasi</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+
                         @if ($spk->status === 'Dalam Pengerjaan')
-                        <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}" class="btn btn-warning mb-4">
+                        <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
+                            class="btn btn-warning mb-4"
+                            onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
                             Edit SPK
                         </a>
                         @endif
 
                         @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Pengerjaan']) && Auth::user()->level === 'mekanik')
-                        <a href="{{ route('kerja.mekanik', ['spk_id' => $spk->id]) }}" class="btn btn-primary mb-4">
+                        <a href="{{ route('kerja.mekanik', ['spk_id' => $spk->id]) }}"
+                            class="btn btn-primary mb-4"
+                            onclick="return startWorkConfirmation(event)">
                             Mulai Kerja
                         </a>
                         @endif
+
+
 
                     </div>
 
@@ -39,6 +72,16 @@
                     <div class="table-container mb-6">
                         <table class="detail-table">
                             <h2>{{ $spk->no_spk }}</h2>
+
+                            @if ($spk->status === 'Cancel')
+                            <div class="alert alert-danger">
+                                <h4 style="color : #ff6347;">SPK Dibatalkan</h4>
+                                <p>Alasan: {{ $spk->cancel_reason }}</p>
+                            </div>
+                            <br>
+                            @endif
+                        
+
                             <tbody>
 
                                 <tr>

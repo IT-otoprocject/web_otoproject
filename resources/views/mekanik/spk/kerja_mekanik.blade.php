@@ -4,6 +4,14 @@
             {{ __('Kerja Mekanik') }}
         </h2>
     </x-slot>
+    <!-- Popup Notification -->
+    @if (session('message'))
+    <div id="notifPopup" class="notif-popup">
+        <p>{{ session('message') }}</p>
+    </div>
+    @endif
+
+
     <div class="py-12 flex justify-center items-center">
         <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

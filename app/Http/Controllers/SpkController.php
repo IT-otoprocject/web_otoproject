@@ -70,6 +70,9 @@ class SpkController extends Controller
             ]);
         }
 
+        // Set session flash message popup
+        session()->flash('message', 'SPK telah dibuat segera Infokan ke Mekanik 😁');
+
         // Redirect ke halaman untuk mekanik
         return redirect()->route('mekanik.spk.show', $spk->id)->with('success', 'SPK berhasil diterbitkan.');
     }
@@ -192,9 +195,14 @@ class SpkController extends Controller
             ]);
         }
 
+        // Set session flash message popup
+        session()->flash('message', 'SPK Berhasil di Edit 👌');
+
         // Redirect ke halaman detail dengan pesan sukses
         return redirect()->route('mekanik.spk.show', ['id' => $spk->id])->with('success', 'SPK berhasil diperbarui.');
     }
+
+
 
 
 
@@ -205,17 +213,32 @@ class SpkController extends Controller
     // }
 
     // controller untuk tombol cancel (detail SPK)
-    public function cancel($spk_id)
+    public function cancel(Request $request, $id)
     {
-        $spk = Spk::findOrFail($spk_id);
+        // Validasi input alasan
+        $validatedData = $request->validate([
+            'reason' => 'required|string|max:1000', // Alasan wajib diisi
+        ]);
 
+        // Ambil data SPK berdasarkan ID
+        $spk = Spk::findOrFail($id);
+
+        // Periksa apakah status SPK dapat dibatalkan
         if ($spk->status !== 'Baru Diterbitkan') {
-            return redirect()->back()->with('error', 'SPK tidak bisa dibatalkan!');
+            return redirect()->back()->with('error', 'SPK tidak dapat dibatalkan karena statusnya sudah berubah!');
         }
 
-        $spk->status = 'Cancel';
-        $spk->save();
+        // Perbarui status dan simpan alasan pembatalan
+        $spk->update([
+            'status' => 'Cancel', // Perbaiki ejaan status agar seragam dan konsisten
+            'cancel_reason' => $validatedData['reason'], // Simpan alasan pembatalan
+        ]);
 
-        return redirect()->route('mekanik.spk.show', $spk_id)->with('success', 'SPK berhasil dibatalkan.');
+        // Set session flash message popup
+        session()->flash('message', 'SPK Berhasil di Cancel 🧐');
+
+        // Redirect ke halaman show dengan pesan sukses
+        return redirect()->route('mekanik.spk.show', ['id' => $spk->id])
+            ->with('success', 'SPK berhasil dibatalkan dengan alasan: ' . $validatedData['reason']);
     }
 }

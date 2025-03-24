@@ -101,3 +101,12 @@ document.addEventListener('DOMContentLoaded', function () {
     window.showCancelPopup = showCancelPopup;
     window.closeCancelPopup = closeCancelPopup;
 });
+
+// pop up filter 
+document.getElementById('openFilter').addEventListener('click', function() {
+    document.getElementById('filterPopup').classList.remove('d-none');
+});
+
+document.getElementById('closePopup').addEventListener('click', function() {
+    document.getElementById('filterPopup').classList.add('d-none');
+});

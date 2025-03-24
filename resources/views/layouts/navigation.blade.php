@@ -40,7 +40,7 @@
                             {{ __('Admin Dashboard') }}
                         </x-dropdown-link>
                         @endif
-                        @if (in_array(Auth::user()->level, ['admin', 'kasir']))
+                        @if (in_array(Auth::user()->level, ['admin', 'kasir', 'mekanik']))
                         <x-dropdown-link :href="route('spk.index')">
                             {{ __('Daftar SPK') }}
                         </x-dropdown-link>

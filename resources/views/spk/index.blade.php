@@ -153,12 +153,6 @@
 
     <!-- Script -->
     <script>
-        document.getElementById('openFilter').addEventListener('click', function() {
-            document.getElementById('filterPopup').classList.remove('d-none');
-        });
-
-        document.getElementById('closePopup').addEventListener('click', function() {
-            document.getElementById('filterPopup').classList.add('d-none');
-        });
+        
     </script>
 </x-app-layout>

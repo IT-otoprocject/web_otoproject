@@ -47,7 +47,7 @@
 
 
 
-                        @if ($spk->status === 'Dalam Pengerjaan')
+                        @if ($spk->status === 'Dalam Proses')
                         <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
                             class="btn btn-warning mb-4"
                             onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
@@ -55,13 +55,15 @@
                         </a>
                         @endif
 
-                        @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Pengerjaan']) && Auth::user()->level === 'mekanik')
-                        <a href="{{ route('kerja.mekanik', ['spk_id' => $spk->id]) }}"
-                            class="btn btn-primary mb-4"
-                            onclick="return startWorkConfirmation(event)">
-                            Mulai Kerja
-                        </a>
+                        @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
+                        <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
+                            @csrf
+                            <button type="submit" class="btn btn-primary mb-4">
+                                Mulai Kerja
+                            </button>
+                        </form>
                         @endif
+
 
 
 
@@ -80,7 +82,7 @@
                             </div>
                             <br>
                             @endif
-                        
+
 
                             <tbody>
 
@@ -125,9 +127,33 @@
                                     <td>: {{ $spk->catatan }}</td>
                                 </tr>
                                 <tr>
+                                    <td class="label">Waktu Terbit</td>
+                                    <td>: {{ $spk->waktu_terbit_spk }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Waktu klik Mulai Kerja</td>
+                                    <td>: {{ $spk->waktu_mulai_kerja }}</td>
+                                </tr>
+
+
+                                @if ($spk->status === 'Sudah Selesai' || $spk->status === 'Dalam Proses')
+
+
+                                <tr>
+                                    <td class="label">Durasi <br>Terbit - Mulai</td>
+                                    <td>: {{ $spk->durasi }}</td>
+                                </tr>
+                                </tr>
+                                @endif
+
+                                <tr>
                                     <td class="label" style="border-bottom: 1px solid white;">Status</td>
                                     <td style="border-bottom: 1px solid white;">: {{ $spk->status }}</td>
                                 </tr>
+
+
+
+
 
                                 @if ($spk->status === 'Sudah Selesai')
                                 <tr>

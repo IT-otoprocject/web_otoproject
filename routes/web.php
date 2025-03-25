@@ -74,18 +74,8 @@ Route::get('/spk/edit/{spk_id}', [SpkController::class, 'edit'])->name('spk.edit
 Route::put('/spk/update/{spk_id}', [SpkController::class, 'update'])->name('spk.update');
 
 
-
-// Route::middleware(['auth', 'level:kasir'])->group(function () {
-//     Route::get('/spk/create', [SpkController::class, 'create'])->name('spk.create');
-//     Route::post('/spk', [SpkController::class, 'store'])->name('spk.store');
-// });
-
-// Route::middleware(['auth', 'level:mekanik'])->group(function () {
-//     Route::get('/mekanik/spk', [SpkController::class, 'index'])->name('mekanik.spk.index');
-//     Route::get('/mekanik/spk/{id}', [SpkController::class, 'show'])->name('mekanik.spk.show');
-// });
-
 // Rute untuk kerja mekanik
+Route::post('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class, 'waktu_mulai_kerja'])->name('spk.waktuMulaiKerja');
 Route::get('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class, 'show'])->name('kerja.mekanik');
 Route::post('mekanik/spk/kerja-selesai/{spk_id}', [KerjaMekanikController::class, 'selesai'])->name('kerja.selesai');
 

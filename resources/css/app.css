@@ -563,7 +563,7 @@ button.removeItem:hover {
 }
 
 /* Status Dalam Pengerjaan: Kuning keemasan */
-.status-cell.dalam-pengerjaan {
+.status-cell.dalam-proses {
     background-color: #FFB732;
     /* Kuning lembut dengan kesan modern */
     color: white;

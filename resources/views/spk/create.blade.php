@@ -91,13 +91,13 @@
                         
 
                         <!-- Barang Section -->
-                        <h2 class="section-title font-semibold text-lg mb-4">Barang</h2>
+                        <h2 class="section-title font-semibold text-lg mb-4">Product</h2>
 
                         <div class="table-container mb-6">
                             <table class="table-barang w-full text-left border-collapse">
                                 <thead>
                                     <tr>
-                                        <th class="border-barang px-4 py-2">Nama Barang</th>
+                                        <th class="border-barang px-4 py-2">Nama Product</th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;"></th>
                                     </tr>
@@ -120,7 +120,7 @@
                                 </tbody>
                             </table>
                             <button type="button" id="addItem" class="btn btn-secondary">
-                                <i class="fas fa-plus"></i> Tambah Barang
+                                <i class="fas fa-plus"></i> Tambah Product
                             </button>
 
                         </div>

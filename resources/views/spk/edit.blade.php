@@ -92,49 +92,45 @@
                                 class="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300">{{ $spk->catatan }}</textarea>
                         </div>
 
-
-                        <!-- Barang Section -->
-                        <h2 class="section-title font-semibold text-lg mb-4">Barang</h2>
-                        <div class="table-container mb-6">
-                            <table class="table-barang w-full text-left border-collapse">
-                                <thead>
-                                    <tr>
-                                        <th class="border-barang px-4 py-2">Nama Barang</th>
-                                        <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
-                                        <th class="border-barang px-4 py-2" style="width: 80px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="itemContainer">
-                                    @foreach ($spk->items as $index => $item)
-                                    <tr>
-                                        <td class="custom-td">
-                                            <input type="text" name="nama_barang[]" class="form-control w-full"
-                                                value="{{ $item->nama_barang }}" required>
-                                        </td>
-                                        <td class="custom-td">
-                                            <input type="number" name="qty[]" class="form-control"
-                                                value="{{ $item->qty }}" style="width: 80px;" required>
-                                        </td>
-                                        <td class="custom-td text-center">
-                                            <button type="button" class="btn btn-outline-danger removeItem">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <button type="button" id="addItem" class="btn btn-secondary">
-                                <i class="fas fa-plus"></i> Tambah Barang
-                            </button>
-                        </div>
-
                         <!-- Submit Button -->
                         <div class="flex justify-center mt-6">
                             <button type="submit" class="btn btn-primary text-lg px-6 py-3">
                                 Simpan Perubahan
                             </button>
                         </div>
+
+
+                        <!-- Barang Section (invisible) -->
+                        <div style="display: none;"></div>
+                            <!-- <h2 class="section-title font-semibold text-lg mb-4">Barang</h2> -->
+                            <div class="table-container mb-6">
+                                <table class="table-barang w-full text-left border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th class="border-barang px-4 py-2">Nama Barang</th>
+                                            <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
+                                            <th class="border-barang px-4 py-2" style="width: 80px;"></th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemContainer">
+                                        @foreach ($spk->items as $index => $item)
+                                        <tr>
+                                            <td class="custom-td">
+                                                <input type="hidden" name="nama_barang[]" class="form-control w-full"
+                                                    value="{{ $item->nama_barang }}">
+                                            </td>
+                                            <td class="custom-td">
+                                                <input type="hidden" name="qty[]" class="form-control"
+                                                    value="{{ $item->qty }}" style="width: 80px;">
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        
                     </form>
 
                 </div>

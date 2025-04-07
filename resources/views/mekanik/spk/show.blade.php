@@ -66,7 +66,6 @@
 
 
 
-
                     </div>
 
 
@@ -140,7 +139,7 @@
 
 
                                 <tr>
-                                    <td class="label">Durasi <br>Terbit - Mulai</td>
+                                    <td class="label">Durasi Waktu Tunggu</td>
                                     <td>: {{ $spk->durasi }}</td>
                                 </tr>
                                 </tr>
@@ -181,39 +180,60 @@
                     </div>
 
                     {{-- Tabel Barang --}}
-                    <h2 class="section-title">Barang :</h2>
+                    @if ($barangBaru->isNotEmpty() || $barangLama->isNotEmpty())
+                    <h3>Product :</h3>
+                    @endif
+
+                    @if ($barangLama->isNotEmpty())
+                    <!-- <h3>Barang Lama:</h3> -->
                     <div class="table-container">
                         <table class="table-barang-show w-full text-left border-collapse">
                             <thead>
                                 <tr>
-                                    <th></th>
-                                    <th style="border-bottom: 2px solid white;">
-                                        <h5>Nama Barang</h5>
-                                    </th>
-                                    <th style="width: 80px; text-align: center; border-bottom: 2px solid white;">
-                                        <h5>Jumlah (QTY)</h5>
-                                    </th>
-                                    <th></th>
+                                    <th>Nama Product</th>
+                                    <th style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if ($spk->items && $spk->items->isNotEmpty())
-                                @foreach ($spk->items as $index => $item)
+                                @foreach ($barangLama as $item)
                                 <tr>
-                                    <td style="width: 15px;" class="custom-td"></td>
-                                    <td class="custom-td" style="">{{ $item->nama_barang }}</td>
-                                    <td class="custom-td" style="width: 80px; text-align: center; ">{{ $item->qty }}</td>
-                                    <td style="width: 15px;"></td>
+                                    <td>{{ $item->nama_barang }}</td>
+                                    <td style="text-align: center;">{{ $item->qty }}</td>
                                 </tr>
                                 @endforeach
-                                @else
-                                <tr>
-                                    <td colspan="3" class="text-center">Tidak ada barang ditemukan.</td>
-                                </tr>
-                                @endif
                             </tbody>
                         </table>
                     </div>
+                    @endif
+
+                    @if ($barangBaru->isNotEmpty())
+                    <!-- <h3>Barang Baru:</h3> -->
+                    <div class="table-container">
+                        <table class="table-barang-show w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th>Nama Product</th>
+                                    <th style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($barangBaru as $item)
+                                <tr>
+                                    <td>{{ $item->nama_barang }}</td>
+                                    <td style="text-align: center;">{{ $item->qty }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
+                    {{-- Tombol Edit Barang --}}
+                    @if ($spk->status === 'Dalam Proses')
+                    <br>
+                    <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning mb-4">
+                        Edit Product
+                    </a>
+                    @endif
 
                 </div>
             </div>

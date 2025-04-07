@@ -73,6 +73,10 @@ Route::get('/spk/edit/{spk_id}', [SpkController::class, 'edit'])->name('spk.edit
 // Route untuk pembaruan data
 Route::put('/spk/update/{spk_id}', [SpkController::class, 'update'])->name('spk.update');
 
+Route::get('/spk/{spk_id}/edit-barang', [SpkController::class, 'editBarang'])->name('spk.editBarang');
+Route::put('/spk/{spk_id}/update-barang', [SpkController::class, 'updateBarang'])->name('spk.updateBarang');
+
+Route::delete('/spk/barang/{id}', [SpkController::class, 'destroyBarang'])->name('spk.destroyBarang');
 
 // Rute untuk kerja mekanik
 Route::post('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class, 'waktu_mulai_kerja'])->name('spk.waktuMulaiKerja');

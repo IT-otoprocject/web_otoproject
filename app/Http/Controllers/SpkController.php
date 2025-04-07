@@ -82,7 +82,11 @@ class SpkController extends Controller
     public function show($id)
     {
         $spk = Spk::findOrFail($id);
-        return view('mekanik.spk.show', compact('spk'));
+
+        $barangLama = $spk->items()->where('is_new', false)->get();
+        $barangBaru = $spk->items()->where('is_new', true)->get();
+
+        return view('mekanik.spk.show', compact('spk', 'barangLama', 'barangBaru'));
     }
     // public function show(Spk $spk)
     // {
@@ -145,6 +149,10 @@ class SpkController extends Controller
         // Ambil data SPK berdasarkan ID
         $spk = Spk::findOrFail($spk_id);
 
+        if ($spk->status !== 'Dalam Proses') {
+            return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
+        }
+
         // Kirim data ke view edit
         return view('spk.edit', compact('spk'));
     }
@@ -193,6 +201,7 @@ class SpkController extends Controller
                 'spk_id' => $spk->id,
                 'nama_barang' => $nama_barang,
                 'qty' => $validatedData['qty'][$index],
+                'is_new' => true, // Tandai sebagai barang baru
             ]);
         }
 
@@ -203,9 +212,108 @@ class SpkController extends Controller
         return redirect()->route('mekanik.spk.show', ['id' => $spk->id])->with('success', 'SPK berhasil diperbarui.');
     }
 
+    public function editBarang($spk_id)
+    {
+        $spk = Spk::findOrFail($spk_id);
 
+        if ($spk->status !== 'Dalam Proses') {
+            return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
+        }
 
+        $barangLama = $spk->items()->where('is_new', false)->get();
+        $barangBaru = $spk->items()->where('is_new', true)->get();
 
+        return view('mekanik.spk.edit-barang', compact('spk', 'barangLama', 'barangBaru'));
+    }
+
+    public function updateBarang(Request $request, $spk_id)
+    {
+        $validatedData = $request->validate([
+            'nama_barang' => 'required|array', // Pastikan array barang harus ada
+            'nama_barang.*' => 'required|string|max:255', // Validasi setiap elemen array nama_barang
+            'qty' => 'required|array', // Pastikan array qty harus ada
+            'qty.*' => 'required|integer|min:1', // Validasi setiap elemen array qty
+        ]);
+
+        $spk = Spk::findOrFail($spk_id);
+
+        if ($spk->status !== 'Dalam Proses') {
+            return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
+        }
+
+        // Hapus barang lama yang terkait dengan SPK
+        $spk->items()->delete();
+
+        // Tambahkan barang baru
+        foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
+            SpkItem::create([
+                'spk_id' => $spk->id,
+                'nama_barang' => $nama_barang,
+                'qty' => $validatedData['qty'][$index],
+                'is_new' => true, // Tandai sebagai barang baru
+            ]);
+        }
+
+        session()->flash('message', 'Barang berhasil diperbarui.');
+        return redirect()->route('mekanik.spk.show', $spk->id)->with('success', 'Barang berhasil diperbarui.');
+    }
+
+    // public function updateBarang(Request $request, $spk_id)
+    // {
+    //     $spk = Spk::findOrFail($spk_id);
+
+    //     if ($spk->status !== 'Dalam Proses') {
+    //         return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
+    //     }
+
+    //     $validatedData = $request->validate([
+    //         'nama_barang_baru' => 'nullable|array',
+    //         'nama_barang_baru.*' => 'nullable|string|max:255',
+    //         'qty_baru' => 'nullable|array',
+    //         'qty_baru.*' => 'nullable|integer|min:1',
+    //     ]);
+
+    //     // Ambil semua ID barang baru yang ada di database
+    //     $existingBarangIds = $spk->items()->where('is_new', true)->pluck('id')->toArray();
+
+    //     // Barang baru yang dikirimkan dalam permintaan
+    //     $submittedBarangIds = [];
+
+    //     if (!empty($validatedData['nama_barang_baru'])) {
+    //         foreach ($validatedData['nama_barang_baru'] as $index => $nama_barang) {
+    //             $qty = $validatedData['qty_baru'][$index];
+
+    //             // Periksa apakah barang sudah ada di database
+    //             $existingBarang = $spk->items()->where('is_new', true)
+    //                 ->where('nama_barang', $nama_barang)
+    //                 ->first();
+
+    //             if ($existingBarang) {
+    //                 // Perbarui barang yang sudah ada
+    //                 $existingBarang->update(['qty' => $qty]);
+    //                 $submittedBarangIds[] = $existingBarang->id;
+    //             } else {
+    //                 // Tambahkan barang baru
+    //                 $newBarang = SpkItem::create([
+    //                     'spk_id' => $spk->id,
+    //                     'nama_barang' => $nama_barang,
+    //                     'qty' => $qty,
+    //                     'is_new' => true,
+    //                 ]);
+    //                 $submittedBarangIds[] = $newBarang->id;
+    //             }
+    //         }
+    //     }
+
+    //     // Hapus barang baru yang tidak lagi dikirimkan dalam permintaan
+    //     $barangToDelete = array_diff($existingBarangIds, $submittedBarangIds);
+    //     SpkItem::whereIn('id', $barangToDelete)->delete();
+
+    //     session()->flash('message', 'Barang berhasil diperbarui.');
+    //     return redirect()->route('mekanik.spk.show', $spk->id);
+    // }
+    
+    // -----------------------------------------
 
     // public function index()
     // {
@@ -243,5 +351,16 @@ class SpkController extends Controller
             ->with('success', 'SPK berhasil dibatalkan dengan alasan: ' . $validatedData['reason']);
     }
 
+    public function destroyBarang($id)
+    {
+        $barang = SpkItem::findOrFail($id);
+
+        if ($barang->is_new) {
+            $barang->delete();
+            return response()->json(['message' => 'Barang berhasil dihapus.'], 200);
+        }
+
+        return response()->json(['message' => 'Barang lama tidak dapat dihapus.'], 403);
+    }
     
 }

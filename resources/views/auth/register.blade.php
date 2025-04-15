@@ -17,15 +17,17 @@
         </div>
 
         <!-- User Level -->
-        <div class="form-group">
-            <label for="level">Level User</label>
-            <select name="level" id="level" class="form-control">
+        <div class="mt-4">
+            <x-input-label for="level" :value="__('User Level')" />
+            <select id="level" name="level" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 <option value="admin" {{ old('level') == 'admin' ? 'selected' : '' }}>Admin</option>
+                <option value="headstore" {{ old('level') == 'headstore' ? 'selected' : '' }}>Headstore</option>
                 <option value="kasir" {{ old('level') == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                <option value="manager" {{ old('level') == 'manager' ? 'selected' : '' }}>Manager</option>
                 <option value="mekanik" {{ old('level') == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
             </select>
+            <x-input-error :messages="$errors->get('level')" class="mt-2" />
         </div>
-
 
         <!-- Password -->
         <div class="mt-4">

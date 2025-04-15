@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -54,7 +54,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'level' => ['required', 'string', 'in:admin,kasir,mekanik'], // Validasi level
+            'level' => ['required', 'string', 'in:admin,kasir,mekanik,headstore,manager'], // Tambahkan opsi level
         ]);
     }
 
@@ -66,12 +66,54 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        dd($data); // Ini akan menampilkan semua data yang diterima
+        dd($data); // Periksa data yang diterima sebelum membuat user
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'level' => $data['level'], // Simpan level
+            'level' => $data['level'],
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            Log::info('Register request received', $request->all());
+
+            // Validasi data
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|confirmed|min:8',
+                'level' => 'required|string|in:admin,kasir,mekanik,headstore,manager',
+            ]);
+
+            Log::info('Validation passed', $validated);
+
+            // Buat user baru
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'level' => $validated['level'],
+            ]);
+
+            Log::info('User registered successfully', ['user_id' => $user->id]);
+
+            return redirect()->route('dashboard');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', [
+                'errors' => $e->errors(),
+            ]);
+
+            return back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            Log::error('Error during registration', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->withErrors(['error' => 'Registration failed. Please try again.']);
+        }
     }
 }

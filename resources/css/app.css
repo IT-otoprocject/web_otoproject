@@ -792,3 +792,34 @@ button.removeItem:hover {
 .td-spk{
     border: 1px solid #ddd;
 }
+
+/* Report SPK Styles */
+.datepicker {
+    z-index: 1600 !important;
+}
+
+.date-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.date-input-container input {
+    cursor: pointer;
+    background-color: white;
+}
+
+.datepicker-dropdown {
+    font-size: 1.2rem !important;
+    padding: 1rem !important;
+    min-width: 320px !important;
+}
+
+.datepicker table tr td,
+.datepicker table tr th {
+    padding: 0.75rem !important;
+    font-size: 1.1rem !important;
+}
+
+.datepicker-days th.dow {
+    font-weight: 600 !important;
+}

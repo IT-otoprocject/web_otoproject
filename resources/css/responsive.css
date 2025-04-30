@@ -1,0 +1,331 @@
+/* Responsive styles for Redmi Pad SE landscape mode (1970 x 1200) */
+@media screen and (min-width: 1200px) and (max-width: 1970px) and (orientation: landscape) {
+    /* Container and Layout */
+    .max-w-7xl {
+        max-width: 1800px !important;
+        padding: 0 2rem;
+    }
+
+    .container {
+        max-width: 1800px !important;
+        margin: 0 auto;
+    }
+
+    /* Typography */
+    h1, .h1 { font-size: 2.5rem !important; }
+    h2, .h2 { font-size: 2rem !important; }
+    h3, .h3 { font-size: 1.75rem !important; }
+    h4, .h4 { font-size: 1.5rem !important; }
+    h5, .h5 { font-size: 1.25rem !important; }
+    p, .p { font-size: 1.1rem !important; }
+
+    /* Form Elements */
+    .form-control, input, select, textarea {
+        font-size: 1.1rem !important;
+        padding: 0.75rem 1rem !important;
+        height: 3.5rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    /* Form Layout Improvements */
+    .form-group {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .input-group {
+        min-height: 3.5rem !important;
+    }
+
+    .input-group-text {
+        font-size: 1.1rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    /* Tables */
+    .table, .table-barang, .table-barang-show {
+        font-size: 1.1rem !important;
+    }
+
+    .table th, .table td,
+    .table-barang th, .table-barang td,
+    .table-barang-show th, .table-barang-show td {
+        padding: 1rem !important;
+    }
+
+    /* Table Improvements */
+    .table-responsive {
+        margin: 2rem 0 !important;
+        border-radius: 0.5rem !important;
+        overflow: hidden !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075) !important;
+    }
+
+    .table-header-fixed {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10 !important;
+    }
+
+    /* Action Buttons in Tables */
+    .table-action-buttons {
+        display: flex !important;
+        gap: 1rem !important;
+        justify-content: flex-end !important;
+    }
+
+    .table-action-buttons .btn {
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* Form Validation Messages */
+    .invalid-feedback {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    /* Help Text */
+    .form-text {
+        font-size: 1rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    /* Cards */
+    .card {
+        border-radius: 1rem !important;
+        margin-bottom: 2rem !important;
+        max-width: 1400px !important;
+        margin: 0 auto;
+    }
+
+    .card-body {
+        padding: 2rem !important;
+    }
+
+    .card-title {
+        font-size: 1.75rem !important;
+        margin-bottom: 1.5rem !important;
+        font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+        font-size: 1.1rem !important;
+        padding: 0.75rem 1.5rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    button[type="submit"] {
+        height: 3.5rem !important;
+        min-width: 200px;
+    }
+
+    /* Labels */
+    label {
+        font-size: 1.25rem !important;
+        margin-bottom: 1rem !important;
+        font-weight: 500;
+    }
+
+    /* Grid and Spacing */
+    .grid {
+        gap: 2rem !important;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 2rem !important;
+    }
+
+    /* Padding and Margins */
+    .p-6 { padding: 2rem !important; }
+    .py-12 { padding: 3rem 0 !important; }
+    .mt-4 { margin-top: 1.5rem !important; }
+    .mt-6 { margin-top: 3rem !important; }
+    .mb-4 { margin-bottom: 1.5rem !important; }
+    .my-4 { margin: 1.5rem 0 !important; }
+
+    /* Search Bar */
+    .search-bar {
+        width: 100% !important;
+        max-width: 500px !important;
+    }
+
+    .search-bar input {
+        height: 3rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Status Badges */
+    .status-cell {
+        font-size: 1rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* Modal/Popup */
+    .filter-popup .filter-content {
+        width: 600px !important;
+        padding: 2rem !important;
+    }
+
+    /* Navigation */
+    nav {
+        padding: 1rem 2rem !important;
+    }
+
+    .nav-link {
+        font-size: 1.1rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    /* SPK Details */
+    .detail-table td {
+        padding: 1rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    .detail-table td.label {
+        width: 200px !important;
+    }
+
+    /* Datepicker */
+    .datepicker-dropdown {
+        font-size: 1.1rem !important;
+        padding: 1rem !important;
+        min-width: 400px !important;
+    }
+
+    .datepicker table tr td,
+    .datepicker table tr th {
+        padding: 1rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* Shadows */
+    .shadow-sm {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* Modal and Dialog Improvements */
+    .modal-dialog {
+        max-width: 800px !important;
+        margin: 2rem auto !important;
+    }
+
+    .modal-content {
+        border-radius: 1rem !important;
+        padding: 1.5rem !important;
+    }
+
+    .modal-header {
+        padding: 1.5rem !important;
+    }
+
+    .modal-body {
+        padding: 2rem !important;
+    }
+
+    .modal-footer {
+        padding: 1.5rem !important;
+        gap: 1rem !important;
+    }
+
+    /* Action Buttons Group */
+    .action-buttons {
+        display: flex !important;
+        gap: 1rem !important;
+        align-items: center !important;
+    }
+
+    .action-buttons .btn {
+        min-width: 120px !important;
+    }
+
+    /* Filter Actions */
+    .filter-actions {
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 1rem !important;
+        margin-top: 2rem !important;
+    }
+
+    /* Alert Messages */
+    .alert {
+        font-size: 1.1rem !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: 0.5rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    /* Dark Mode Specific */
+    .dark .bg-gray-800 {
+        background-color: #1a202c !important;
+    }
+
+    .dark .text-gray-200 {
+        color: #e2e8f0 !important;
+    }
+
+    .dark .border-gray-300 {
+        border-color: #4a5568 !important;
+    }
+
+    /* Navigation Bar Improvements */
+    .navbar {
+        height: 5rem !important;
+    }
+
+    .navbar-brand {
+        font-size: 1.5rem !important;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 1.1rem !important;
+        padding: 1rem 1.5rem !important;
+    }
+
+    .dropdown-menu {
+        font-size: 1.1rem !important;
+        min-width: 200px !important;
+    }
+
+    /* Sidebar (if exists) */
+    .sidebar {
+        width: 280px !important;
+    }
+
+    .sidebar-link {
+        padding: 1rem 1.5rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* Header Section */
+    .header-section {
+        padding: 2rem 0 !important;
+    }
+
+    .page-header {
+        font-size: 2rem !important;
+        margin-bottom: 2rem !important;
+    }
+}
+
+/* Responsive Print Styles */
+@media print {
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}

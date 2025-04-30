@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\KerjaMekanikController;
+use App\Http\Controllers\ReportSpkController; // Tambahkan controller untuk report SPK
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
@@ -83,6 +84,8 @@ Route::post('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class
 Route::get('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class, 'show'])->name('kerja.mekanik');
 Route::post('mekanik/spk/kerja-selesai/{spk_id}', [KerjaMekanikController::class, 'selesai'])->name('kerja.selesai');
 
-
+// Route untuk halaman report SPK dan export ke Excel
+Route::get('/report/spk', [ReportSpkController::class, 'index'])->name('report.spk.index');
+Route::get('/report/spk/export', [ReportSpkController::class, 'export'])->name('report.spk.export');
 
 require __DIR__ . '/auth.php';

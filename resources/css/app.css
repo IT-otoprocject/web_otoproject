@@ -184,6 +184,71 @@ h5 {
     }
 }
 
+/* Navigation responsive styles for Redmi Pad SE landscape */
+@media screen and (min-width: 1920px) {
+    .nav-link {
+        font-size: 1.2rem;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .dropdown-link {
+        font-size: 1.1rem;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .dropdown-content {
+        min-width: 280px;
+    }
+
+    .nav-user-info {
+        font-size: 1.1rem;
+    }
+
+    .hamburger-icon {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .mobile-menu-item {
+        font-size: 1.1rem;
+        padding: 0.75rem 1.25rem;
+    }
+}
+
+/* Responsive styles for Redmi Pad SE landscape (1920x1200) */
+@media screen and (min-width: 1920px) {
+    body {
+        font-size: 16px;
+    }
+
+    .min-h-screen {
+        min-height: 100vh;
+    }
+
+    main {
+        min-height: calc(100vh - 150px);
+    }
+
+    .bg-white {
+        padding: 1rem 1.5rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .py-4 {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .px-4 {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
 /* Responsif untuk Handphone (Portrait dan Landscape) */
 @media screen and (max-width: 768px) {
     /* Umum */

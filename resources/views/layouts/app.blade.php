@@ -33,20 +33,18 @@
         <!-- Page Heading -->
         @isset($header)
         <header class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-[90%] lg:max-w-[1700px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-[95%] mx-auto py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
                 {{ $header }}
             </div>
         </header>
-
         @endisset
 
         <!-- Page Content -->
-        <main>
-            {{ $slot }}
+        <main class="py-4 sm:py-6 lg:py-8">
+            <div class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
+                {{ $slot }}
+            </div>
         </main>
-
-
-
     </div>
 </body>
 

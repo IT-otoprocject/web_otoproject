@@ -1,0 +1,103 @@
+/* ...existing code... */
+
+/* Responsif untuk Form dan Popup */
+@media screen and (max-width: 768px) {
+    .filter-content {
+        width: 90%;
+        margin: 0 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .notif-popup {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+}
+
+/* Responsif untuk Mode Landscape */
+@media screen and (max-height: 500px) {
+    .filter-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        padding: 6px;
+    }
+}
+
+/* Responsive styles for laptop and large screens */
+@media screen and (min-width: 1366px) {
+    .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .table td, .table th {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .search-bar input {
+        width: 400px;
+    }
+}
+
+/* Responsive styles for Redmi Pad SE landscape (1920 x 1200) */
+@media screen and (min-width: 1920px) {
+    .container {
+        max-width: 1800px;
+        padding: 2.5rem;
+    }
+
+    .table {
+        font-size: 1.1rem;
+    }
+
+    .table td, .table th {
+        padding: 1.25rem;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    .search-bar input {
+        width: 500px;
+        padding: 0.75rem 1rem;
+    }
+
+    .filter-content {
+        width: 450px;
+        padding: 2rem;
+    }
+
+    .status-cell {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+}

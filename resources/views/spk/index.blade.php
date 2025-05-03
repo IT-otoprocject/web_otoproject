@@ -103,7 +103,7 @@
                     @if ($spks->isNotEmpty())
                     <table class="table">
                         <thead>
-                            <tr style="border: 1px solid #ddd;">
+                            <tr>
                                 <th>No. SPK</th>
                                 <th>Garage</th>
                                 <th>Tanggal</th>
@@ -117,7 +117,7 @@
                         </thead>
                         <tbody>
                             @foreach ($spks as $spk)
-                            <tr style="border: 1px solid #ddd;">
+                            <tr>
                                 <td class="td-spk">{{ $spk->no_spk }}</td>
                                 <td class="td-spk">{{ $spk->garage }}</td>
                                 <td class="td-spk">{{ $spk->tanggal }}</td>
@@ -146,28 +146,8 @@
     </div>
     <!-- </div> -->
 
-    <!-- CSS -->
-    <style>
-        /* Icon Filter Style */
-        #openFilter i.fas.fa-filter {
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: #4b5563;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-        }
-
-        .btn-secondary:hover {
-            background-color: #374151;
-        }
-    </style>
-
     <!-- Script -->
     <script>
-        
+        // Your JavaScript code here
     </script>
 </x-app-layout>

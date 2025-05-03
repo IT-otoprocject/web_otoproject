@@ -50,7 +50,9 @@
                         </div>
 
                         {{-- Tombol Simpan --}}
+                        <div class="flex justify-center space-x-4">
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        </div>
                     </form>
                 </div>
             </div>

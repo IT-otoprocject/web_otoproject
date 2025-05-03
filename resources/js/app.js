@@ -1,10 +1,21 @@
 import './bootstrap';
-
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
-
 Alpine.start();
+
+// Flash message auto-dismiss handler
+document.addEventListener('DOMContentLoaded', function() {
+    const notifPopups = document.querySelectorAll('.notif-popup');
+    notifPopups.forEach(popup => {
+        setTimeout(() => {
+            popup.style.opacity = '0';
+            setTimeout(() => {
+                popup.remove();
+            }, 300);
+        }, 3000);
+    });
+});
 
 // Tambah Barang & Hapus Barang
 document.addEventListener('DOMContentLoaded', function () {

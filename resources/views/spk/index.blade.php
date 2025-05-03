@@ -148,7 +148,22 @@
 
     <!-- CSS -->
     <style>
+        /* Icon Filter Style */
+        #openFilter i.fas.fa-filter {
+            color: white;
+        }
 
+        .btn-secondary {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #374151;
+        }
     </style>
 
     <!-- Script -->

@@ -103,10 +103,20 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // pop up filter 
-document.getElementById('openFilter').addEventListener('click', function() {
-    document.getElementById('filterPopup').classList.remove('d-none');
-});
+document.addEventListener('DOMContentLoaded', function() {
+    const openFilterBtn = document.getElementById('openFilter');
+    const closePopupBtn = document.getElementById('closePopup');
+    const filterPopup = document.getElementById('filterPopup');
 
-document.getElementById('closePopup').addEventListener('click', function() {
-    document.getElementById('filterPopup').classList.add('d-none');
+    if (openFilterBtn && filterPopup) {
+        openFilterBtn.addEventListener('click', function() {
+            filterPopup.classList.remove('d-none');
+        });
+    }
+
+    if (closePopupBtn && filterPopup) {
+        closePopupBtn.addEventListener('click', function() {
+            filterPopup.classList.add('d-none');
+        });
+    }
 });

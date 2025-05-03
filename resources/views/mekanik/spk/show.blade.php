@@ -11,10 +11,10 @@
     </div>
     @endif
 
-    <div class="py-12">
-        <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 lg:py-12">
+        <div class="max-w-[95%] mx-auto sm:px-4 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+                <div class="p-4 lg:p-6 text-gray-900 dark:text-gray-100">
 
                     {{-- Tombol Aksi --}}
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -70,8 +70,8 @@
 
 
                     {{-- Tabel Detail SPK --}}
-                    <div class="table-container mb-6">
-                        <table class="detail-table">
+                    <div class="table-container mb-4 lg:mb-6">
+                        <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <h2>{{ $spk->no_spk }}</h2>
 
                             @if ($spk->status === 'Cancel')
@@ -181,13 +181,18 @@
 
                     {{-- Tabel Barang --}}
                     @if ($barangBaru->isNotEmpty() || $barangLama->isNotEmpty())
-                    <h3>Product :</h3>
+                    <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
+                        <td >
+                            <h2>Product :</h2>
+                        </td>
+                        
+                    </table>
                     @endif
 
                     @if ($barangLama->isNotEmpty())
                     <!-- <h3>Barang Lama:</h3> -->
-                    <div class="table-container">
-                        <table class="table-barang-show w-full text-left border-collapse">
+                    <div class="table-container mb-4">
+                        <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
                                     <th>Nama Product</th>
@@ -209,7 +214,7 @@
                     @if ($barangBaru->isNotEmpty())
                     <!-- <h3>Barang Baru:</h3> -->
                     <div class="table-container">
-                        <table class="table-barang-show w-full text-left border-collapse">
+                        <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
                                     <th>Nama Product</th>
@@ -229,10 +234,16 @@
                     @endif
                     {{-- Tombol Edit Barang --}}
                     @if ($spk->status === 'Dalam Proses')
-                    <br>
-                    <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning mb-4">
-                        Edit Product
-                    </a>
+                    
+                    <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
+                        <td >
+                            <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning mb-4">
+                                Edit Product
+                            </a>
+                        </td>
+                        <td></td>
+                    </table>
+
                     @endif
 
                 </div>

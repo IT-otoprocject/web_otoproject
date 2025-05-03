@@ -123,10 +123,66 @@ h5 {
         font-size: 1.2rem;
         padding: 12px 20px;
     }
+
+    .detail-table, .table-barang-show {
+        font-size: 1rem;
+        margin: 0.5rem auto;
+    }
+
+    .detail-table td, .table-barang-show td {
+        padding: 0.75rem 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .popup-content {
+        max-width: 550px;
+        padding: 1.5rem;
+    }
+
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.25rem; }
+
+    .detail-table, 
+    .table-barang-show {
+        font-size: 1.25rem;
+    }
+
+    .detail-table td, 
+    .table-barang-show td {
+        padding: 1rem 1.5rem;
+    }
+
+    .detail-table td.label {
+        width: 160px;
+    }
+
+    .table-barang tbody td,
+    .table-barang thead th {
+        font-size: 1.25rem;
+        padding: 1rem;
+    }
+
+    .notif-popup {
+        font-size: 1.25rem;
+        padding: 1.25rem 1.75rem;
+    }
+
+    .popup-content {
+        font-size: 1.2rem;
+    }
+
+    /* Increase filter and search elements */
+    .search-bar input,
+    .search-bar button,
+    .filter-popup input,
+    .filter-popup select {
+        font-size: 1.2rem;
+    }
 }
-
-
-
 
 /* Responsif untuk Handphone (Portrait dan Landscape) */
 @media screen and (max-width: 768px) {
@@ -442,7 +498,7 @@ textarea {
 }
 
 .detail-table td.label {
-    width: 130px;
+    width: 150px;
     /* kasih batas biar kolom label gak melar */
     font-weight: 600;
     /* background-color: #1f2937; */

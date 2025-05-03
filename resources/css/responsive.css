@@ -71,33 +71,57 @@
     }
 
     .table {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
     }
 
     .table td, .table th {
         padding: 1.25rem;
+        font-size: 1.2rem;
     }
 
     .btn {
         padding: 1rem 2rem;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .search-bar input {
         width: 500px;
         padding: 0.75rem 1rem;
+        font-size: 1.2rem;
     }
 
     .filter-content {
         width: 450px;
         padding: 2rem;
+        font-size: 1.2rem;
     }
 
     .status-cell {
         padding: 0.75rem 1.5rem;
+        font-size: 1.25rem;
     }
 
     .page-title {
+        font-size: 2.2rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .form-control {
+        font-size: 1.2rem;
+    }
+
+    h2 {
         font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.8rem;
+    }
+
+    h4 {
+        font-size: 1.6rem;
     }
 }

@@ -27,6 +27,13 @@ class CreateSpksTable extends Migration
             $table->string('no_plat');
             $table->text('catatan')->nullable();
             $table->string('status')->default('Baru Diterbitkan');
+            $table->string('waktu_kerja')->nullable();
+            $table->text('catatan_kerja')->nullable();
+            $table->string('teknisi_selesai')->nullable();
+            $table->text('cancel_reason')->nullable();
+            $table->timestamp('waktu_terbit_spk')->nullable();
+            $table->timestamp('waktu_mulai_kerja')->nullable();
+            $table->text('durasi')->nullable();
             $table->timestamps();
         });
     }

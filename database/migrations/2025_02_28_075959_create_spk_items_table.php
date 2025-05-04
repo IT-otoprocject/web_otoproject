@@ -18,6 +18,7 @@ class CreateSpkItemsTable extends Migration
             $table->foreignId('spk_id')->constrained('spks')->onDelete('cascade'); // Menghubungkan dengan tabel spks
             $table->string('nama_barang');
             $table->integer('qty');
+            $table->boolean('is_new')->default(false);
             $table->timestamps();
         });
     }

@@ -75,4 +75,13 @@ class Spk extends Model
 
         return '00:00:00'; // Jika data tidak ada
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($spk) {
+            if (empty($spk->waktu_terbit_spk)) {
+                $spk->waktu_terbit_spk = now();
+            }
+        });
+    }
 }

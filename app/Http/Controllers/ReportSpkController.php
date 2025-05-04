@@ -30,10 +30,6 @@ class ReportSpkController extends Controller
             'garage' => $request->garage,
         ];
 
-        try {
-            return Excel::download(new SpkExport($filters), 'report_spk_' . date('Y-m-d_His') . '.xlsx');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Export failed. Please try again.');
-        }
+        return Excel::download(new SpkExport($filters), 'report_spk_' . date('Y-m-d_His') . '.xlsx');
     }
 }

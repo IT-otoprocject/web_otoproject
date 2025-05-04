@@ -48,6 +48,11 @@
                             {{ __('Daftar SPK') }}
                         </x-dropdown-link>
                         @endif
+                        @if (in_array(Auth::user()->level, ['admin', 'headstore', 'manager']))
+                        <x-dropdown-link :href="route('report.spk.index')" class="text-sm lg:text-base">
+                            {{ __('Lihat Report SPK') }}
+                        </x-dropdown-link>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"

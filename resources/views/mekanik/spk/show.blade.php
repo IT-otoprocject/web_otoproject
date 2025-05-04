@@ -17,57 +17,55 @@
                 <div class="p-4 lg:p-6 text-gray-900 dark:text-gray-100">
 
                     {{-- Tombol Aksi --}}
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        @if ($spk->status === 'Baru Diterbitkan')
-                        <button type="button" class="btn btn-danger mb-4" onclick="showCancelPopup()">Cancel</button>
-                        @endif
+                    <div class="d-flex justify-content-between mb-4">
+                        <div>
+                            @if ($spk->status === 'Baru Diterbitkan')
+                            <button type="button" class="btn btn-danger" onclick="showCancelPopup()">Cancel</button>
+                            @endif
 
-                        <!-- Popup Alasan Cancel -->
-                        <div id="cancelPopup" class="popup d-none">
-                            <div class="popup-content">
-                                <h5>Alasan Pembatalan</h5>
-                                <form id="cancelForm" action="{{ route('spk.cancel', ['spk_id' => $spk->id]) }}" method="POST">
-                                    @csrf
-                                    @method('PUT') {{-- Jika route menggunakan update --}}
-
-                                    <!-- Input Alasan -->
-                                    <div class="form-group mb-3">
-                                        <label for="cancelReason" class="form-label">Alasan:</label>
-                                        <textarea id="cancelReason" name="reason" class="form-control w-full" rows="3" required></textarea>
-                                    </div>
-
-                                    <!-- Tombol Konfirmasi dan Batal -->
-                                    <div class="d-flex justify-content-between">
-                                        <button type="button" class="btn btn-secondary" onclick="closeCancelPopup()">Batal</button>
-                                        <button type="submit" class="btn btn-danger">Konfirmasi</button>
-                                    </div>
-                                </form>
-                            </div>
+                            @if ($spk->status === 'Dalam Proses' && Auth::user()->level === 'kasir')
+                            <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
+                                class="btn btn-warning"
+                                onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
+                                Edit SPK
+                            </a>
+                            @endif
                         </div>
 
-
-
-                        @if ($spk->status === 'Dalam Proses')
-                        <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
-                            class="btn btn-warning mb-4"
-                            onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
-                            Edit SPK
-                        </a>
-                        @endif
-
-                        @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
-                        <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
-                            @csrf
-                            <button type="submit" class="btn btn-primary mb-4">
-                                Mulai Kerja
-                            </button>
-                        </form>
-                        @endif
-
-
-
+                        <div>
+                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
+                            <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">
+                                    Mulai Kerja
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                     </div>
 
+                    <!-- Popup Alasan Cancel -->
+                    <div id="cancelPopup" class="popup d-none">
+                        <div class="popup-content">
+                            <h5>Alasan Pembatalan</h5>
+                            <form id="cancelForm" action="{{ route('spk.cancel', ['spk_id' => $spk->id]) }}" method="POST">
+                                @csrf
+                                @method('PUT') {{-- Jika route menggunakan update --}}
+
+                                <!-- Input Alasan -->
+                                <div class="form-group mb-3">
+                                    <label for="cancelReason" class="form-label">Alasan:</label>
+                                    <textarea id="cancelReason" name="reason" class="form-control w-full" rows="3" required></textarea>
+                                </div>
+
+                                <!-- Tombol Konfirmasi dan Batal -->
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="closeCancelPopup()">Batal</button>
+                                    <button type="submit" class="btn btn-danger">Konfirmasi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
                     {{-- Tabel Detail SPK --}}
                     <div class="table-container mb-4 lg:mb-6">
@@ -82,9 +80,7 @@
                             <br>
                             @endif
 
-
                             <tbody>
-
                                 <tr>
                                     <td class="label">Garage</td>
                                     <td>: {{ $spk->garage }}</td>
@@ -134,14 +130,10 @@
                                     <td>: {{ $spk->waktu_mulai_kerja }}</td>
                                 </tr>
 
-
                                 @if ($spk->status === 'Sudah Selesai' || $spk->status === 'Dalam Proses')
-
-
                                 <tr>
                                     <td class="label">Durasi Waktu Tunggu</td>
                                     <td>: {{ $spk->durasi }}</td>
-                                </tr>
                                 </tr>
                                 @endif
 
@@ -149,10 +141,6 @@
                                     <td class="label" style="border-bottom: 1px solid white;">Status</td>
                                     <td style="border-bottom: 1px solid white;">: {{ $spk->status }}</td>
                                 </tr>
-
-
-
-
 
                                 @if ($spk->status === 'Sudah Selesai')
                                 <tr>
@@ -173,7 +161,6 @@
                                     <td class="label" style="border-bottom: 1px solid white;">Akun Mekanik</td>
                                     <td style="border-bottom: 1px solid white;">: {{ $spk->teknisi_selesai }}</td>
                                 </tr>
-
                                 @endif
                             </tbody>
                         </table>
@@ -185,12 +172,10 @@
                         <td >
                             <h2>Product :</h2>
                         </td>
-                        
                     </table>
                     @endif
 
                     @if ($barangLama->isNotEmpty())
-                    <!-- <h3>Barang Lama:</h3> -->
                     <div class="table-container mb-4">
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
@@ -212,7 +197,6 @@
                     @endif
 
                     @if ($barangBaru->isNotEmpty())
-                    <!-- <h3>Barang Baru:</h3> -->
                     <div class="table-container">
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
@@ -232,18 +216,15 @@
                         </table>
                     </div>
                     @endif
-                    {{-- Tombol Edit Barang --}}
-                    @if ($spk->status === 'Dalam Proses')
-                    
-                    <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
-                        <td >
-                            <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning mb-4">
-                                Edit Product
-                            </a>
-                        </td>
-                        <td></td>
-                    </table>
 
+                    {{-- Tombol Edit Barang --}}
+                    @if ($spk->status === 'Dalam Proses' && Auth::user()->level === 'kasir')
+                    <br>
+                    <div>
+                        <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning">
+                            Edit Product
+                        </a>
+                    </div>
                     @endif
 
                 </div>

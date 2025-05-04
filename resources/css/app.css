@@ -611,6 +611,7 @@ textarea {
     cursor: pointer;
     text-decoration: none;
     transition: background-color 0.3s ease;
+    margin-left: 0px; /* Add space between buttons */
 }
 
 .btn-primary {
@@ -658,7 +659,8 @@ button.removeItem:hover {
 .d-flex {
     display: flex;
     flex-direction: row;
-    /* Ensure horizontal alignment */
+    justify-content: flex-end; /* Align items to the right */
+    gap: 10px; /* Add space between buttons */
 }
 
 .justify-content-between {

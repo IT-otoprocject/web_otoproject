@@ -130,9 +130,7 @@
                     <p class="text-center">Tidak ada data SPK.</p>
                     @endif
                     @endif
-                    <div class="mb-4">
-                        <a href="{{ route('report.spk.index') }}" class="btn btn-primary">Lihat Report SPK</a>
-                    </div>
+                    
 
 
                 </div>

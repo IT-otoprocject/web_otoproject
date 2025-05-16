@@ -23,7 +23,7 @@
                             <button type="button" class="btn btn-danger" onclick="showCancelPopup()">Cancel</button>
                             @endif
 
-                            @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin']))
+                            @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin', 'sales']))
                             <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
                                 class="btn btn-warning"
                                 onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
@@ -218,7 +218,7 @@
                     @endif
 
                     {{-- Tombol Edit Barang --}}
-                    @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin']))
+                    @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin', 'sales']))
                     <br>
                     <div>
                         <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning">

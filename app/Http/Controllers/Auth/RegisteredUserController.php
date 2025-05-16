@@ -33,7 +33,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'level' => ['required', 'string', 'in:admin,kasir,mekanik,manager,headstore'], // Validasi level
+            'level' => ['required', 'string', 'in:admin,kasir,mekanik,manager,headstore,sales'], // Validasi level
         ]);
 
         $user = User::create([

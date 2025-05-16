@@ -23,7 +23,7 @@
                             <button type="button" class="btn btn-danger" onclick="showCancelPopup()">Cancel</button>
                             @endif
 
-                            @if ($spk->status === 'Dalam Proses' && Auth::user()->level === 'kasir')
+                            @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin']))
                             <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
                                 class="btn btn-warning"
                                 onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
@@ -33,7 +33,7 @@
                         </div>
 
                         <div>
-                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
+                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && in_array(Auth::user()->level, ['mekanik', 'admin']))
                             <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
                                 @csrf
                                 <button type="submit" class="btn btn-primary">
@@ -169,7 +169,7 @@
                     {{-- Tabel Barang --}}
                     @if ($barangBaru->isNotEmpty() || $barangLama->isNotEmpty())
                     <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
-                        <td >
+                        <td>
                             <h2>Product :</h2>
                         </td>
                     </table>
@@ -218,7 +218,7 @@
                     @endif
 
                     {{-- Tombol Edit Barang --}}
-                    @if ($spk->status === 'Dalam Proses' && Auth::user()->level === 'kasir')
+                    @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin']))
                     <br>
                     <div>
                         <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning">

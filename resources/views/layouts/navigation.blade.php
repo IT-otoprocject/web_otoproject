@@ -90,17 +90,34 @@
                 <div class="font-medium text-sm lg:text-base text-gray-500">{{ Auth::user()->email }}</div>
             </div>
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')" class="text-base lg:text-lg">
+                @if (Auth::user()->level == 'admin')
+                <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <x-responsive-nav-link :href="route('logout')"
-                        onclick="event.preventDefault(); this.closest('form').submit();"
-                        class="text-base lg:text-lg">
-                        {{ __('Log Out') }}
+                @endif
+                @if (Auth::user()->level == 'admin')
+                <x-responsive-nav-link :href="route('admin.dashboard')">
+                    {{ __('Admin Dashboard') }}
+                    </x-responsive-responsive-nav-link>
+                    @endif
+                    @if (in_array(Auth::user()->level, ['admin', 'kasir', 'mekanik', 'sales']))
+                    <x-responsive-nav-link :href="route('spk.index')">
+                        {{ __('Daftar SPK') }}
                     </x-responsive-nav-link>
-                </form>
+                    @endif
+                    @if (in_array(Auth::user()->level, ['admin', 'headstore', 'manager']))
+                    <x-responsive-nav-link :href="route('report.spk.index')">
+                        {{ __('Lihat Report SPK') }}
+                    </x-responsive-nav-link>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault(); this.closest('form').submit();"
+                            class="text-base lg:text-lg">
+                            {{ __('Log Out') }}
+                        </x-responsive-nav-link>
+                    </form>
             </div>
         </div>
     </div>

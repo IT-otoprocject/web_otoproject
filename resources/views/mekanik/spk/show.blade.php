@@ -19,11 +19,11 @@
                     {{-- Tombol Aksi --}}
                     <div class="d-flex justify-content-between mb-4">
                         <div>
-                            @if ($spk->status === 'Baru Diterbitkan')
+                            @if ($spk->status === 'Baru Diterbitkan' && in_array(Auth::user()->level, ['admin', 'kasir']))
                             <button type="button" class="btn btn-danger" onclick="showCancelPopup()">Cancel</button>
                             @endif
 
-                            @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin', 'sales']))
+                            @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['admin', 'kasir']))
                             <a href="{{ route('spk.edit', ['spk_id' => $spk->id]) }}"
                                 class="btn btn-warning"
                                 onclick="return confirm('Apakah Anda yakin ingin mengedit SPK ini?')">
@@ -33,7 +33,7 @@
                         </div>
 
                         <div>
-                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && in_array(Auth::user()->level, ['mekanik', 'admin']))
+                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
                             <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
                                 @csrf
                                 <button type="submit" class="btn btn-primary">
@@ -218,7 +218,7 @@
                     @endif
 
                     {{-- Tombol Edit Barang --}}
-                    @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['kasir', 'admin', 'sales']))
+                    @if ($spk->status === 'Dalam Proses' && in_array(Auth::user()->level, ['admin', 'kasir']))
                     <br>
                     <div>
                         <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" class="btn btn-warning">

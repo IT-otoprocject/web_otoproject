@@ -75,6 +75,8 @@ h5 {
 
     .search-bar input {
         width: 350px; /* Input lebih lebar */
+        border: 1px solid #4b5563; /* Garis luar abu-abu gelap */
+
     }
 
     .page-title {
@@ -119,6 +121,7 @@ h5 {
     .search-bar input {
         width: 450px; /* Lebar input lebih besar */
         padding: 14px 24px;
+        border: 1px solid #4b5563;  /* Warna abu-abu untuk border */
     }
 
     .search-bar button {
@@ -183,6 +186,8 @@ h5 {
     .filter-popup input,
     .filter-popup select {
         font-size: 1.2rem;
+        border: 1px solid #ccc; /* Warna abu-abu untuk border */
+
     }
 }
 
@@ -291,7 +296,7 @@ h5 {
         flex-direction: column; /* Baris berubah jadi kolom */
         margin-bottom: 10px; /* Tambahkan jarak antar baris */
         padding: 8px;
-        background-color: #1f2937; /* Warna latar belakang */
+        background-color: #a7a6a6; /* Warna latar belakang */
         border-radius: 8px;
     }
 
@@ -307,7 +312,7 @@ h5 {
     .table-barang-show tbody tr td::before {
         content: attr(data-label); /* Ambil data-label */
         font-weight: bold;
-        color: #d1d5db; /* Warna label */
+        
         margin-right: 10px;
     }
 
@@ -322,6 +327,7 @@ h5 {
         width: 100%; /* Lebar penuh */
         padding: 10px; /* Padding nyaman */
         margin-bottom: 10px; /* Jarak antar elemen */
+        border: 1px solid #4b5563; 
     }
 
     /* Tombol */
@@ -409,7 +415,7 @@ textarea {
 
 /* Hover efek */
 .table tr:hover {
-    background-color: #333;
+    background-color: #878787;
     /* Warna abu terang saat hover */
 }
 
@@ -552,28 +558,35 @@ textarea {
     overflow: hidden;
     /* background-color: rgb(17, 22, 31); */
     /* gray-900 */
+    color: #1a202c; /* dark text for light mode */
+}
+
+.dark .detail-table {
+    color: #ffffff; /* light text for dark mode */
 }
 
 .detail-table td,
 .barang-table th,
 .barang-table td {
-    /* border: 1px solid #ddd; */
-    /* gray-700 */
     padding: 0.75rem;
-    color: #d1d5db;
-    /* gray-300 */
+    color: #1a202c; /* dark text for light mode */
+}
+
+.dark .detail-table td,
+.dark .barang-table th,
+.dark .barang-table td {
+    color: #ffffff; /* light text for dark mode */
 }
 
 .detail-table td.label {
     width: 150px;
-    /* kasih batas biar kolom label gak melar */
     font-weight: 600;
-    /* background-color: #1f2937; */
-    /* gray-800 */
-    color: #f9fafb;
-    /* gray-50 */
     padding-right: 1rem;
-    /* jarak ke isi */
+    color: inherit;
+}
+
+.dark .detail-table td.label {
+    color: #ffffff;
 }
 
 .detail-table td.label-header {
@@ -685,6 +698,7 @@ button.removeItem:hover {
     /* Add spacing between input and button */
     margin-left: auto;
     /* Push search bar to the right */
+    
 }
 
 .search-bar input {
@@ -693,6 +707,7 @@ button.removeItem:hover {
     padding: 8px 15px;
     /* Comfortable padding for input */
     width: 300px;
+    border: 1px solid #4b5563; 
 }
 
 .search-bar button {
@@ -896,7 +911,7 @@ button.removeItem:hover {
 
 /* Opsional: Efek hover untuk <tr> */
 .table-barang tbody tr:hover td {
-    background-color: #28303d; /* Warna lebih terang saat di-hover */
+    background-color: #8a8a8a; /* Warna lebih terang saat di-hover */
 }
 
 /* tabel show SPK */
@@ -906,16 +921,35 @@ button.removeItem:hover {
     border-collapse: collapse; /* Hilangkan ruang antar border */
     border-radius: 8px; /* Membuat sudut tabel menjadi rounded */
     overflow: hidden; /* Pastikan rounded berlaku untuk seluruh tabel */
+    color: #1a202c; /* dark text for light mode */
+}
+
+.dark .table-barang-show {
+    color: #ffffff; /* light text for dark mode */
+}
+
+.table-barang-show thead th,
+.table-barang-show tbody td {
+    color: #2e2e2e; /* dark text for light mode */
+}
+
+.dark .table-barang-show thead th,
+.dark .table-barang-show tbody td {
+    color: #ffffff; /* light text for dark mode */
 }
 
 /* Styling untuk header tabel */
 .table-barang-show thead th {
     /* background-color: white;  Warna latar belakang */
     font: bold;
-    color:  white; /* Warna teks */
+    color:  #1a202c; /* Warna teks */
     /* text-align: center; Teks di tengah */
     padding: 8px; /* Jarak teks dengan tepi */
     font-weight: bold; /* Mempertegas tulisan */
+}
+
+.dark .table-barang-show thead th {
+    color: #ffffff; /* light text for dark mode */
 }
 
 /* Styling untuk elemen <td> */
@@ -934,9 +968,79 @@ button.removeItem:hover {
 
 /* Opsional: Efek hover untuk <tr> */
 .table-barang-show tbody tr:hover td {
-    background-color: #28303d; /* Warna lebih terang saat di-hover */
+    background-color: #848484; /* Warna lebih terang saat di-hover */
 }
 
+/* Dark mode support for table elements */
+.table-barang-show {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dark .table-barang-show {
+    color: #ffffff;
+}
+
+.table-barang-show td,
+.table-barang-show th {
+    color: #1a202c;
+}
+
+.dark .table-barang-show td,
+.dark .table-barang-show th {
+    color: #ffffff;
+}
+
+.detail-table td {
+    color: #1a202c;
+}
+
+.dark .detail-table td {
+    color: #ffffff;
+}
+
+.detail-table td span,
+.detail-table td:last-child {
+    color: inherit;
+}
+
+.table-barang-show thead {
+    background-color: #f3f4f6;
+}
+
+.dark .table-barang-show thead {
+    background-color: #136eff;
+}
+
+.table-barang-show thead th {
+    padding: 12px;
+    font-weight: 600;
+    text-align: left;
+    color: #1a202c;
+}
+
+.dark .table-barang-show thead th {
+    color: #ffffff;
+}
+
+.table-barang-show tbody td {
+    padding: 12px;
+    color: #1a202c;
+}
+
+.dark .table-barang-show tbody td {
+    color: #ffffff;
+}
+
+.table-barang-show tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.dark .table-barang-show tbody tr:hover {
+    background-color: #4b5563;
+}
 
 .td-spk{
     border: 1px solid #ddd;

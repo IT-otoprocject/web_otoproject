@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="page-title">
+        <h2 class="font-semibold text-x2 text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Detail SPK') }}
         </h2>
     </x-slot>
@@ -69,97 +69,170 @@
 
                     {{-- Tabel Detail SPK --}}
                     <div class="table-container mb-4 lg:mb-6">
-                        <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
-                            <h2>{{ $spk->no_spk }}</h2>
+                        <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto text-gray-900 dark:text-white">
+                            <h2 class="text-gray-900 dark:text-white">{{ $spk->no_spk }}</h2>
 
                             @if ($spk->status === 'Cancel')
                             <div class="alert alert-danger">
                                 <h4 style="color : #ff6347;">SPK Dibatalkan</h4>
-                                <p>Alasan: {{ $spk->cancel_reason }}</p>
+                                <p class="text-gray-900 dark:text-white">Alasan: {{ $spk->cancel_reason }}</p>
                             </div>
                             <br>
                             @endif
 
                             <tbody>
-                                <tr>
-                                    <td class="label">Garage</td>
-                                    <td>: {{ $spk->garage }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="text-gray-900 dark:text-white">
+                                        <h4 class="text-gray-900 dark:text-white">Detail SPK :</h4>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Tanggal</td>
-                                    <td>: {{ $spk->tanggal }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Garage</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->garage }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Teknisi 1</td>
-                                    <td>: {{ $spk->teknisi_1 }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Tanggal</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->tanggal }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Teknisi 2</td>
-                                    <td>: {{ $spk->teknisi_2 }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Teknisi 1</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->teknisi_1 }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Customer</td>
-                                    <td>: {{ $spk->customer }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Teknisi 2</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->teknisi_2 }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Alamat</td>
-                                    <td>: {{ $spk->alamat }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Customer</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->customer }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">No. HP</td>
-                                    <td>: {{ $spk->no_hp }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Alamat</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->alamat }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Jenis Mobil</td>
-                                    <td>: {{ $spk->jenis_mobil }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">No. HP</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->no_hp }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">No. Plat</td>
-                                    <td>: {{ $spk->no_plat }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Jenis Mobil</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->jenis_mobil }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Catatan</td>
-                                    <td>: {{ $spk->catatan }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">No. Plat</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->no_plat }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Waktu Terbit</td>
-                                    <td>: {{ $spk->waktu_terbit_spk }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Catatan</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->catatan }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Waktu klik Mulai Kerja</td>
-                                    <td>: {{ $spk->waktu_mulai_kerja }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Waktu Terbit</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->waktu_terbit_spk }}</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Waktu klik Mulai Kerja</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->waktu_mulai_kerja }}</span>
+                                    </td>
                                 </tr>
 
                                 @if ($spk->status === 'Sudah Selesai' || $spk->status === 'Dalam Proses')
-                                <tr>
-                                    <td class="label">Durasi Waktu Tunggu</td>
-                                    <td>: {{ $spk->durasi }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Durasi Waktu Tunggu</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->durasi }}</span>
+                                    </td>
                                 </tr>
                                 @endif
 
-                                <tr>
-                                    <td class="label" style="border-bottom: 1px solid white;">Status</td>
-                                    <td style="border-bottom: 1px solid white;">: {{ $spk->status }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label" style="border-bottom: 1px solid gray;">
+                                        <span class="text-gray-900 dark:text-white">Status</span>
+                                    </td>
+                                    <td style="border-bottom: 1px solid gray;">
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->status }}</span>
+                                    </td>
                                 </tr>
 
                                 @if ($spk->status === 'Sudah Selesai')
-                                <tr>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="label">
-                                        <h4>Mekanik :</h4>
+                                        <h4 class="text-gray-900 dark:text-white">Mekanik :</h4>
                                     </td>
                                     <td></td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Waktu Kerja</td>
-                                    <td>: {{ $spk->waktu_kerja }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Waktu Kerja</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->waktu_kerja }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label">Catatan Kerja</td>
-                                    <td>: {{ $spk->catatan_kerja }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label">
+                                        <span class="text-gray-900 dark:text-white">Catatan Kerja</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->catatan_kerja }}</span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="label" style="border-bottom: 1px solid white;">Akun Mekanik</td>
-                                    <td style="border-bottom: 1px solid white;">: {{ $spk->teknisi_selesai }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="label" style="border-bottom: 1px solid gray;">
+                                        <span class="text-gray-900 dark:text-white">Akun Mekanik</span>
+                                    </td>
+                                    <td style="border-bottom: 1px solid gray;">
+                                        <span class="text-gray-900 dark:text-white">: {{ $spk->teknisi_selesai }}</span>
+                                    </td>
                                 </tr>
                                 @endif
                             </tbody>
@@ -170,7 +243,7 @@
                     @if ($barangBaru->isNotEmpty() || $barangLama->isNotEmpty())
                     <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
                         <td>
-                            <h2>Product :</h2>
+                            <h2 class="text-gray-900 dark:text-white">Product :</h2>
                         </td>
                     </table>
                     @endif
@@ -180,15 +253,19 @@
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
-                                    <th>Nama Product</th>
-                                    <th style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                    <th class="text-gray-900 dark:text-white">Nama Product</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($barangLama as $item)
-                                <tr>
-                                    <td>{{ $item->nama_barang }}</td>
-                                    <td style="text-align: center;">{{ $item->qty }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="text-gray-900 dark:text-white">
+                                        <span class="text-gray-900 dark:text-white">{{ $item->nama_barang }}</span>
+                                    </td>
+                                    <td class="text-gray-900 dark:text-white text-center">
+                                        <span class="text-gray-900 dark:text-white">{{ $item->qty }}</span>
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -201,15 +278,19 @@
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
-                                    <th>Nama Product</th>
-                                    <th style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                    <th class="text-gray-900 dark:text-white">Nama Product</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($barangBaru as $item)
-                                <tr>
-                                    <td>{{ $item->nama_barang }}</td>
-                                    <td style="text-align: center;">{{ $item->qty }}</td>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="text-gray-900 dark:text-white">
+                                        <span class="text-gray-900 dark:text-white">{{ $item->nama_barang }}</span>
+                                    </td>
+                                    <td class="text-gray-900 dark:text-white text-center">
+                                        <span class="text-gray-900 dark:text-white">{{ $item->qty }}</span>
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>

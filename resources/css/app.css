@@ -392,8 +392,12 @@ textarea {
     padding: 15px;
     /* padding: 4px 10px; */
     /* Tambahkan padding untuk tampilan rapi */
+    color: #1a202c; /* dark text for light mode */
+}
 
-    /* Rata kiri isi sel */
+.dark .table th,
+.dark .table td {
+    color: #ffffff; /* light text for dark mode */
 }
 
 /*  */
@@ -406,6 +410,11 @@ textarea {
     color: #333;
     /* Warna teks gelap */
     text-align: Center;
+}
+
+.dark .table th {
+    background-color: #374151; /* dark background for dark mode */
+    color: #ffffff;
 }
 
 /* Baris ganjil untuk tampilan zebra */
@@ -653,10 +662,13 @@ textarea {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
-    color: #f9fafb;
+    color: #1a202c;
     /* gray-50 */
 }
 
+.dark .section-title {
+    color: #ffffff;
+}
 
 /* icon sampah/trash  */
 button.removeItem {
@@ -802,8 +814,7 @@ button.removeItem:hover {
 .form-control {
     border-radius: 15px;
     /* Membuat input menjadi rounded */
-    border: none;
-    /* Menghilangkan garis border */
+    border: 1px solid #4b5563; /* Added gray border */
     /* background-color: transparent; */
     /* Menghilangkan background */
     box-shadow: none;
@@ -889,7 +900,7 @@ button.removeItem:hover {
 /* Styling untuk header tabel */
 .table-barang thead th {
     /* background-color: #10151c; Warna latar belakang */
-    color: white; /* Warna teks */
+    color: rgb(0, 0, 0); /* Warna teks */
     text-align: center; /* Teks di tengah */
     padding: 8px; /* Jarak teks dengan tepi */
     font-weight: bold; /* Mempertegas tulisan */
@@ -1044,4 +1055,32 @@ button.removeItem:hover {
 
 .td-spk{
     border: 1px solid #ddd;
+}
+
+/* Table cell dark mode styles */
+tr, td, th {
+    color: #1a202c; /* dark text for light mode */
+}
+
+.dark tr,
+.dark td,
+.dark th {
+    color: #ffffff; /* light text for dark mode */
+}
+
+/* Form label dark mode styles */
+.detail-table .label {
+    color: #1a202c; /* dark text for light mode */
+}
+
+.dark .detail-table .label {
+    color: #ffffff; /* light text for dark mode */
+}
+
+.dark .detail-table h2 {
+    color: #ffffff;
+}
+
+.dark .section-title {
+    color: #ffffff;
 }

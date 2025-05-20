@@ -33,7 +33,7 @@
                         </div>
 
                         <div>
-                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && Auth::user()->level === 'mekanik')
+                            @if (in_array($spk->status, ['Baru Diterbitkan', 'Dalam Proses']) && in_array(Auth::user()->level, ['admin', 'mekanik']))
                             <form action="{{ route('spk.waktuMulaiKerja', ['spk_id' => $spk->id]) }}" method="POST" onsubmit="return startWorkConfirmation(event)">
                                 @csrf
                                 <button type="submit" class="btn btn-primary">

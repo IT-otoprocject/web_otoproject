@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="page-title">
+        <h2 class="font-semibold text-x2 text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Edit Informasi SPK') }}
         </h2>
     </x-slot>
@@ -98,43 +98,58 @@
                                 Simpan Perubahan
                             </button>
                         </div>
-
+                        <div class="flex justify-center mt-6">
+                            <a href="{{ route('spk.editBarang', ['spk_id' => $spk->id]) }}" 
+                               class="btn btn-warning"
+                               onclick="return confirm('Jika tidak disimpan perubahan akan hilang, Anda yakin melanjutkannya?')">
+                                Edit Product
+                            </a>
+                        </div>
 
                         <!-- Barang Section (invisible) -->
                         <div style="display: none;"></div>
-                            <!-- <h2 class="section-title font-semibold text-lg mb-4">Barang</h2> -->
-                            <div class="table-container mb-6">
-                                <table class="table-barang w-full text-left border-collapse">
-                                    <thead>
-                                        <tr>
-                                            <!-- <th class="border-barang px-4 py-2">Nama Barang</th>
-                                            <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
-                                            <th class="border-barang px-4 py-2" style="width: 80px;"></th> -->
-                                        </tr>
-                                    </thead>
-                                    <tbody id="itemContainer">
-                                        @foreach ($spk->items as $index => $item)
-                                        <tr>
-                                            <td class="custom-td">
-                                                <input type="hidden" name="nama_barang[]" class="form-control w-full"
-                                                    value="{{ $item->nama_barang }}">
-                                            </td>
-                                            <td class="custom-td">
-                                                <input type="hidden" name="qty[]" class="form-control"
-                                                    value="{{ $item->qty }}" style="width: 80px;">
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                        <!-- <h2 class="section-title font-semibold text-lg mb-4">Barang</h2> -->
+                        <div class="table-container mb-6">
+                            <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto">
+                                <td>
+                                    <h2 class="text-gray-900 dark:text-white">View Product :</h2>
+                                </td>
+                            </table>
+                            <table class="table-barang w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border-barang px-4 py-2">Nama Barang</th>
+                                        <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
+
+                                    </tr>
+                                </thead>
+
+                                <tbody id="itemContainer">
+
+                                    @foreach ($spk->items as $index => $item)
+
+
+                                    <tr>
+                                        <td class="custom-td">
+                                            <input name="nama_barang[]" class="form-control w-full"
+                                                value="{{ $item->nama_barang }}" readonly>
+                                        </td>
+                                        <td class="custom-td">
+                                            <input name="qty[]" class="form-control"
+                                                value="{{ $item->qty }}" style="width: 80px;" readonly>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-
-                        
-                    </form>
-
                 </div>
+
+
+                </form>
+
             </div>
         </div>
+    </div>
     </div>
 </x-app-layout>

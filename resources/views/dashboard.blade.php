@@ -45,16 +45,16 @@
 
                     <!-- Popup Filter -->
                     <div id="filterPopup" class="filter-popup d-none">
-                        <div class="filter-content">
+                        <div class="filter-content dark:bg-gray-800">
                             <!-- Tombol "X" untuk menutup popup -->
                             <button type="button" id="closePopup" class="close-button">X</button>
 
-                            <h5 class="mb-3"><i class="fas fa-filter"></i> Filter SPK</h5>
+                            <h5 class="mb-3 text-gray-900 dark:text-white"><i class="fas fa-filter"></i> Filter SPK</h5>
                             <form method="GET" action="{{ route('dashboard') }}">
                                 <!-- Dropdown Garage -->
                                 <div class="form-group">
-                                    <label for="garage" class="block text-lg font-medium mb-2">Garage:</label>
-                                    <select name="garage" id="garage" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300">
+                                    <label for="garage" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Garage:</label>
+                                    <select name="garage" id="garage" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
                                         <option value="" selected>-- Pilih Garage --</option>
                                         <option value="Bandung" {{ request('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
                                         <option value="Bekasi" {{ request('garage') == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
@@ -68,8 +68,8 @@
 
                                 <!-- Dropdown Status -->
                                 <div class="form-group mt-3">
-                                    <label for="status" class="block text-lg font-medium mb-2">Status:</label>
-                                    <select name="status" id="status" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300">
+                                    <label for="status" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Status:</label>
+                                    <select name="status" id="status" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
                                         <option value="" selected>-- Pilih Status --</option>
                                         <option value="Baru Diterbitkan" {{ request('status') == 'Baru Diterbitkan' ? 'selected' : '' }}>Baru Diterbitkan</option>
                                         <option value="Dalam Proses" {{ request('status') == 'Dalam Proses' ? 'selected' : '' }}>Dalam Proses</option>
@@ -92,42 +92,48 @@
                     @if ($spks->isNotEmpty())
                     <table class="table">
                         <thead>
-                            <tr style="border: 1px solid #ddd;">
-
-                                <th>Garage</th>
-
-                                <th>Customer</th>
-
-                                <th>No. Plat</th>
-                                <th>Status</th>
-                                <th>Durasi</th>
-                                <th>Detail</th>
+                            <tr>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Garage</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Customer</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. Plat</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Status</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Durasi</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Detail</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($spks as $spk)
-                            <tr style="border: 1px solid #ddd;">
-
-                                <td class="td-spk">{{ $spk->garage }}</td>
-
-                                <td class="td-spk">{{ $spk->customer }}</td>
-
-                                <td class="td-spk">{{ $spk->no_plat }}</td>
-                                <td class="status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
-                                    style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px; border: 1px solid #ccc;">
+                            <tr>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->garage }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->customer }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->no_plat }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
+                                    style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px;">
                                     {{ $spk->status }}
                                 </td>
-                                <td class="td-spk">{{ $spk->waktu_kerja }}</td>
-                                <td class="td-spk"><a href="{{ route('mekanik.spk.show', $spk->id) }}">Lihat Detail</a></td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
+                                    <a href="{{ route('mekanik.spk.show', $spk->id) }}" 
+                                       class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">
+                                        Lihat Detail
+                                    </a>
+                                </td>
                             </tr>
-
                             @endforeach
                         </tbody>
                     </table>
 
                     @else
                     <br>
-                    <p class="text-center">Tidak ada data SPK.</p>
+                    <p class="text-center text-gray-900 dark:text-white">Tidak ada data SPK.</p>
                     @endif
                     @endif
                     

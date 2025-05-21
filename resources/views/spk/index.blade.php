@@ -145,10 +145,11 @@
                                 <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                                     <span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
                                 </td>
-                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                                    <span class="text-gray-900 dark:text-white">
-                                        <a href="{{ route('mekanik.spk.show', $spk->id) }}" class="text-gray-900 dark:text-white">Lihat Detail</a>
-                                    </span>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
+                                    <a href="{{ route('mekanik.spk.show', $spk->id) }}" 
+                                       class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">
+                                        Lihat Detail
+                                    </a>
                                 </td>
                             </tr>
                             @endforeach

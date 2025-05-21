@@ -106,34 +106,51 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>No. SPK</th>
-                                <th>Garage</th>
-                                <th>Tanggal</th>
-                                <th>Customer</th>
-                                <th>No. HP</th>
-                                <th>No. Plat</th>
-                                <th>Status</th>
-                                <th>Durasi</th>
-                                <th>Detail</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. SPK</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Garage</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Tanggal</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Customer</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. HP</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. Plat</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Status</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Durasi</th>
+                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Detail</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($spks as $spk)
                             <tr>
-                                <td class="td-spk">{{ $spk->no_spk }}</td>
-                                <td class="td-spk">{{ $spk->garage }}</td>
-                                <td class="td-spk">{{ $spk->tanggal }}</td>
-                                <td class="td-spk">{{ $spk->customer }}</td>
-                                <td class="td-spk">{{ $spk->no_hp }}</td>
-                                <td class="td-spk">{{ $spk->no_plat }}</td>
-                                <td class="status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
-                                    style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px; border: 1px solid #ccc;">
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->no_spk }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->garage }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->tanggal }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->customer }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->no_hp }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->no_plat }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
+                                    style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px;">
                                     {{ $spk->status }}
                                 </td>
-                                <td class="td-spk">{{ $spk->waktu_kerja }}</td>
-                                <td class="td-spk"><a href="{{ route('mekanik.spk.show', $spk->id) }}">Lihat Detail</a></td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
+                                </td>
+                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                    <span class="text-gray-900 dark:text-white">
+                                        <a href="{{ route('mekanik.spk.show', $spk->id) }}" class="text-gray-900 dark:text-white">Lihat Detail</a>
+                                    </span>
+                                </td>
                             </tr>
-
                             @endforeach
                         </tbody>
                     </table>

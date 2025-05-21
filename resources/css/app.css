@@ -400,7 +400,34 @@ textarea {
     color: #ffffff; /* light text for dark mode */
 }
 
-/*  */
+/* Table cell styles with dark mode support */
+.table td.td-spk {
+    color: #1a202c; /* dark text for light mode */
+    border: 1px solid #ddd;
+}
+
+.dark .table td.td-spk {
+    color: #ffffff; /* light text for dark mode */
+    border: 1px solid #4b5563;
+}
+
+/* Override any conflicting styles */
+.dark .table td.td-spk,
+.dark .table td.td-spk a {
+    color: #ffffff !important;
+}
+
+/* Table dark mode overrides */
+.dark .table td,
+.dark .table td span,
+.dark .table td a {
+    color: #ffffff !important;
+}
+
+.dark .table tr:hover {
+    background-color: #374151;
+}
+
 /* Header tabel */
 .table th {
     background-color: #f8f9fa;

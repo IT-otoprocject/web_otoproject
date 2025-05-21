@@ -864,6 +864,17 @@ button.removeItem:hover {
     /* Placeholder transparan */
 }
 
+/* Dark mode support for select options */
+.form-control option {
+    background-color: white;
+    color: black;
+}
+
+.dark .form-control option {
+    background-color: #374151;
+    color: white;
+}
+
 /* Pop Up buttom aksi (notifikasi) */
 .notif-popup {
     position: fixed;

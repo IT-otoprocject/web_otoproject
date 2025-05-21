@@ -14,26 +14,28 @@
                         @method('PUT')
 
                         <!-- Barang Section -->
-                        <h2 class="section-title font-semibold text-lg mb-4">Product</h2>
+                        <h2><span class="section-title font-semibold text-lg mb-4 text-gray-900 dark:text-white">Product</span></h2>
                         <div class="table-container mb-6">
                             <table class="table-barang w-full text-left border-collapse">
                                 <thead>
                                     <tr>
-                                        <th class="border-barang px-4 py-2">Nama Product</th>
-                                        <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
+                                        <th class="border-barang px-4 py-2">
+                                            <span class="text-gray-900 dark:text-white">Nama Product</span>
+                                        </th>
+                                        <th class="border-barang px-4 py-2" style="width: 80px;">
+                                            <span class="text-gray-900 dark:text-white">Quantity</span>
+                                        </th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemContainer">
                                     @foreach ($spk->items as $index => $item)
                                     <tr>
-                                        <td class="custom-td">
-                                            <input type="text" name="nama_barang[]" class="form-control w-full"
-                                                value="{{ $item->nama_barang }}" required>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $item->nama_barang }}" required>
                                         </td>
-                                        <td class="custom-td">
-                                            <input type="number" name="qty[]" class="form-control"
-                                                value="{{ $item->qty }}" style="width: 80px;" required>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ $item->qty }}" style="width: 80px;" required>
                                         </td>
                                         <td class="custom-td text-center">
                                             <button type="button" class="btn btn-outline-danger removeItem">

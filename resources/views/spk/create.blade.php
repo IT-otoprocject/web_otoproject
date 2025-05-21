@@ -21,7 +21,7 @@
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 w-1/4 text-gray-900 dark:text-white">Garage</td>
                                         <td class="py-2 px-4">
-                                            <select name="garage" id="garage" class="form-control w-full" required>
+                                            <select name="garage" id="garage" class="form-control w-full dark:text-white dark:bg-gray-700" required>
                                                 <option value="Bandung">Bandung</option>
                                                 <option value="Bekasi">Bekasi</option>
                                                 <option value="Bintaro">Bintaro</option>
@@ -34,55 +34,55 @@
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Tanggal</td>
                                         <td class="py-2 px-4">
-                                            <input type="date" class="form-control w-full" id="tanggal" name="tanggal" required>
+                                            <input type="date" class="form-control w-full dark:text-white dark:bg-gray-700" id="tanggal" name="tanggal" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Teknisi 1</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="teknisi_1" name="teknisi_1" required>
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="teknisi_1" name="teknisi_1" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Teknisi 2</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="teknisi_2" name="teknisi_2">
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="teknisi_2" name="teknisi_2">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Customer</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="customer" name="customer" required>
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="customer" name="customer" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Alamat</td>
                                         <td class="py-2 px-4">
-                                            <textarea class="form-control w-full" id="alamat" name="alamat" required></textarea>
+                                            <textarea class="form-control w-full dark:text-white dark:bg-gray-700" id="alamat" name="alamat" required></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">No. HP</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="no_hp" name="no_hp" required>
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="no_hp" name="no_hp" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">Jenis Mobil</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="jenis_mobil" name="jenis_mobil" required>
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="jenis_mobil" name="jenis_mobil" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white">No. Plat</td>
                                         <td class="py-2 px-4">
-                                            <input type="text" class="form-control w-full" id="no_plat" name="no_plat" required>
+                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="no_plat" name="no_plat" required>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4 text-gray-900 dark:text-white" style="border-bottom: 1px solid white;">Catatan</td>
                                         <td class="py-2 px-4" style="border-bottom: 1px solid white;">
-                                            <textarea class="form-control w-full" id="catatan" name="catatan"></textarea>
+                                            <textarea class="form-control w-full dark:text-white dark:bg-gray-700" id="catatan" name="catatan"></textarea>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -91,24 +91,24 @@
                         
 
                         <!-- Barang Section -->
-                        <h2 class="section-title font-semibold text-lg mb-4">Product</h2>
+                        <h2 class="section-title font-semibold text-lg mb-4 text-gray-900 dark:text-white">Product</h2>
 
                         <div class="table-container mb-6">
                             <table class="table-barang w-full text-left border-collapse">
                                 <thead>
                                     <tr>
-                                        <th class="border-barang px-4 py-2">Nama Product</th>
-                                        <th class="border-barang px-4 py-2" style="width: 80px;">Quantity</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white">Nama Product</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white" style="width: 80px;">Quantity</th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemContainer">
                                     <tr>
                                         <td class="custom-td">
-                                            <input type="text" name="nama_barang[]" class="form-control w-full" placeholder="Nama Product" required>
+                                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" placeholder="Nama Product" required>
                                         </td>
                                         <td class="custom-td">
-                                            <input type="number" name="qty[]" class="form-control" placeholder="Qty" style="width: 80px;" required>
+                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" required>
                                         </td>
 
                                         <td class="custom-td text-center">

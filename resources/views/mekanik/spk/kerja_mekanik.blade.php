@@ -146,12 +146,15 @@
             }, 1000);
         }
 
-        // Checklist Product Dipasang berbasis nama produk
+        // Checklist Product Dipasang berbasis nama produk dan qty
         document.addEventListener('DOMContentLoaded', function() {
             const spkId = "{{ $spk->id }}";
             const buttons = document.querySelectorAll('.btn-pasang');
-            // Ambil semua nama barang yang ada di halaman
-            const barangNames = Array.from(buttons).map(btn => btn.getAttribute('data-barang-nama'));
+            // Ambil semua nama barang dan qty yang ada di halaman
+            const barangList = Array.from(buttons).map(btn => ({
+                nama: btn.getAttribute('data-barang-nama'),
+                qty: btn.getAttribute('data-barang-qty')
+            }));
             const storageKey = `spk_${spkId}_barang_pasang_nama`;
             let checkedBarang = [];
             try {
@@ -160,27 +163,45 @@
                 checkedBarang = [];
             }
 
-            // Filter hanya nama yang masih ada di halaman
-            const filteredChecked = checkedBarang.filter(nama => barangNames.includes(nama));
-            if (filteredChecked.length !== checkedBarang.length) {
-                localStorage.setItem(storageKey, JSON.stringify(filteredChecked));
-                checkedBarang = filteredChecked;
+            // Cek perubahan qty: jika nama sama tapi qty berbeda, reset checklist dan beri notifikasi
+            let changed = false;
+            checkedBarang = checkedBarang.filter(saved => {
+                const current = barangList.find(b => b.nama === saved.nama);
+                if (current) {
+                    if (String(current.qty) !== String(saved.qty)) {
+                        // Qty berubah, beri notifikasi
+                        alert(`qty dari product ${saved.nama} berubah menjadi ${current.qty}`);
+                        changed = true;
+                        return false; // hapus dari checklist
+                    }
+                    return true;
+                }
+                return false;
+            });
+            if (changed) {
+                localStorage.setItem(storageKey, JSON.stringify(checkedBarang));
             }
 
             // Render tombol sesuai status
             buttons.forEach(function(btn) {
                 const barangNama = btn.getAttribute('data-barang-nama');
                 const barangQty = btn.getAttribute('data-barang-qty');
-                if (checkedBarang.includes(barangNama)) {
+                const isChecked = checkedBarang.some(b => b.nama === barangNama && String(b.qty) === String(barangQty));
+                if (isChecked) {
                     btn.classList.add('bg-blue-600', 'text-white');
                     btn.querySelector('.btn-label').classList.add('hidden');
                     btn.querySelector('.btn-check').classList.remove('hidden');
                     btn.disabled = true;
+                } else {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.querySelector('.btn-label').classList.remove('hidden');
+                    btn.querySelector('.btn-check').classList.add('hidden');
+                    btn.disabled = false;
                 }
                 btn.addEventListener('click', function() {
-                    if (!checkedBarang.includes(barangNama)) {
+                    if (!checkedBarang.some(b => b.nama === barangNama && String(b.qty) === String(barangQty))) {
                         if (confirm(`apakah benar product ${barangNama} dengan qty ${barangQty} sudah terpasang?`)) {
-                            checkedBarang.push(barangNama);
+                            checkedBarang.push({ nama: barangNama, qty: barangQty });
                             localStorage.setItem(storageKey, JSON.stringify(checkedBarang));
                             btn.classList.add('bg-blue-600', 'text-white');
                             btn.querySelector('.btn-label').classList.add('hidden');
@@ -190,6 +211,18 @@
                     }
                 });
             });
+
+            // Restore catatan (notes) dari localStorage jika ada
+            const notesInput = document.getElementById('notes');
+            if (notesInput) {
+                const savedNotes = localStorage.getItem('spk_notes_{{ $spk->id }}');
+                if (savedNotes !== null) {
+                    notesInput.value = savedNotes;
+                }
+                notesInput.addEventListener('input', function() {
+                    localStorage.setItem('spk_notes_{{ $spk->id }}', notesInput.value);
+                });
+            }
         });
 
         // Function to handle form submission
@@ -220,5 +253,15 @@
 
         // Add event listener for form submission
         document.getElementById('kerjaForm').addEventListener('submit', handleFormSubmit);
+
+        // Refresh halaman setiap 5 detik, pastikan catatan tetap tersimpan
+        setInterval(function() {
+            // Simpan catatan sebelum reload (jaga-jaga jika ada perubahan terakhir)
+            const notesInput = document.getElementById('notes');
+            if (notesInput) {
+                localStorage.setItem('spk_notes_{{ $spk->id }}', notesInput.value);
+            }
+            location.reload();
+        }, 10000);
     </script>
 </x-app-layout>

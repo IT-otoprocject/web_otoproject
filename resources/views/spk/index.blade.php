@@ -113,7 +113,7 @@
                                 <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. HP</th>
                                 <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. Plat</th>
                                 <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Status</th>
-                                <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Durasi</th>
+                                <!-- <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Durasi</th> -->
                                 <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Detail</th>
                             </tr>
                         </thead>
@@ -142,9 +142,9 @@
                                     style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px;">
                                     {{ $spk->status }}
                                 </td>
-                                <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                <!-- <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                                     <span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
-                                </td>
+                                </td> -->
                                 <td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
                                     <a href="{{ route('mekanik.spk.show', $spk->id) }}" 
                                        class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">

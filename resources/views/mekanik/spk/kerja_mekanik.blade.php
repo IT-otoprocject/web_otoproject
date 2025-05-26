@@ -22,6 +22,69 @@
                     <!-- Timer -->
                     <div id="timer" class="text-4xl font-semibold mb-8">00:00:00</div>
 
+                    <!-- Daftar Produk -->
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Product</h2>
+                        @php
+                            $barangLama = $spk->items()->where('is_new', false)->get();
+                            $barangBaru = $spk->items()->where('is_new', true)->get();
+                        @endphp
+                        @if ($barangLama->isNotEmpty())
+                        <div class="mb-4">
+                            <table class="table-barang w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 120px; text-align: center;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($barangLama as $item)
+                                    <tr>
+                                        <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
+                                        <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
+                                        <td class="custom-td text-center">
+                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white" data-barang-nama="{{ $item->nama_barang }}" data-barang-qty="{{ $item->qty }}">
+                                                <span class="btn-label">Tandai Sudah Dipasang</span>
+                                                <span class="btn-check hidden">&#10003;</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @endif
+                        @if ($barangBaru->isNotEmpty())
+                        <div>
+                            <table class="table-barang w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 120px; text-align: center;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($barangBaru as $item)
+                                    <tr>
+                                        <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
+                                        <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
+                                        <td class="custom-td text-center">
+                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white" data-barang-nama="{{ $item->nama_barang }}" data-barang-qty="{{ $item->qty }}">
+                                                <span class="btn-label">Tandai Sudah Dipasang</span>
+                                                <span class="btn-check hidden">&#10003;</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @endif
+                    </div>
+
                     <!-- Form -->
                     <form id="kerjaForm" action="{{ route('kerja.selesai', ['spk_id' => $spk->id]) }}" method="POST" class="space-y-6">
                         @csrf
@@ -83,6 +146,51 @@
             }, 1000);
         }
 
+        // Checklist Product Dipasang berbasis nama produk
+        document.addEventListener('DOMContentLoaded', function() {
+            const spkId = "{{ $spk->id }}";
+            const buttons = document.querySelectorAll('.btn-pasang');
+            // Ambil semua nama barang yang ada di halaman
+            const barangNames = Array.from(buttons).map(btn => btn.getAttribute('data-barang-nama'));
+            const storageKey = `spk_${spkId}_barang_pasang_nama`;
+            let checkedBarang = [];
+            try {
+                checkedBarang = JSON.parse(localStorage.getItem(storageKey)) || [];
+            } catch (e) {
+                checkedBarang = [];
+            }
+
+            // Filter hanya nama yang masih ada di halaman
+            const filteredChecked = checkedBarang.filter(nama => barangNames.includes(nama));
+            if (filteredChecked.length !== checkedBarang.length) {
+                localStorage.setItem(storageKey, JSON.stringify(filteredChecked));
+                checkedBarang = filteredChecked;
+            }
+
+            // Render tombol sesuai status
+            buttons.forEach(function(btn) {
+                const barangNama = btn.getAttribute('data-barang-nama');
+                const barangQty = btn.getAttribute('data-barang-qty');
+                if (checkedBarang.includes(barangNama)) {
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    btn.querySelector('.btn-label').classList.add('hidden');
+                    btn.querySelector('.btn-check').classList.remove('hidden');
+                    btn.disabled = true;
+                }
+                btn.addEventListener('click', function() {
+                    if (!checkedBarang.includes(barangNama)) {
+                        if (confirm(`apakah benar product ${barangNama} dengan qty ${barangQty} sudah terpasang?`)) {
+                            checkedBarang.push(barangNama);
+                            localStorage.setItem(storageKey, JSON.stringify(checkedBarang));
+                            btn.classList.add('bg-blue-600', 'text-white');
+                            btn.querySelector('.btn-label').classList.add('hidden');
+                            btn.querySelector('.btn-check').classList.remove('hidden');
+                            btn.disabled = true;
+                        }
+                    }
+                });
+            });
+        });
 
         // Function to handle form submission
         function handleFormSubmit(event) {

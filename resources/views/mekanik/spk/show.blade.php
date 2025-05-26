@@ -260,11 +260,11 @@
                             <tbody>
                                 @foreach ($barangLama as $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="text-gray-900 dark:text-white">
-                                        <span class="text-gray-900 dark:text-white">{{ $item->nama_barang }}</span>
+                                    <td class="text-gray-900">
+                                        <span class="text-gray-900">{{ $item->nama_barang }}</span>
                                     </td>
-                                    <td class="text-gray-900 dark:text-white text-center">
-                                        <span class="text-gray-900 dark:text-white">{{ $item->qty }}</span>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">{{ $item->qty }}</span>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -285,11 +285,11 @@
                             <tbody>
                                 @foreach ($barangBaru as $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="text-gray-900 dark:text-white">
-                                        <span class="text-gray-900 dark:text-white">{{ $item->nama_barang }}</span>
+                                    <td class="text-gray-900">
+                                        <span class="text-gray-900">{{ $item->nama_barang }}</span>
                                     </td>
-                                    <td class="text-gray-900 dark:text-white text-center">
-                                        <span class="text-gray-900 dark:text-white">{{ $item->qty }}</span>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">{{ $item->qty }}</span>
                                     </td>
                                 </tr>
                                 @endforeach

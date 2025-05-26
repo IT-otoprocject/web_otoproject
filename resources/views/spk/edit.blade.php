@@ -119,27 +119,22 @@
                                 <thead>
                                     <tr>
                                         <th class="border-barang px-4 py-2">
-                                            <span class="text-gray-900 dark:text-white">Nama Barang</span>
+                                            <span class="text-gray-900 dark:text-gray-900">Nama Barang</span>
                                         </th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;">
-                                            <span class="text-gray-900 dark:text-white">Quantity</span>
+                                            <span class="text-gray-900 dark:text-gray-900">Quantity</span>
                                         </th>
                                     </tr>
                                 </thead>
 
                                 <tbody id="itemContainer">
-
                                     @foreach ($spk->items as $index => $item)
-
-
                                     <tr>
-                                        <td class="custom-td">
-                                            <input name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700"
-                                                value="{{ $item->nama_barang }}" readonly>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                            <input name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $item->nama_barang }}" readonly>
                                         </td>
-                                        <td class="custom-td">
-                                            <input name="qty[]" class="form-control dark:text-white dark:bg-gray-700"
-                                                value="{{ $item->qty }}" style="width: 80px;" readonly>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                            <input name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ $item->qty }}" style="width: 80px;" readonly>
                                         </td>
                                     </tr>
                                     @endforeach

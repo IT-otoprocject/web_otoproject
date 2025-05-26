@@ -28,10 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             newRow.innerHTML = `
                 <td class="custom-td">
-                    <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" required>
+                    <input type="text" name="nama_barang[]" placeholder="Product" class="form-control w-full dark:text-white dark:bg-gray-700" required>
                 </td>
                 <td class="custom-td">
-                    <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" style="width: 80px;" required>
+                    <input type="number" name="qty[]" placeholder="QTY" class="form-control dark:text-white dark:bg-gray-700" style="width: 80px;" required>
                 </td>
                 <td class="custom-td text-center">
                     <button type="button" class="btn btn-outline-danger removeItem">

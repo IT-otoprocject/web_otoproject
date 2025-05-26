@@ -20,10 +20,10 @@
                                 <thead>
                                     <tr>
                                         <th class="border-barang px-4 py-2">
-                                            <span class="text-gray-900 dark:text-white">Nama Product</span>
+                                            <span class="text-gray-900 dark:text-gray-900">Nama Product</span>
                                         </th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;">
-                                            <span class="text-gray-900 dark:text-white">Quantity</span>
+                                            <span class="text-gray-900 dark:text-gray-900">Quantity</span>
                                         </th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;"></th>
                                     </tr>
@@ -31,13 +31,13 @@
                                 <tbody id="itemContainer">
                                     @foreach ($spk->items as $index => $item)
                                     <tr>
-                                        <td class="custom-td text-gray-900 dark:text-white">
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                                             <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $item->nama_barang }}" required>
                                         </td>
-                                        <td class="custom-td text-gray-900 dark:text-white">
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ $item->qty }}" style="width: 80px;" required>
                                         </td>
-                                        <td class="custom-td text-center">
+                                        <td class="custom-td text-center bg-white dark:bg-gray-800">
                                             <button type="button" class="btn btn-outline-danger removeItem">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -46,6 +46,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <br>
                             <button type="button" id="addItem" class="btn btn-secondary">
                                 <i class="fas fa-plus"></i> Tambah Product
                             </button>

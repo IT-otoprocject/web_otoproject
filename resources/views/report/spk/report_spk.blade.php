@@ -38,8 +38,8 @@
                                             <option value="">Semua Status</option>
                                             <option value="Baru Diterbitkan">Baru Diterbitkan</option>
                                             <option value="Dalam Proses">Dalam Proses</option>
-                                            <option value="Selesai">Selesai</option>
-                                            <option value="Dibatalkan">Dibatalkan</option>
+                                            <option value="Sudah Selesai">Sudah Selesai</option>
+                                            <option value="Cancel">Cancel</option>
                                         </select>
                                     </div>
                                     

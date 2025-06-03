@@ -27,7 +27,7 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
 
-                    @if (in_array(Auth::user()->level, ['kasir', 'mekanik']))
+                    @if (in_array(Auth::user()->level, ['kasir', 'mekanik', 'headstore']))
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <!-- Tombol Filter -->
                         <button type="button" id="openFilter" class="btn btn-secondary">

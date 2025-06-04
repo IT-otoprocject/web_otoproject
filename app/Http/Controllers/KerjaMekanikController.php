@@ -79,6 +79,6 @@ class KerjaMekanikController extends Controller
         // Set session flash message
         session()->flash('message', 'Pekerjaan Telah Direcord, Kerja Bagus 🕺');
 
-        return redirect()->route('spk.index', ['spk' => $spk_id])->with('success');
+        return redirect()->route('spk.items.pilihMekanik', ['spk' => $spk_id])->with('success');
     }
 }

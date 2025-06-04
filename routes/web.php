@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\KerjaMekanikController;
 use App\Http\Controllers\ReportSpkController; // Tambahkan controller untuk report SPK
+use App\Http\Controllers\SpkItemMekanikController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
@@ -87,5 +88,9 @@ Route::post('mekanik/spk/kerja-selesai/{spk_id}', [KerjaMekanikController::class
 // Route untuk halaman report SPK dan export ke Excel
 Route::get('/report/spk', [ReportSpkController::class, 'index'])->name('report.spk.index');
 Route::get('/report/spk/export', [ReportSpkController::class, 'export'])->name('report.spk.export');
+
+// Pilih mekanik untuk item SPK
+Route::get('/spk/{spk}/pilih-mekanik', [SpkItemMekanikController::class, 'form'])->name('spk.items.pilihMekanik');
+Route::post('/spk/{spk}/assign-mekanik', [SpkItemMekanikController::class, 'assign'])->name('spk.items.assignMekanik');
 
 require __DIR__ . '/auth.php';

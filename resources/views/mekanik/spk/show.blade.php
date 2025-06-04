@@ -255,6 +255,7 @@
                                 <tr>
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -265,6 +266,11 @@
                                     </td>
                                     <td class="text-gray-900 text-center">
                                         <span class="text-gray-900">{{ $item->qty }}</span>
+                                    </td>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">
+                                            {{ $item->mekanik ? $item->mekanik->name : '-' }}
+                                        </span>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -280,6 +286,7 @@
                                 <tr>
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -290,6 +297,11 @@
                                     </td>
                                     <td class="text-gray-900 text-center">
                                         <span class="text-gray-900">{{ $item->qty }}</span>
+                                    </td>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">
+                                            {{ $item->mekanik ? $item->mekanik->name : '-' }}
+                                        </span>
                                     </td>
                                 </tr>
                                 @endforeach

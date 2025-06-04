@@ -19,6 +19,9 @@ class CreateSpkItemsTable extends Migration
             $table->string('nama_barang');
             $table->integer('qty');
             $table->boolean('is_new')->default(false);
+            $table->unsignedBigInteger('mekanik_id')->nullable(); // Tambah kolom mekanik_id
+            // Jika ingin relasi ke tabel users:
+            // $table->foreign('mekanik_id')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
         });
     }

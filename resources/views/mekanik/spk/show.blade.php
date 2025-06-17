@@ -104,22 +104,6 @@
                                 </tr>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="label">
-                                        <span class="text-gray-900 dark:text-white">Teknisi 1</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-gray-900 dark:text-white">: {{ $spk->teknisi_1 }}</span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="label">
-                                        <span class="text-gray-900 dark:text-white">Teknisi 2</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-gray-900 dark:text-white">: {{ $spk->teknisi_2 }}</span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="label">
                                         <span class="text-gray-900 dark:text-white">Customer</span>
                                     </td>
                                     <td>

@@ -19,8 +19,6 @@ class SpkController extends Controller
         $validatedData = $request->validate([
             'garage' => 'required|string',
             'tanggal' => 'required|date',
-            'teknisi_1' => 'required|string',
-            'teknisi_2' => 'nullable|string',
             'customer' => 'required|string',
             'alamat' => 'required|string',
             'no_hp' => 'required|string',
@@ -50,8 +48,6 @@ class SpkController extends Controller
             'no_spk' => $no_spk,
             'garage' => $validatedData['garage'],
             'tanggal' => $validatedData['tanggal'],
-            'teknisi_1' => $validatedData['teknisi_1'],
-            'teknisi_2' => $validatedData['teknisi_2'],
             'customer' => $validatedData['customer'],
             'alamat' => $validatedData['alamat'],
             'no_hp' => $validatedData['no_hp'],
@@ -163,8 +159,6 @@ class SpkController extends Controller
         $validatedData = $request->validate([
             'garage' => 'required|string|max:255',
             'tanggal' => 'required|date',
-            'teknisi_1' => 'nullable|string|max:255',
-            'teknisi_2' => 'nullable|string|max:255',
             'customer' => 'required|string|max:255',
             'alamat' => 'nullable|string|max:500',
             'no_hp' => 'required|string|max:20',
@@ -182,8 +176,6 @@ class SpkController extends Controller
         $spk->update([
             'garage' => $validatedData['garage'],
             'tanggal' => $validatedData['tanggal'],
-            'teknisi_1' => $validatedData['teknisi_1'],
-            'teknisi_2' => $validatedData['teknisi_2'],
             'customer' => $validatedData['customer'],
             'alamat' => $validatedData['alamat'],
             'no_hp' => $validatedData['no_hp'],

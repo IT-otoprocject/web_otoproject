@@ -17,8 +17,6 @@ class Spk extends Model
     protected $fillable = [
         'no_spk',
         'tanggal',
-        'teknisi_1',
-        'teknisi_2',
         'customer',
         'alamat',
         'no_hp',

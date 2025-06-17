@@ -36,20 +36,6 @@
                                 class="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700" required>
                         </div>
 
-                        <!-- Teknisi 1 -->
-                        <div class="mb-4">
-                            <label for="teknisi_1" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Teknisi 1</label>
-                            <input type="text" id="teknisi_1" name="teknisi_1" value="{{ $spk->teknisi_1 }}"
-                                class="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
-                        </div>
-
-                        <!-- Teknisi 2 -->
-                        <div class="mb-4">
-                            <label for="teknisi_2" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Teknisi 2</label>
-                            <input type="text" id="teknisi_2" name="teknisi_2" value="{{ $spk->teknisi_2 }}"
-                                class="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
-                        </div>
-
                         <!-- Customer -->
                         <div class="mb-4">
                             <label for="customer" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Customer</label>

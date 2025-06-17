@@ -43,22 +43,6 @@
                                     </tr>
                                     <tr>
                                         <td class="label font-semibold py-2 px-4">
-                                            <span class="text-gray-900 dark:text-white">Teknisi 1</span>
-                                        </td>
-                                        <td class="py-2 px-4 text-gray-900 dark:text-white">
-                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="teknisi_1" name="teknisi_1" required>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="label font-semibold py-2 px-4">
-                                            <span class="text-gray-900 dark:text-white">Teknisi 2</span>
-                                        </td>
-                                        <td class="py-2 px-4 text-gray-900 dark:text-white">
-                                            <input type="text" class="form-control w-full dark:text-white dark:bg-gray-700" id="teknisi_2" name="teknisi_2">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="label font-semibold py-2 px-4">
                                             <span class="text-gray-900 dark:text-white">Customer</span>
                                         </td>
                                         <td class="py-2 px-4 text-gray-900 dark:text-white">

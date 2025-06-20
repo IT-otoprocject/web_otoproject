@@ -37,6 +37,7 @@
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 120px; text-align: center;">Aksi</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 140px; text-align: center;">Waktu Pengerjaan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45,10 +46,16 @@
                                         <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
                                         <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
                                         <td class="custom-td text-center">
-                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white" data-barang-nama="{{ $item->nama_barang }}" data-barang-qty="{{ $item->qty }}">
+                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white"
+                                                data-barang-id="{{ $item->id }}"
+                                                data-barang-nama="{{ $item->nama_barang }}"
+                                                data-barang-qty="{{ $item->qty }}">
                                                 <span class="btn-label">Tandai Sudah Dipasang</span>
                                                 <span class="btn-check hidden">&#10003;</span>
                                             </button>
+                                        </td>
+                                        <td class="custom-td text-center" data-waktu-pengerjaan>
+                                            {{ $item->waktu_pengerjaan_barang ?? '-' }}
                                         </td>
                                     </tr>
                                     @endforeach
@@ -64,6 +71,7 @@
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 120px; text-align: center;">Aksi</th>
+                                        <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800" style="width: 140px; text-align: center;">Waktu Pengerjaan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -72,10 +80,16 @@
                                         <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
                                         <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
                                         <td class="custom-td text-center">
-                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white" data-barang-nama="{{ $item->nama_barang }}" data-barang-qty="{{ $item->qty }}">
+                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white"
+                                                data-barang-id="{{ $item->id }}"
+                                                data-barang-nama="{{ $item->nama_barang }}"
+                                                data-barang-qty="{{ $item->qty }}">
                                                 <span class="btn-label">Tandai Sudah Dipasang</span>
                                                 <span class="btn-check hidden">&#10003;</span>
                                             </button>
+                                        </td>
+                                        <td class="custom-td text-center" data-waktu-pengerjaan>
+                                            {{ $item->waktu_pengerjaan_barang ?? '-' }}
                                         </td>
                                     </tr>
                                     @endforeach
@@ -186,6 +200,7 @@
             buttons.forEach(function(btn) {
                 const barangNama = btn.getAttribute('data-barang-nama');
                 const barangQty = btn.getAttribute('data-barang-qty');
+                const barangId = btn.getAttribute('data-barang-id');
                 const isChecked = checkedBarang.some(b => b.nama === barangNama && String(b.qty) === String(barangQty));
                 if (isChecked) {
                     btn.classList.add('bg-blue-600', 'text-white');
@@ -207,6 +222,25 @@
                             btn.querySelector('.btn-label').classList.add('hidden');
                             btn.querySelector('.btn-check').classList.remove('hidden');
                             btn.disabled = true;
+
+                            // Ambil waktu dari timer
+                            let timerText = document.getElementById('timer').innerText.trim(); // format: HH:mm:ss
+                            // Kirim waktu pengerjaan barang via AJAX
+                            fetch("{{ route('spk.item.waktu_pengerjaan') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                                },
+                                body: JSON.stringify({
+                                    item_id: barangId,
+                                    waktu_pengerjaan_barang: timerText
+                                })
+                            }).then(res => res.json())
+                            .then(data => {
+                                // Optional: tampilkan notifikasi jika perlu
+                                // alert(data.message);
+                            });
                         }
                     }
                 });
@@ -227,6 +261,22 @@
 
         // Function to handle form submission
         function handleFormSubmit(event) {
+            // Konfirmasi sebelum submit
+            if (!confirm('Apakah Semua Perkerjaan Sudah Selesai?')) {
+                event.preventDefault();
+                return false;
+            }
+
+            // Versi dinamis (JS-only, lebih baik):
+            let waktuCells = document.querySelectorAll('td[data-waktu-pengerjaan]');
+            let allDone = Array.from(waktuCells).every(td => td.innerText.trim() !== '-');
+
+            if (!allDone) {
+                alert('Masih ada product belum dipasang Silahkan di cek kembali');
+                event.preventDefault();
+                return false;
+            }
+
             event.preventDefault();
             let startTime = parseInt(localStorage.getItem('startTime'), 10);
             let now = new Date().getTime();

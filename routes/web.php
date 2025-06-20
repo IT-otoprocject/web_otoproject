@@ -93,4 +93,7 @@ Route::get('/report/spk/export', [ReportSpkController::class, 'export'])->name('
 Route::get('/spk/{spk}/pilih-mekanik', [SpkItemMekanikController::class, 'form'])->name('spk.items.pilihMekanik');
 Route::post('/spk/{spk}/assign-mekanik', [SpkItemMekanikController::class, 'assign'])->name('spk.items.assignMekanik');
 
+// Route untuk AJAX
+Route::post('/spk/item/waktu-pengerjaan', [KerjaMekanikController::class, 'setWaktuPengerjaanBarang'])->name('spk.item.waktu_pengerjaan');
+
 require __DIR__ . '/auth.php';

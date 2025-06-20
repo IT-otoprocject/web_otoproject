@@ -240,6 +240,7 @@
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 140px; text-align: center;">Waktu Pengerjaan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -254,6 +255,11 @@
                                     <td class="text-gray-900 text-center">
                                         <span class="text-gray-900">
                                             {{ $item->mekanik ? $item->mekanik->name : '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">
+                                            {{ $item->waktu_pengerjaan_barang ?? '-' }}
                                         </span>
                                     </td>
                                 </tr>
@@ -271,6 +277,7 @@
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 140px; text-align: center;">Waktu Pengerjaan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -285,6 +292,11 @@
                                     <td class="text-gray-900 text-center">
                                         <span class="text-gray-900">
                                             {{ $item->mekanik ? $item->mekanik->name : '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">
+                                            {{ $item->waktu_pengerjaan_barang ?? '-' }}
                                         </span>
                                     </td>
                                 </tr>

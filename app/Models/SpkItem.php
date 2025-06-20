@@ -10,7 +10,7 @@ class SpkItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'spk_id', 'nama_barang', 'qty', 'is_new', 'mekanik_id'
+        'spk_id', 'nama_barang', 'qty', 'is_new', 'mekanik_id', 'waktu_pengerjaan_barang'
     ];
 
     // Definisikan relasi dengan model Spk

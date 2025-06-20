@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Spk;
+use App\Models\SpkItem;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -80,5 +81,20 @@ class KerjaMekanikController extends Controller
         session()->flash('message', 'Pekerjaan Telah Direcord, Kerja Bagus 🕺');
 
         return redirect()->route('spk.items.pilihMekanik', ['spk' => $spk_id])->with('success');
+    }
+
+    // Tambahkan method berikut:
+    public function setWaktuPengerjaanBarang(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required|exists:spk_items,id',
+            'waktu_pengerjaan_barang' => 'required'
+        ]);
+        $item = SpkItem::findOrFail($request->item_id);
+        // Simpan sebagai string durasi (HH:mm:ss)
+        $item->waktu_pengerjaan_barang = $request->waktu_pengerjaan_barang;
+        $item->save();
+
+        return response()->json(['success' => true, 'message' => 'Waktu pengerjaan barang berhasil disimpan']);
     }
 }

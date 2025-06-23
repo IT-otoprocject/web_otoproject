@@ -34,7 +34,7 @@ class SpkController extends Controller
         // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
         $lowered = array_map(fn($v) => mb_strtolower(trim($v)), $validatedData['nama_barang']);
         if (count($lowered) !== count(array_unique($lowered))) {
-            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty.']);
+            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty jika dibutuhkan.']);
         }
 
         // Format the date to 'dmy' (e.g., 311225 for 31 December 2025)
@@ -236,7 +236,7 @@ class SpkController extends Controller
         // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
         $lowered = array_map(fn($v) => mb_strtolower(trim($v)), $validatedData['nama_barang']);
         if (count($lowered) !== count(array_unique($lowered))) {
-            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty.']);
+            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty jika dibutuhkan.']);
         }
 
         $spk = Spk::findOrFail($spk_id);

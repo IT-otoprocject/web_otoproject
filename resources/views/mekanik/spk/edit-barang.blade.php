@@ -9,6 +9,11 @@
         <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
+                    @if ($errors->has('nama_barang'))
+                    <div class="mb-4 text-red-600 font-semibold">
+                        {{ $errors->first('nama_barang') }}
+                    </div>
+                    @endif
                     <form action="{{ route('spk.updateBarang', ['spk_id' => $spk->id]) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -29,6 +34,23 @@
                                     </tr>
                                 </thead>
                                 <tbody id="itemContainer">
+                                    @if(old('nama_barang'))
+                                    @foreach (old('nama_barang') as $i => $nama_barang)
+                                    <tr>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $nama_barang }}" required>
+                                        </td>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
+                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ old('qty')[$i] ?? '' }}" style="width: 80px;" required>
+                                        </td>
+                                        <td class="custom-td text-center bg-white dark:bg-gray-800">
+                                            <button type="button" class="btn btn-outline-danger removeItem">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                    @else
                                     @foreach ($spk->items as $index => $item)
                                     <tr>
                                         <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
@@ -44,6 +66,7 @@
                                         </td>
                                     </tr>
                                     @endforeach
+                                    @endif
                                 </tbody>
                             </table>
                             <br>
@@ -54,7 +77,7 @@
 
                         {{-- Tombol Simpan --}}
                         <div class="flex justify-center space-x-4">
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>
@@ -63,37 +86,47 @@
     </div>
 
     <script>
-        function addNewItem() {
-            const container = document.getElementById('barangBaruContainer');
-            const index = container.children.length;
-            const newItem = `
-                <div class="form-group mb-3">
-                    <label for="nama_barang_baru_${index}">Nama Barang:</label>
-                    <input type="text" id="nama_barang_baru_${index}" name="nama_barang_baru[]" class="form-control">
-                    <label for="qty_baru_${index}">Jumlah (QTY):</label>
-                    <input type="number" id="qty_baru_${index}" name="qty_baru[]" class="form-control">
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', newItem);
-        }
-
         function deleteBarang(itemId) {
             if (confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
                 fetch(`/spk/barang/${itemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById(`barangBaru_${itemId}`).remove();
-                        alert('Barang berhasil dihapus.');
-                    } else {
-                        alert('Gagal menghapus barang.');
-                    }
-                });
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            document.getElementById(`barangBaru_${itemId}`).remove();
+                            alert('Barang berhasil dihapus.');
+                        } else {
+                            alert('Gagal menghapus barang.');
+                        }
+                    });
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                const productInputs = form.querySelectorAll('input[name="nama_barang[]"]');
+                const names = new Set();
+                let hasDuplicate = false;
+                productInputs.forEach(input => {
+                    const val = input.value.trim().toLowerCase();
+                    if (val !== '' && names.has(val)) {
+                        hasDuplicate = true;
+                        input.classList.add('border-red-500');
+                    } else {
+                        input.classList.remove('border-red-500');
+                    }
+                    names.add(val);
+                });
+                if (hasDuplicate) {
+                    e.preventDefault();
+                    alert('Product ada yang sama lebih dari 1, Silahkan hapus product yang sama dan Cukup ubah Qty');
+                    return false;
+                }
+            });
+        });
     </script>
 </x-app-layout>

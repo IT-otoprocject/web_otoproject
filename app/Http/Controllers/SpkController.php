@@ -31,6 +31,12 @@ class SpkController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
+        $lowered = array_map(fn($v) => mb_strtolower(trim($v)), $validatedData['nama_barang']);
+        if (count($lowered) !== count(array_unique($lowered))) {
+            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty.']);
+        }
+
         // Format the date to 'dmy' (e.g., 311225 for 31 December 2025)
         $formattedDate = \Carbon\Carbon::parse($validatedData['tanggal'])->format('dmy');
 
@@ -226,6 +232,12 @@ class SpkController extends Controller
             'qty' => 'required|array', // Pastikan array qty harus ada
             'qty.*' => 'required|integer|min:1', // Validasi setiap elemen array qty
         ]);
+
+        // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
+        $lowered = array_map(fn($v) => mb_strtolower(trim($v)), $validatedData['nama_barang']);
+        if (count($lowered) !== count(array_unique($lowered))) {
+            return back()->withInput()->withErrors(['nama_barang' => 'Terdapat nama product yang sama, silakan hapus duplikat dan ubah Qty.']);
+        }
 
         $spk = Spk::findOrFail($spk_id);
 

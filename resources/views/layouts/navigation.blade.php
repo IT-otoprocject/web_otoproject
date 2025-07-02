@@ -15,6 +15,12 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-base lg:text-lg">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                     @if (in_array(Auth::user()->level, ['admin']))
+                    <!-- Tombol ke Produk Odoo -->
+                    <x-nav-link href="{{ route('odoo.products') }}" :active="request()->routeIs('odoo.products')" class="text-base lg:text-lg">
+                        <i class="fas fa-box"></i> Produk Odoo
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 

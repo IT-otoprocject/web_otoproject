@@ -22,7 +22,6 @@
                     @endif -->
 
 
-
                     @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
@@ -33,8 +32,6 @@
                         <button type="button" id="openFilter" class="btn btn-secondary">
                             <i class="fas fa-filter"></i> Filter
                         </button>
-
-
                         <!-- Search Bar -->
                         <!-- <form method="GET" action="{{ route('dashboard') }}" class="search-bar">
                             <input type="text" name="search" class="form-control" placeholder="Cari Customer, No. HP, atau No. Plat" value="{{ request('search') }}">
@@ -121,8 +118,8 @@
                                     <span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
                                 </td>
                                 <td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
-                                    <a href="{{ route('mekanik.spk.show', $spk->id) }}" 
-                                       class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">
+                                    <a href="{{ route('mekanik.spk.show', $spk->id) }}"
+                                        class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">
                                         Lihat Detail
                                     </a>
                                 </td>
@@ -136,7 +133,7 @@
                     <p class="text-center text-gray-900 dark:text-white">Tidak ada data SPK.</p>
                     @endif
                     @endif
-                    
+
 
 
                 </div>
@@ -145,9 +142,9 @@
     </div>
 
     <script>
-    setTimeout(function() {
-        location.reload();
-    }, 9000); // 10000 milidetik = 10 detik
-</script>
+        setTimeout(function() {
+            location.reload();
+        }, 9000); // 10000 milidetik = 10 detik
+    </script>
 
 </x-app-layout>

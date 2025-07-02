@@ -96,4 +96,8 @@ Route::post('/spk/{spk}/assign-mekanik', [SpkItemMekanikController::class, 'assi
 // Route untuk AJAX
 Route::post('/spk/item/waktu-pengerjaan', [KerjaMekanikController::class, 'setWaktuPengerjaanBarang'])->name('spk.item.waktu_pengerjaan');
 
+// Route Odoo Product
+Route::get('/odoo/products', [\App\Http\Controllers\ProductOdooController::class, 'index'])->name('odoo.products');
+Route::get('/odoo/products/{db}/{id}', [\App\Http\Controllers\ProductOdooController::class, 'show'])->name('odoo.products.show');
+
 require __DIR__ . '/auth.php';

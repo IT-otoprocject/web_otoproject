@@ -29,7 +29,7 @@
                             </tr>
                             <tr>
                                 <th class="border-collapse border border-gray-300 dark:border-gray-600">
-                                    <span class="text-gray-900 dark:text-gray-900">Kode</span>
+                                    <span class="text-gray-900 dark:text-gray-900">SKU</span>
                                 </th>
                                 <td class="border-collapse border border-gray-300 dark:border-gray-600">
                                     <span class="text-gray-900 dark:text-white">{{ $detail['default_code'] ?? '-' }}</span>

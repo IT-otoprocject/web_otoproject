@@ -100,4 +100,7 @@ Route::post('/spk/item/waktu-pengerjaan', [KerjaMekanikController::class, 'setWa
 Route::get('/odoo/products', [\App\Http\Controllers\ProductOdooController::class, 'index'])->name('odoo.products');
 Route::get('/odoo/products/{db}/{id}', [\App\Http\Controllers\ProductOdooController::class, 'show'])->name('odoo.products.show');
 
+// Tambahkan route ini
+Route::get('/api/search-products', [App\Http\Controllers\Api\ProductSearchController::class, 'search']);
+
 require __DIR__ . '/auth.php';

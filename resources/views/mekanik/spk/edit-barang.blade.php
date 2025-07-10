@@ -27,6 +27,9 @@
                                         <th class="border-barang px-4 py-2">
                                             <span class="text-gray-900 dark:text-gray-900">Nama Product</span>
                                         </th>
+                                        <th class="border-barang px-4 py-2" style="width: 120px;">
+                                            <span class="text-gray-900 dark:text-gray-900">SKU</span>
+                                        </th>
                                         <th class="border-barang px-4 py-2" style="width: 80px;">
                                             <span class="text-gray-900 dark:text-gray-900">Quantity</span>
                                         </th>
@@ -38,7 +41,13 @@
                                     @foreach (old('nama_barang') as $i => $nama_barang)
                                     <tr>
                                         <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $nama_barang }}" required>
+                                            <div class="product-input-container">
+                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" value="{{ $nama_barang }}" required autocomplete="off">
+                                                <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                                            </div>
+                                        </td>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" value="{{ old('sku')[$i] ?? '' }}" readonly>
                                         </td>
                                         <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ old('qty')[$i] ?? '' }}" style="width: 80px;" required>
@@ -54,7 +63,13 @@
                                     @foreach ($spk->items as $index => $item)
                                     <tr>
                                         <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $item->nama_barang }}" required>
+                                            <div class="product-input-container">
+                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" value="{{ $item->nama_barang }}" required autocomplete="off">
+                                                <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                                            </div>
+                                        </td>
+                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" value="{{ $item->sku ?? '' }}" readonly>
                                         </td>
                                         <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ $item->qty }}" style="width: 80px;" required>
@@ -85,7 +100,50 @@
         </div>
     </div>
 
+    <!-- Custom CSS untuk dropdown -->
+    <style>
+        .product-dropdown {
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999 !important;
+            position: fixed !important;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .dark .product-dropdown {
+            background: #374151;
+            border-color: #4b5563;
+        }
+        .product-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .product-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        .dark .product-dropdown-item {
+            border-bottom-color: #4b5563;
+        }
+        .dark .product-dropdown-item:hover {
+            background-color: #4b5563;
+        }
+        .product-input-container {
+            position: relative;
+        }
+        .table-container {
+            overflow: visible !important;
+        }
+        .table-barang {
+            overflow: visible !important;
+        }
+    </style>
+
     <script>
+        let debounceTimer;
+
         function deleteBarang(itemId) {
             if (confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
                 fetch(`/spk/barang/${itemId}`, {
@@ -106,6 +164,48 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Add item functionality
+            document.getElementById('addItem').addEventListener('click', function() {
+                const container = document.getElementById('itemContainer');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                        <div class="product-input-container">
+                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" required autocomplete="off">
+                            <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                        </div>
+                    </td>
+                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                        <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" readonly>
+                    </td>
+                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
+                        <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" style="width: 80px;" required>
+                    </td>
+                    <td class="custom-td text-center bg-white dark:bg-gray-800">
+                        <button type="button" class="btn btn-outline-danger removeItem">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                container.appendChild(newRow);
+                attachProductAutocomplete(newRow.querySelector('.product-input'));
+            });
+
+            // Remove item functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.removeItem')) {
+                    const row = e.target.closest('tr');
+                    const container = document.getElementById('itemContainer');
+                    if (container.children.length > 1) {
+                        row.remove();
+                    }
+                }
+            });
+
+            // Attach autocomplete to existing inputs
+            document.querySelectorAll('.product-input').forEach(attachProductAutocomplete);
+
+            // Form validation
             const form = document.querySelector('form');
             form.addEventListener('submit', function(e) {
                 const productInputs = form.querySelectorAll('input[name="nama_barang[]"]');
@@ -126,6 +226,117 @@
                     alert('Product ada yang sama lebih dari 1, Silahkan hapus product yang sama dan Cukup ubah Qty');
                     return false;
                 }
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.product-input-container')) {
+                    document.querySelectorAll('.product-dropdown').forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
+                }
+            });
+        });
+
+        function attachProductAutocomplete(input) {
+            const container = input.closest('.product-input-container');
+            const dropdown = container.querySelector('.product-dropdown');
+            const skuInput = input.closest('tr').querySelector('.sku-input');
+
+            input.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (query.length >= 2) {
+                        searchProducts(query, dropdown, input, skuInput);
+                    } else {
+                        dropdown.innerHTML = '';
+                        dropdown.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            input.addEventListener('focus', function() {
+                positionDropdown(input, dropdown);
+            });
+        }
+
+        function positionDropdown(input, dropdown) {
+            const rect = input.getBoundingClientRect();
+            const dropdownHeight = 200; // max height
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            // Position dropdown
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+            
+            // Check if there's enough space below
+            if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
+                dropdown.style.top = (rect.bottom + 2) + 'px';
+                dropdown.style.bottom = 'auto';
+            } else {
+                dropdown.style.bottom = (viewportHeight - rect.top + 2) + 'px';
+                dropdown.style.top = 'auto';
+            }
+        }
+
+        function searchProducts(query, dropdown, input, skuInput) {
+            // Show loading state
+            dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">Loading...</div>';
+            dropdown.classList.remove('hidden');
+            positionDropdown(input, dropdown);
+            
+            fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Products found:', data);
+                    dropdown.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">No products found</div>';
+                    } else {
+                        data.forEach(product => {
+                            const item = document.createElement('div');
+                            item.className = 'product-dropdown-item text-gray-900 dark:text-white';
+                            item.innerHTML = `
+                                <div class="font-medium">${product.name}</div>
+                                <div class="text-sm text-gray-500">SKU: ${product.default_code || 'N/A'} | DB: ${product.database}</div>
+                            `;
+                            item.addEventListener('click', function() {
+                                input.value = product.name;
+                                skuInput.value = product.default_code || '';
+                                dropdown.classList.add('hidden');
+                            });
+                            dropdown.appendChild(item);
+                        });
+                    }
+                    
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(input, dropdown);
+                })
+                .catch(error => {
+                    console.error('Error searching products:', error);
+                    dropdown.innerHTML = '<div class="product-dropdown-item text-red-500">Error loading products: ' + error.message + '</div>';
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(input, dropdown);
+                });
+        }
+
+        // Reposition dropdown on window resize
+        window.addEventListener('resize', function() {
+            document.querySelectorAll('.product-dropdown:not(.hidden)').forEach(dropdown => {
+                const container = dropdown.closest('.product-input-container');
+                const input = container.querySelector('.product-input');
+                positionDropdown(input, dropdown);
             });
         });
     </script>

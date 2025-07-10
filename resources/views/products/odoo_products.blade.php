@@ -13,7 +13,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <form method="GET" action="" id="searchForm" class="search-bar">
                             <input type="text" name="search" id="searchInput" class="form-control" 
-                                placeholder="Cari ID, Nama, atau Kode..." value="{{ $search ?? '' }}">
+                                placeholder="Cari ID, Nama, atau SKU..." value="{{ $search ?? '' }}">
                             <button type="submit" class="btn btn-primary">Cari</button>
                         </form>
                     </div>
@@ -27,7 +27,7 @@
                                         <tr>
                                             <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">ID</th>
                                             <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Nama</th>
-                                            <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Kode</th>
+                                            <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">SKU</th>
                                             <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Harga</th>
                                             <th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Detail</th>
                                         </tr>

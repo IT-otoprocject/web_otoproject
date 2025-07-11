@@ -227,4 +227,106 @@
         }
     </style>
 
+    <script>
+        // Salin fungsi attachProductAutocomplete dan event dari edit-barang.blade.php
+        let debounceTimer;
+
+        function attachProductAutocomplete(input) {
+            const container = input.closest('.product-input-container');
+            const dropdown = container.querySelector('.product-dropdown');
+            const skuInput = input.closest('tr').querySelector('.sku-input');
+
+            input.addEventListener('input', function() {
+                const query = this.value.trim();
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (query.length >= 2) {
+                        searchProducts(query, dropdown, input, skuInput);
+                    } else {
+                        dropdown.innerHTML = '';
+                        dropdown.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            input.addEventListener('focus', function() {
+                positionDropdown(input, dropdown);
+            });
+        }
+
+        function positionDropdown(input, dropdown) {
+            const rect = input.getBoundingClientRect();
+            const dropdownHeight = 200;
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+            if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
+                dropdown.style.top = (rect.bottom + 2) + 'px';
+                dropdown.style.bottom = 'auto';
+            } else {
+                dropdown.style.bottom = (viewportHeight - rect.top + 2) + 'px';
+                dropdown.style.top = 'auto';
+            }
+        }
+
+        function searchProducts(query, dropdown, input, skuInput) {
+            dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">Loading...</div>';
+            dropdown.classList.remove('hidden');
+            positionDropdown(input, dropdown);
+            fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">No products found</div>';
+                    } else {
+                        data.forEach(product => {
+                            const item = document.createElement('div');
+                            item.className = 'product-dropdown-item text-gray-900 dark:text-white';
+                            item.innerHTML = `<div class="font-medium">${product.name}</div><div class="text-sm text-gray-500">SKU: ${product.default_code || 'N/A'} | DB: ${product.database}</div>`;
+                            item.addEventListener('click', function() {
+                                input.value = product.name;
+                                skuInput.value = product.default_code || '';
+                                dropdown.classList.add('hidden');
+                            });
+                            dropdown.appendChild(item);
+                        });
+                    }
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(input, dropdown);
+                })
+                .catch(error => {
+                    dropdown.innerHTML = '<div class="product-dropdown-item text-red-500">Error loading products: ' + error.message + '</div>';
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(input, dropdown);
+                });
+        }
+
+        // Attach autocomplete to all product-input on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.product-input').forEach(attachProductAutocomplete);
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.product-input-container')) {
+                    document.querySelectorAll('.product-dropdown').forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
+                }
+            });
+            // Reposition dropdown on window resize
+            window.addEventListener('resize', function() {
+                document.querySelectorAll('.product-dropdown:not(.hidden)').forEach(dropdown => {
+                    const container = dropdown.closest('.product-input-container');
+                    const input = container.querySelector('.product-input');
+                    positionDropdown(input, dropdown);
+                });
+            });
+        });
+    </script>
+
 </x-app-layout>

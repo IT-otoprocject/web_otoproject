@@ -40,19 +40,19 @@
                                     @if(old('nama_barang'))
                                     @foreach (old('nama_barang') as $i => $nama_barang)
                                     <tr>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                        <td class="custom-td text-gray-900 dark:text-white">
                                             <div class="product-input-container">
-                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" value="{{ $nama_barang }}" required autocomplete="off">
+                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" value="{{ $nama_barang }}" required autocomplete="off">
                                                 <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                                             </div>
                                         </td>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" value="{{ old('sku')[$i] ?? '' }}" readonly>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ old('sku')[$i] ?? '' }}" readonly>
                                         </td>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
-                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ old('qty')[$i] ?? '' }}" style="width: 80px;" required>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" value="{{ old('qty')[$i] ?? '' }}" required>
                                         </td>
-                                        <td class="custom-td text-center bg-white dark:bg-gray-800">
+                                        <td class="custom-td text-center">
                                             <button type="button" class="btn btn-outline-danger removeItem">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -62,19 +62,19 @@
                                     @else
                                     @foreach ($spk->items as $index => $item)
                                     <tr>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
+                                        <td class="custom-td text-gray-900 dark:text-white">
                                             <div class="product-input-container">
-                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" value="{{ $item->nama_barang }}" required autocomplete="off">
+                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" value="{{ $item->nama_barang }}" required autocomplete="off">
                                                 <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                                             </div>
                                         </td>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" value="{{ $item->sku ?? '' }}" readonly>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ $item->sku ?? '' }}" readonly>
                                         </td>
-                                        <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
-                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" value="{{ $item->qty }}" style="width: 80px;" required>
+                                        <td class="custom-td text-gray-900 dark:text-white">
+                                            <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" value="{{ $item->qty }}" required>
                                         </td>
-                                        <td class="custom-td text-center bg-white dark:bg-gray-800">
+                                        <td class="custom-td text-center">
                                             <button type="button" class="btn btn-outline-danger removeItem">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -164,33 +164,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Add item functionality
-            document.getElementById('addItem').addEventListener('click', function() {
-                const container = document.getElementById('itemContainer');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                        <div class="product-input-container">
-                            <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" required autocomplete="off">
-                            <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
-                        </div>
-                    </td>
-                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800">
-                        <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" readonly>
-                    </td>
-                    <td class="custom-td !text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-center">
-                        <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" style="width: 80px;" required>
-                    </td>
-                    <td class="custom-td text-center bg-white dark:bg-gray-800">
-                        <button type="button" class="btn btn-outline-danger removeItem">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                container.appendChild(newRow);
-                attachProductAutocomplete(newRow.querySelector('.product-input'));
-            });
-
             // Remove item functionality
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.removeItem')) {

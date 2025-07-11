@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Tambah Barang & Hapus Barang
+// Tambah Barang & Hapus Barang (nama, sku, qty, satu form saja)
 document.addEventListener('DOMContentLoaded', function () {
     const addItemButton = document.getElementById('addItem');
     const itemContainer = document.getElementById('itemContainer');
@@ -25,13 +25,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (addItemButton && itemContainer) {
         addItemButton.addEventListener('click', function () {
             const newRow = document.createElement('tr');
-
             newRow.innerHTML = `
-                <td class="custom-td">
-                    <input type="text" name="nama_barang[]" placeholder="Product" class="form-control w-full dark:text-white dark:bg-gray-700" required>
+                <td class="custom-td text-gray-900 dark:text-white">
+                    <div class="product-input-container">
+                        <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off">
+                        <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                    </div>
                 </td>
-                <td class="custom-td">
-                    <input type="number" name="qty[]" placeholder="QTY" class="form-control dark:text-white dark:bg-gray-700" style="width: 80px;" required>
+                <td class="custom-td text-gray-900 dark:text-white">
+                    <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" readonly>
+                </td>
+                <td class="custom-td text-gray-900 dark:text-white">
+                    <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" required>
                 </td>
                 <td class="custom-td text-center">
                     <button type="button" class="btn btn-outline-danger removeItem">
@@ -39,13 +44,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     </button>
                 </td>
             `;
-
             itemContainer.appendChild(newRow);
+
+            // Attach autocomplete jika ada fungsi attachProductAutocomplete
+            if (typeof attachProductAutocomplete === "function") {
+                const input = newRow.querySelector('.product-input');
+                if (input) attachProductAutocomplete(input);
+            }
         });
 
         itemContainer.addEventListener('click', function (event) {
             if (event.target.closest('.removeItem')) {
-                event.target.closest('tr').remove();
+                // Jangan hapus jika hanya tersisa satu baris
+                if (itemContainer.children.length > 1) {
+                    event.target.closest('tr').remove();
+                }
             }
         });
     }

@@ -124,12 +124,12 @@
                                     <tr>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <div class="product-input-container">
-                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" value="{{ $nama_barang }}" required autocomplete="off">
+                                                <textarea name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off" style="min-height:38px;resize:vertical;overflow-y:auto;">{{ $nama_barang }}</textarea>
                                                 <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                                             </div>
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ old('sku')[$i] ?? '' }}" readonly>
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ old('sku')[$i] ?? '' }}" readonly style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:150px; letter-spacing:1.5px; font-size:1rem;" maxlength="12">
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" value="{{ old('qty')[$i] ?? '' }}" required>
@@ -145,12 +145,12 @@
                                     <tr>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <div class="product-input-container">
-                                                <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off">
+                                                <textarea name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off" style="min-height:38px;resize:vertical;overflow-y:auto;"></textarea>
                                                 <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                                             </div>
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" readonly>
+                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" readonly style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:170px; letter-spacing:1.5px; font-size:1rem;" maxlength="12">
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" required>
@@ -199,8 +199,8 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .dark .product-dropdown {
-            background: #374151;
-            border-color: #4b5563;
+            background: #1f2937 !important;
+            border-color: #4b5563 !important;
         }
         .product-dropdown-item {
             padding: 8px 12px;
@@ -211,10 +211,19 @@
             background-color: #f5f5f5;
         }
         .dark .product-dropdown-item {
-            border-bottom-color: #4b5563;
+            color: #f3f4f6 !important;
+            background: #1f2937 !important;
+            border-bottom-color: #374151 !important;
         }
         .dark .product-dropdown-item:hover {
-            background-color: #4b5563;
+            background-color: #374151 !important;
+            color: #fff !important;
+        }
+        .dark .product-dropdown-item:hover {
+            background-color: #374151;
+        }
+        .dark .product-dropdown-item {
+            border-bottom-color: #4b5563;
         }
         .product-input-container {
             position: relative;
@@ -224,6 +233,26 @@
         }
         .table-barang {
             overflow: visible !important;
+        }
+
+        @media (max-width: 600px) {
+            .table-barang th, .table-barang td {
+                padding: 6px 4px !important;
+                font-size: 15px;
+            }
+            .product-input-container textarea.product-input {
+                width: 100% !important;
+                min-height: 48px !important;
+                font-size: 16px !important;
+                padding: 10px 8px !important;
+            }
+            .sku-input {
+                width: 100% !important;
+                font-size: 15px !important;
+            }
+            .table-barang {
+                font-size: 15px;
+            }
         }
     </style>
 
@@ -287,7 +316,7 @@
                     } else {
                         data.forEach(product => {
                             const item = document.createElement('div');
-                            item.className = 'product-dropdown-item text-gray-900 dark:text-white';
+                            item.className = 'product-dropdown-item text-gray-900 dark:text-gray-900';
                             item.innerHTML = `<div class="font-medium">${product.name}</div><div class="text-sm text-gray-500">SKU: ${product.default_code || 'N/A'} | DB: ${product.database}</div>`;
                             item.addEventListener('click', function() {
                                 input.value = product.name;

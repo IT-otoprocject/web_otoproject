@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             newRow.innerHTML = `
                 <td class="custom-td text-gray-900 dark:text-white">
                     <div class="product-input-container">
-                        <input type="text" name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off">
+                        <textarea name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off" style="min-height:38px;resize:vertical;overflow-y:auto;"></textarea>
                         <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                     </div>
                 </td>

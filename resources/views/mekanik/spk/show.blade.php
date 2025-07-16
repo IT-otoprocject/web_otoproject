@@ -237,15 +237,19 @@
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
+                                    <th class="text-gray-900 dark:text-white">SKU</th>
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
-                                    <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
-                                    <th class="text-gray-900 dark:text-white" style="width: 140px; text-align: center;">Waktu Pengerjaan</th>
+                                    <th class="text-gray-900 dark:text-white" style="width: 140px; text-align: center;">Waktu</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($barangLama as $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">{{ $item->sku ?? '-' }}</span>
+                                    </td>
                                     <td class="text-gray-900">
                                         <span class="text-gray-900">{{ $item->nama_barang }}</span>
                                     </td>
@@ -274,6 +278,7 @@
                         <table class="table-barang-show w-full lg:w-[95%] xl:w-[90%] mx-auto">
                             <thead>
                                 <tr>
+                                    <th class="text-gray-900 dark:text-white">SKU</th>
                                     <th class="text-gray-900 dark:text-white">Nama Product</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 80px; text-align: center;">Jumlah (QTY)</th>
                                     <th class="text-gray-900 dark:text-white" style="width: 180px; text-align: center;">Mekanik</th>
@@ -283,6 +288,9 @@
                             <tbody>
                                 @foreach ($barangBaru as $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="text-gray-900 text-center">
+                                        <span class="text-gray-900">{{ $item->sku ?? '-' }}</span>
+                                    </td>
                                     <td class="text-gray-900">
                                         <span class="text-gray-900">{{ $item->nama_barang }}</span>
                                     </td>

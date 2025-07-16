@@ -28,6 +28,8 @@ class SpkController extends Controller
             'nama_barang.*' => 'required|string',
             'qty' => 'required|array',
             'qty.*' => 'required|integer',
+            'sku' => 'nullable|array',
+            'sku.*' => 'nullable|string',
             'catatan' => 'nullable|string',
         ]);
 
@@ -70,6 +72,7 @@ class SpkController extends Controller
                 'spk_id' => $spk->id,
                 'nama_barang' => $nama_barang,
                 'qty' => $validatedData['qty'][$index],
+                'sku' => $validatedData['sku'][$index] ?? null,
             ]);
         }
 
@@ -231,6 +234,8 @@ class SpkController extends Controller
             'nama_barang.*' => 'required|string|max:255', // Validasi setiap elemen array nama_barang
             'qty' => 'required|array', // Pastikan array qty harus ada
             'qty.*' => 'required|integer|min:1', // Validasi setiap elemen array qty
+            'sku' => 'nullable|array',
+            'sku.*' => 'nullable|string',
         ]);
 
         // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
@@ -254,6 +259,7 @@ class SpkController extends Controller
                 'spk_id' => $spk->id,
                 'nama_barang' => $nama_barang,
                 'qty' => $validatedData['qty'][$index],
+                'sku' => $validatedData['sku'][$index] ?? null,
                 'is_new' => true, // Tandai sebagai barang baru
             ]);
         }

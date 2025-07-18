@@ -28,15 +28,22 @@
                                             <span class="text-gray-900 dark:text-white">Garage</span>
                                         </td>
                                         <td class="py-2 px-4 text-gray-900 dark:text-white">
-                                            <select name="garage" id="garage" class="form-control w-full dark:text-white dark:bg-gray-700" required>
-                                                <option value="">Pilih Garage</option>
-                                                <option value="Bandung" {{ old('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
-                                                <option value="Bekasi" {{ old('garage') == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
-                                                <option value="Bintaro" {{ old('garage') == 'Bintaro' ? 'selected' : '' }}>Bintaro</option>
-                                                <option value="Cengkareng" {{ old('garage') == 'Cengkareng' ? 'selected' : '' }}>Cengkareng</option>
-                                                <option value="Cibubur" {{ old('garage') == 'Cibubur' ? 'selected' : '' }}>Cibubur</option>
-                                                <option value="Surabaya" {{ old('garage') == 'Surabaya' ? 'selected' : '' }}>Surabaya</option>
-                                            </select>
+                                            @php
+                                                $userGarage = Auth::user()->garage ?? null;
+                                            @endphp
+                                            @if($userGarage)
+                                                <input type="text" name="garage" id="garage" class="form-control w-full dark:text-white dark:bg-gray-700" value="{{ $userGarage }}" readonly>
+                                            @else
+                                                <select name="garage" id="garage" class="form-control w-full dark:text-white dark:bg-gray-700" required>
+                                                    <option value="">Pilih Garage</option>
+                                                    <option value="Bandung" {{ old('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
+                                                    <option value="Bekasi" {{ old('garage') == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
+                                                    <option value="Bintaro" {{ old('garage') == 'Bintaro' ? 'selected' : '' }}>Bintaro</option>
+                                                    <option value="Cengkareng" {{ old('garage') == 'Cengkareng' ? 'selected' : '' }}>Cengkareng</option>
+                                                    <option value="Cibubur" {{ old('garage') == 'Cibubur' ? 'selected' : '' }}>Cibubur</option>
+                                                    <option value="Surabaya" {{ old('garage') == 'Surabaya' ? 'selected' : '' }}>Surabaya</option>
+                                                </select>
+                                            @endif
                                         </td>
                                     </tr>
                                     <tr>

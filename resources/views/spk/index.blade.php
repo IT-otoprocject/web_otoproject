@@ -152,7 +152,7 @@
                         </tbody>
                     </table>
                     <div class="mt-4 justify-end">
-                        {{ $spks->links() }}
+                        {{ $spks->appends(request()->except('page'))->links() }}
                     </div>
                     @else
                     <p class="text-center">Tidak ada data yang sesuai dengan pencarian.</p>

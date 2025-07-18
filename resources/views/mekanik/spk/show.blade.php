@@ -67,8 +67,12 @@
                         </div>
                     </div>
 
+                    @php
+                        $userGarage = Auth::user()->garage ?? null;
+                    @endphp
                     {{-- Tabel Detail SPK --}}
                     <div class="table-container mb-4 lg:mb-6">
+                        @if (!$userGarage || $spk->garage == $userGarage)
                         <table class="detail-table w-full lg:w-[95%] xl:w-[90%] mx-auto text-gray-900 dark:text-white">
                             <h2 class="text-gray-900 dark:text-white">{{ $spk->no_spk }}</h2>
 
@@ -221,6 +225,9 @@
                                 @endif
                             </tbody>
                         </table>
+                        @else
+                        <div class="alert alert-warning">Anda tidak memiliki akses ke SPK ini (lokasi garage tidak sesuai).</div>
+                        @endif
                     </div>
 
                     {{-- Tabel Barang --}}

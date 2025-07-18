@@ -104,9 +104,12 @@ class SpkController extends Controller
     // menampilkan daftar SPK yang baru diterbitkan untuk mekanik.
     public function index(Request $request)
     {
-        // Query awal untuk semua data SPK
-        $query = SPK::query();
-
+        $query = Spk::query();
+        $userGarage = \Illuminate\Support\Facades\Auth::user()->garage ?? null;
+        // Filter otomatis berdasarkan garage user jika ada
+        if ($userGarage) {
+            $query->where('garage', $userGarage);
+        }
         // Filter pencarian (opsional)
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -116,22 +119,17 @@ class SpkController extends Controller
                     ->orWhere('no_plat', 'like', "%{$search}%");
             });
         }
-
         // Filter tambahan berdasarkan garage, status, dan range tanggal
         if ($request->filled('garage')) {
             $query->where('garage', $request->garage);
         }
-
         if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
             $query->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai]);
         }
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
-        // Sorting berdasarkan tanggal dan status
-        $query->orderBy('tanggal', 'desc') // Sorting tanggal terbaru ke terlama
+        $query->orderBy('tanggal', 'desc')
             ->orderByRaw("
         CASE
             WHEN status = 'Baru Diterbitkan' THEN 1
@@ -141,10 +139,7 @@ class SpkController extends Controller
             ELSE 5
         END ASC
     ");
-
-        // Ambil hasil query
         $spks = $query->get();
-
         return view('spk.index', compact('spks'));
     }
 

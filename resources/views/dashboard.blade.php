@@ -85,6 +85,10 @@
                         </div>
                     </div>
 
+                    @php
+                    $userGarage = Auth::user()->garage ?? null;
+                    @endphp
+
                     <!-- Tabel Data SPK -->
                     @if ($spks->isNotEmpty())
                     <table class="table">
@@ -100,6 +104,7 @@
                         </thead>
                         <tbody>
                             @foreach ($spks as $spk)
+                            @if (!$userGarage || $spk->garage == $userGarage)
                             <tr>
                                 <td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                                     <span class="text-gray-900 dark:text-white">{{ $spk->garage }}</span>
@@ -124,6 +129,7 @@
                                     </a>
                                 </td>
                             </tr>
+                            @endif
                             @endforeach
                         </tbody>
                     </table>

@@ -139,7 +139,7 @@ class SpkController extends Controller
             ELSE 5
         END ASC
     ");
-        $spks = $query->get();
+        $spks = $query->paginate(10);
         return view('spk.index', compact('spks'));
     }
 

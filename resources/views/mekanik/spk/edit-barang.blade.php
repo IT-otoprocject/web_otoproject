@@ -288,7 +288,8 @@
             dropdown.classList.remove('hidden');
             positionDropdown(input, dropdown);
             
-            fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+            // fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+            fetch(`{{ url('api/search-products') }}?search=${encodeURIComponent(query)}`)
                 .then(response => {
                     console.log('Response status:', response.status);
                     if (!response.ok) {

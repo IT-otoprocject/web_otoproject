@@ -311,7 +311,8 @@
             dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">Loading...</div>';
             dropdown.classList.remove('hidden');
             positionDropdown(input, dropdown);
-            fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+            // fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
+            fetch(`{{ url('api/search-products') }}?search=${encodeURIComponent(query)}`)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();

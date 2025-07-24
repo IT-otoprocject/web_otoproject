@@ -34,6 +34,7 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'level' => ['required', 'string', 'in:admin,kasir,mekanik,manager,headstore,sales'], // Validasi level
+            'garage' => ['required', 'string', 'max:255'], // Validasi garage
         ]);
 
         $user = User::create([
@@ -41,6 +42,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'level' => $request['level'], // Simpan level
+            'garage' => $request['garage'], // Simpan garage
         ]);
 
         event(new Registered($user));

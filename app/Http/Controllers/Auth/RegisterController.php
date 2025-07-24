@@ -54,7 +54,8 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'level' => ['required', 'string', 'in:admin,kasir,mekanik,headstore,manager'], // Tambahkan opsi level
+            'level' => ['required', 'string', 'in:admin,kasir,mekanik,headstore,manager'],
+            'garage' => ['required', 'string', 'max:255'], // validasi garage
         ]);
     }
 
@@ -66,12 +67,13 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        dd($data); // Periksa data yang diterima sebelum membuat user
+        // dd($data); // Periksa data yang diterima sebelum membuat user
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'level' => $data['level'],
+            'garage' => $data['garage'], // simpan garage
         ]);
     }
 

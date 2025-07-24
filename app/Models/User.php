@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'level', // Pastikan level ada di sini
+        'garage', // Tambahkan garage agar bisa mass assignment
     ];
 
     /**

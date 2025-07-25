@@ -67,6 +67,7 @@
                                                 <textarea name="nama_barang[]" class="form-control w-full dark:text-white dark:bg-gray-700 product-input" placeholder="Nama Product" required autocomplete="off" style="min-height:38px;resize:vertical;overflow-y:auto;">{{ $item->nama_barang }}</textarea>
                                                 <div class="product-dropdown hidden max-h-60 overflow-y-auto"></div>
                                             </div>
+                                            <input type="hidden" name="waktu_pengerjaan_barang[]" value="{{ $item->waktu_pengerjaan_barang }}">
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ $item->sku ?? '' }}" readonly style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:150px; letter-spacing:1.5px; font-size:1rem;" maxlength="12">

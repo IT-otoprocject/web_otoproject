@@ -225,12 +225,14 @@ class SpkController extends Controller
     public function updateBarang(Request $request, $spk_id)
     {
         $validatedData = $request->validate([
-            'nama_barang' => 'required|array', // Pastikan array barang harus ada
-            'nama_barang.*' => 'required|string|max:255', // Validasi setiap elemen array nama_barang
-            'qty' => 'required|array', // Pastikan array qty harus ada
-            'qty.*' => 'required|integer|min:1', // Validasi setiap elemen array qty
+            'nama_barang' => 'required|array',
+            'nama_barang.*' => 'required|string|max:255',
+            'qty' => 'required|array',
+            'qty.*' => 'required|integer|min:1',
             'sku' => 'nullable|array',
             'sku.*' => 'nullable|string',
+            'waktu_pengerjaan_barang' => 'nullable|array',
+            'waktu_pengerjaan_barang.*' => 'nullable|string',
         ]);
 
         // Validasi backend: nama_barang tidak boleh duplikat (case-insensitive)
@@ -240,25 +242,55 @@ class SpkController extends Controller
         }
 
         $spk = Spk::findOrFail($spk_id);
-
         if ($spk->status !== 'Dalam Proses') {
             return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
         }
 
-        // Hapus barang lama yang terkait dengan SPK
-        $spk->items()->delete();
-
-        // Tambahkan barang baru
+        $existingItems = $spk->items()->get();
+        $submittedItems = [];
         foreach ($validatedData['nama_barang'] as $index => $nama_barang) {
-            SpkItem::create([
-                'spk_id' => $spk->id,
-                'nama_barang' => $nama_barang,
-                'qty' => $validatedData['qty'][$index],
-                'sku' => $validatedData['sku'][$index] ?? null,
-                'is_new' => true, // Tandai sebagai barang baru
-            ]);
+            $sku = $validatedData['sku'][$index] ?? null;
+            $qty = $validatedData['qty'][$index];
+            $waktu_pengerjaan_barang = $validatedData['waktu_pengerjaan_barang'][$index] ?? null;
+            $existing = $existingItems->first(function($item) use ($nama_barang) {
+                return $item->nama_barang === $nama_barang;
+            });
+            if ($existing) {
+                if ($existing->sku === $sku) {
+                    // SKU sama, update qty dan sku, waktu_pengerjaan_barang tetap
+                    $existing->update([
+                        'qty' => $qty,
+                        'sku' => $sku,
+                        'is_new' => true,
+                        'waktu_pengerjaan_barang' => $waktu_pengerjaan_barang,
+                    ]);
+                } else {
+                    // SKU berubah, update semua dan waktu_pengerjaan_barang diisi sekarang
+                    $existing->update([
+                        'qty' => $qty,
+                        'sku' => $sku,
+                        'is_new' => true,
+                        'waktu_pengerjaan_barang' => now(),
+                    ]);
+                }
+                $submittedItems[] = $existing->id;
+            } else {
+                // Barang baru, waktu pengerjaan barang dikosongkan
+                $newItem = SpkItem::create([
+                    'spk_id' => $spk->id,
+                    'nama_barang' => $nama_barang,
+                    'qty' => $qty,
+                    'sku' => $sku,
+                    'is_new' => true,
+                    'waktu_pengerjaan_barang' => null,
+                ]);
+                $submittedItems[] = $newItem->id;
+            }
         }
-
+        $toDelete = $existingItems->whereNotIn('id', $submittedItems);
+        foreach ($toDelete as $item) {
+            $item->delete();
+        }
         session()->flash('message', 'Barang berhasil diperbarui.');
         return redirect()->route('mekanik.spk.show', $spk->id)->with('success', 'Barang berhasil diperbarui.');
     }

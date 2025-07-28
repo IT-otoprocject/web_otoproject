@@ -46,13 +46,18 @@
                                         <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
                                         <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
                                         <td class="custom-td text-center">
-                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white"
-                                                data-barang-id="{{ $item->id }}"
-                                                data-barang-nama="{{ $item->nama_barang }}"
-                                                data-barang-qty="{{ $item->qty }}">
-                                                <span class="btn-label">Tandai Sudah Dipasang</span>
-                                                <span class="btn-check hidden">&#10003;</span>
-                                            </button>
+                                            @if(!$item->waktu_pengerjaan_barang)
+                                                <button type="button" class="btn btn-pasang bg-blue-600 text-white"
+                                                    data-barang-id="{{ $item->id }}"
+                                                    data-barang-nama="{{ $item->nama_barang }}"
+                                                    data-barang-qty="{{ $item->qty }}">
+                                                    <span class="btn-label">Tandai Sudah Dipasang</span>
+                                                </button>
+                                            @else
+                                                <span class="inline-block bg-green-400 text-white rounded px-4 py-2">
+                                                    &#10003;
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="custom-td text-center" data-waktu-pengerjaan>
                                             {{ $item->waktu_pengerjaan_barang ?? '-' }}
@@ -80,13 +85,18 @@
                                         <td class="custom-td !text-gray-900 dark:text-white">{{ $item->nama_barang }}</td>
                                         <td class="custom-td !text-gray-900 dark:text-white text-center">{{ $item->qty }}</td>
                                         <td class="custom-td text-center">
-                                            <button type="button" class="btn btn-pasang bg-blue-600 text-white"
-                                                data-barang-id="{{ $item->id }}"
-                                                data-barang-nama="{{ $item->nama_barang }}"
-                                                data-barang-qty="{{ $item->qty }}">
-                                                <span class="btn-label">Tandai Sudah Dipasang</span>
-                                                <span class="btn-check hidden">&#10003;</span>
-                                            </button>
+                                            @if(!$item->waktu_pengerjaan_barang)
+                                                <button type="button" class="btn btn-pasang bg-blue-600 text-white"
+                                                    data-barang-id="{{ $item->id }}"
+                                                    data-barang-nama="{{ $item->nama_barang }}"
+                                                    data-barang-qty="{{ $item->qty }}">
+                                                    <span class="btn-label">Tandai Sudah Dipasang</span>
+                                                </button>
+                                            @else
+                                                <span class="inline-block bg-green-400 text-white rounded px-4 py-2">
+                                                    &#10003;
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="custom-td text-center" data-waktu-pengerjaan>
                                             {{ $item->waktu_pengerjaan_barang ?? '-' }}
@@ -162,86 +172,32 @@
 
         // Checklist Product Dipasang berbasis nama produk dan qty
         document.addEventListener('DOMContentLoaded', function() {
-            const spkId = "{{ $spk->id }}";
             const buttons = document.querySelectorAll('.btn-pasang');
-            // Ambil semua nama barang dan qty yang ada di halaman
-            const barangList = Array.from(buttons).map(btn => ({
-                nama: btn.getAttribute('data-barang-nama'),
-                qty: btn.getAttribute('data-barang-qty')
-            }));
-            const storageKey = `spk_${spkId}_barang_pasang_nama`;
-            let checkedBarang = [];
-            try {
-                checkedBarang = JSON.parse(localStorage.getItem(storageKey)) || [];
-            } catch (e) {
-                checkedBarang = [];
-            }
-
-            // Cek perubahan qty: jika nama sama tapi qty berbeda, reset checklist dan beri notifikasi
-            let changed = false;
-            checkedBarang = checkedBarang.filter(saved => {
-                const current = barangList.find(b => b.nama === saved.nama);
-                if (current) {
-                    if (String(current.qty) !== String(saved.qty)) {
-                        // Qty berubah, beri notifikasi
-                        alert(`qty dari product ${saved.nama} berubah menjadi ${current.qty}`);
-                        changed = true;
-                        return false; // hapus dari checklist
-                    }
-                    return true;
-                }
-                return false;
-            });
-            if (changed) {
-                localStorage.setItem(storageKey, JSON.stringify(checkedBarang));
-            }
-
-            // Render tombol sesuai status
             buttons.forEach(function(btn) {
-                const barangNama = btn.getAttribute('data-barang-nama');
-                const barangQty = btn.getAttribute('data-barang-qty');
-                const barangId = btn.getAttribute('data-barang-id');
-                const isChecked = checkedBarang.some(b => b.nama === barangNama && String(b.qty) === String(barangQty));
-                if (isChecked) {
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    btn.querySelector('.btn-label').classList.add('hidden');
-                    btn.querySelector('.btn-check').classList.remove('hidden');
-                    btn.disabled = true;
-                } else {
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                    btn.querySelector('.btn-label').classList.remove('hidden');
-                    btn.querySelector('.btn-check').classList.add('hidden');
-                    btn.disabled = false;
-                }
                 btn.addEventListener('click', function() {
-                    if (!checkedBarang.some(b => b.nama === barangNama && String(b.qty) === String(barangQty))) {
-                        if (confirm(`apakah benar product ${barangNama} dengan qty ${barangQty} sudah terpasang?`)) {
-                            checkedBarang.push({ nama: barangNama, qty: barangQty });
-                            localStorage.setItem(storageKey, JSON.stringify(checkedBarang));
-                            btn.classList.add('bg-blue-600', 'text-white');
-                            btn.querySelector('.btn-label').classList.add('hidden');
-                            btn.querySelector('.btn-check').classList.remove('hidden');
-                            btn.disabled = true;
-
-                            // Ambil waktu dari timer
-                            let timerText = document.getElementById('timer').innerText.trim(); // format: HH:mm:ss
-                            // Kirim waktu pengerjaan barang via AJAX
-                            fetch("{{ route('spk.item.waktu_pengerjaan') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                },
-                                body: JSON.stringify({
-                                    item_id: barangId,
-                                    waktu_pengerjaan_barang: timerText
-                                })
-                            }).then(res => res.json())
-                            .then(data => {
-                                // Optional: tampilkan notifikasi jika perlu
-                                // alert(data.message);
-                            });
-                        }
+                    const barangNama = btn.getAttribute('data-barang-nama');
+                    const barangQty = btn.getAttribute('data-barang-qty');
+                    const barangId = btn.getAttribute('data-barang-id');
+                    if (confirm(`apakah benar product ${barangNama} dengan qty ${barangQty} sudah terpasang?`)) {
+                        // Ambil waktu dari timer
+                        let timerText = document.getElementById('timer').innerText.trim(); // format: HH:mm:ss
+                        // Kirim waktu pengerjaan barang via AJAX
+                        fetch("{{ route('spk.item.waktu_pengerjaan') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                item_id: barangId,
+                                waktu_pengerjaan_barang: timerText
+                            })
+                        }).then(res => res.json())
+                        .then(data => {
+                            // Optional: tampilkan notifikasi jika perlu
+                            // alert(data.message);
+                            location.reload(); // reload agar status berubah
+                        });
                     }
                 });
             });

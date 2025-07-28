@@ -31,7 +31,7 @@
                         @endphp
                         @if ($barangLama->isNotEmpty())
                         <div class="mb-4">
-                            <table class="table-barang w-full text-left border-collapse">
+                            <table id="table-barang-lama" class="table-barang w-full text-left border-collapse">
                                 <thead>
                                     <tr>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
@@ -70,7 +70,7 @@
                         @endif
                         @if ($barangBaru->isNotEmpty())
                         <div>
-                            <table class="table-barang w-full text-left border-collapse">
+                            <table id="table-barang-baru" class="table-barang w-full text-left border-collapse">
                                 <thead>
                                     <tr>
                                         <th class="border-barang px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-800">Nama Product</th>
@@ -260,14 +260,89 @@
         // Add event listener for form submission
         document.getElementById('kerjaForm').addEventListener('submit', handleFormSubmit);
 
-        // Refresh halaman setiap 5 detik, pastikan catatan tetap tersimpan
-        setInterval(function() {
-            // Simpan catatan sebelum reload (jaga-jaga jika ada perubahan terakhir)
-            const notesInput = document.getElementById('notes');
-            if (notesInput) {
-                localStorage.setItem('spk_notes_{{ $spk->id }}', notesInput.value);
+        // Tambahkan: Listener perubahan barang dari localStorage event
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'spk_barang_updated_{{ $spk->id }}') {
+                fetchAndRenderProduk();
             }
-            location.reload();
-        }, 10000);
+        });
+
+        // Fungsi render ulang tabel produk (AJAX)
+        function renderProdukTable(barangLama, barangBaru) {
+            function renderRows(barangList) {
+                return barangList.map(item => {
+                    return `<tr>
+                        <td class=\"custom-td !text-gray-900 dark:text-white\">${item.nama_barang}</td>
+                        <td class=\"custom-td !text-gray-900 dark:text-white text-center\">${item.qty}</td>
+                        <td class=\"custom-td text-center\">
+                            ${!item.waktu_pengerjaan_barang ?
+                                `<button type=\"button\" class=\"btn btn-pasang bg-blue-600 text-white\" data-barang-id=\"${item.id}\" data-barang-nama=\"${item.nama_barang}\" data-barang-qty=\"${item.qty}\"><span class=\"btn-label\">Tandai Sudah Dipasang</span></button>` :
+                                `<span class=\"inline-block bg-green-400 text-white rounded px-4 py-2\">&#10003;</span>`
+                            }
+                        </td>
+                        <td class=\"custom-td text-center\" data-waktu-pengerjaan>${item.waktu_pengerjaan_barang ?? '-'}</td>
+                    </tr>`;
+                }).join('');
+            }
+            // Barang Lama
+            const lamaTable = document.querySelector('#table-barang-lama tbody');
+            if (lamaTable) lamaTable.innerHTML = renderRows(barangLama);
+            // Barang Baru
+            const baruTable = document.querySelector('#table-barang-baru tbody');
+            if (baruTable) baruTable.innerHTML = renderRows(barangBaru);
+            // Re-attach event listener untuk tombol baru
+            attachPasangButtonHandler();
+        }
+
+        function fetchAndRenderProduk() {
+            fetch("{{ route('spk.items.json', ['spk_id' => $spk->id]) }}")
+                .then(res => res.json())
+                .then(data => {
+                    renderProdukTable(data.barangLama, data.barangBaru);
+                });
+        }
+
+        function attachPasangButtonHandler() {
+            const buttons = document.querySelectorAll('.btn-pasang');
+            buttons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const barangNama = btn.getAttribute('data-barang-nama');
+                    const barangQty = btn.getAttribute('data-barang-qty');
+                    const barangId = btn.getAttribute('data-barang-id');
+                    if (confirm(`apakah benar product ${barangNama} dengan qty ${barangQty} sudah terpasang?`)) {
+                        let timerText = document.getElementById('timer').innerText.trim();
+                        fetch("{{ route('spk.item.waktu_pengerjaan') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                item_id: barangId,
+                                waktu_pengerjaan_barang: timerText
+                            })
+                        }).then(res => res.json())
+                        .then(data => {
+                            fetchAndRenderProduk();
+                        });
+                    }
+                });
+            });
+        }
+
+        // POLLING REALTIME: Cek perubahan data barang setiap 3 detik
+        let lastDataHash = '';
+        setInterval(function() {
+            fetch("{{ route('spk.items.json', ['spk_id' => $spk->id]) }}")
+                .then(res => res.json())
+                .then(data => {
+                    // Buat hash sederhana dari data untuk deteksi perubahan
+                    const hash = JSON.stringify(data);
+                    if (hash !== lastDataHash) {
+                        lastDataHash = hash;
+                        renderProdukTable(data.barangLama, data.barangBaru);
+                    }
+                });
+        }, 3000);
     </script>
 </x-app-layout>

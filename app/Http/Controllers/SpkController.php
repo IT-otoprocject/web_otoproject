@@ -400,4 +400,29 @@ class SpkController extends Controller
         return response()->json(['message' => 'Barang lama tidak dapat dihapus.'], 403);
     }
     
+    // Untuk kebutuhan AJAX reload produk di kerja_mekanik.blade.php
+    public function itemsJson($spk_id)
+    {
+        $spk = Spk::findOrFail($spk_id);
+        $barangLama = $spk->items()->where('is_new', false)->get()->map(function($item) {
+            return [
+                'id' => $item->id,
+                'nama_barang' => $item->nama_barang,
+                'qty' => $item->qty,
+                'waktu_pengerjaan_barang' => $item->waktu_pengerjaan_barang,
+            ];
+        });
+        $barangBaru = $spk->items()->where('is_new', true)->get()->map(function($item) {
+            return [
+                'id' => $item->id,
+                'nama_barang' => $item->nama_barang,
+                'qty' => $item->qty,
+                'waktu_pengerjaan_barang' => $item->waktu_pengerjaan_barang,
+            ];
+        });
+        return response()->json([
+            'barangLama' => $barangLama,
+            'barangBaru' => $barangBaru,
+        ]);
+    }
 }

@@ -103,4 +103,7 @@ Route::get('/odoo/products/{db}/{id}', [\App\Http\Controllers\ProductOdooControl
 // Tambahkan route ini
 Route::get('/api/search-products', [App\Http\Controllers\Api\ProductSearchController::class, 'search']);
 
+// Route untuk data barang (JSON) untuk kebutuhan AJAX reload produk di kerja_mekanik
+Route::get('/spk/{spk_id}/items/json', [SpkController::class, 'itemsJson'])->name('spk.items.json');
+
 require __DIR__ . '/auth.php';

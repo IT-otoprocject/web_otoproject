@@ -355,5 +355,18 @@
                 positionDropdown(input, dropdown);
             });
         });
+
+        // Setelah submit form edit barang, trigger event ke localStorage agar halaman kerja mekanik auto update
+        if (window.opener) {
+            window.addEventListener('DOMContentLoaded', function() {
+                const form = document.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        // Set localStorage event agar dideteksi oleh kerja_mekanik.blade.php
+                        localStorage.setItem('spk_barang_updated_{{ $spk->id }}', Date.now());
+                    });
+                }
+            });
+        }
     </script>
 </x-app-layout>

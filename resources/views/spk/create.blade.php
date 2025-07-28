@@ -288,6 +288,22 @@
             input.addEventListener('focus', function() {
                 positionDropdown(input, dropdown);
             });
+
+            // Tambahan: Jika SKU diinput manual, cari nama barang
+            if (skuInput) {
+                skuInput.addEventListener('input', function() {
+                    const skuQuery = this.value.trim();
+                    if (skuQuery.length >= 2) {
+                        fetch(`{{ url('api/search-products') }}?sku=${encodeURIComponent(skuQuery)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.length > 0) {
+                                    input.value = data[0].name;
+                                }
+                            });
+                    }
+                });
+            }
         }
 
         function positionDropdown(input, dropdown) {
@@ -311,8 +327,16 @@
             dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">Loading...</div>';
             dropdown.classList.remove('hidden');
             positionDropdown(input, dropdown);
-            // fetch(`/api/search-products?search=${encodeURIComponent(query)}`)
-            fetch(`{{ url('api/search-products') }}?search=${encodeURIComponent(query)}`)
+
+            // Deteksi jika query kemungkinan adalah SKU (angka semua atau pola tertentu)
+            const isSKU = /^\d{5,}$/.test(query) || /^[A-Z0-9\-]+$/i.test(query);
+            let url = '';
+            if (isSKU) {
+                url = `{{ url('api/search-products') }}?sku=${encodeURIComponent(query)}`;
+            } else {
+                url = `{{ url('api/search-products') }}?search=${encodeURIComponent(query)}`;
+            }
+            fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();

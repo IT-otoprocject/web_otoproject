@@ -13,8 +13,20 @@ class ProductSearchController extends Controller
     {
         try {
             $search = $request->get('search');
-            
-            if (!$search || strlen($search) < 2) {
+            $sku = $request->get('sku');
+
+            // Jika ada parameter sku, gunakan untuk pencarian
+            if ($sku && strlen($sku) >= 2) {
+                $searchValue = $sku;
+                $domain = [['default_code', 'ilike', $searchValue]];
+            } elseif ($search && strlen($search) >= 2) {
+                $searchValue = $search;
+                $domain = ['|', '|',
+                    ['name', 'ilike', $searchValue],
+                    ['default_code', 'ilike', $searchValue],
+                    ['id', '=', is_numeric($searchValue) ? (int)$searchValue : 0]
+                ];
+            } else {
                 return response()->json([]);
             }
 
@@ -38,34 +50,27 @@ class ProductSearchController extends Controller
             foreach ($configs as $key => $config) {
                 try {
                     $odoo = new OdooApiService($config);
-                    $domain = ['|', '|',
-                        ['name', 'ilike', $search],
-                        ['default_code', 'ilike', $search],
-                        ['id', '=', is_numeric($search) ? (int)$search : 0]
-                    ];
-                    
                     $products = $odoo->getProducts(['name', 'default_code', 'list_price', 'id'], 0, 20, $domain);
-                    
+
                     foreach ($products as $product) {
                         $product['database'] = $key;
                         $allProducts[] = $product;
                     }
                 } catch (\Exception $e) {
-                    // Log error but continue with other databases
                     Log::error("Error searching products in {$key}: " . $e->getMessage());
                 }
             }
 
             // Sort by relevance
-            usort($allProducts, function($a, $b) use ($search) {
-                $searchLower = strtolower($search);
-                $aNameLower = strtolower($a['name']);
-                $bNameLower = strtolower($b['name']);
-                
-                return strcmp($aNameLower, $bNameLower);
-            });
+            if (isset($searchValue)) {
+                usort($allProducts, function($a, $b) use ($searchValue) {
+                    $searchLower = strtolower($searchValue);
+                    $aNameLower = strtolower($a['name']);
+                    $bNameLower = strtolower($b['name']);
+                    return strcmp($aNameLower, $bNameLower);
+                });
+            }
 
-            // Limit results
             $allProducts = array_slice($allProducts, 0, 50);
 
             return response()->json($allProducts);

@@ -245,7 +245,6 @@
 
             input.addEventListener('input', function() {
                 const query = this.value.trim();
-                
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
                     if (query.length >= 2) {
@@ -260,6 +259,22 @@
             input.addEventListener('focus', function() {
                 positionDropdown(input, dropdown);
             });
+
+            // Tambahan: Jika SKU diinput manual, cari nama barang
+            if (skuInput) {
+                skuInput.addEventListener('input', function() {
+                    const skuQuery = this.value.trim();
+                    if (skuQuery.length >= 2) {
+                        fetch(`{{ url('api/search-products') }}?sku=${encodeURIComponent(skuQuery)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.length > 0) {
+                                    input.value = data[0].name;
+                                }
+                            });
+                    }
+                });
+            }
         }
 
         function positionDropdown(input, dropdown) {

@@ -47,7 +47,10 @@
                                             </div>
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ old('sku')[$i] ?? '' }}" readonly style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:170px; letter-spacing:1.5px; font-size:1rem;" maxlength="12">
+                                            <div class="sku-input-container">
+                                                <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ old('sku')[$i] ?? '' }}" style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:170px; letter-spacing:1.5px; font-size:1rem;" maxlength="32" autocomplete="off">
+                                                <div class="sku-dropdown product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                                            </div>
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" value="{{ old('qty')[$i] ?? '' }}" required>
@@ -70,7 +73,10 @@
                                             <input type="hidden" name="waktu_pengerjaan_barang[]" value="{{ $item->waktu_pengerjaan_barang }}">
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
-                                            <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ $item->sku ?? '' }}" readonly style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:150px; letter-spacing:1.5px; font-size:1rem;" maxlength="12">
+                                            <div class="sku-input-container">
+                                                <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" value="{{ $item->sku ?? '' }}" style="font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace; width:150px; letter-spacing:1.5px; font-size:1rem;" maxlength="32" autocomplete="off">
+                                                <div class="sku-dropdown product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                                            </div>
                                         </td>
                                         <td class="custom-td text-gray-900 dark:text-white">
                                             <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" value="{{ $item->qty }}" required>
@@ -204,6 +210,7 @@
 
             // Attach autocomplete to existing inputs
             document.querySelectorAll('.product-input').forEach(attachProductAutocomplete);
+            document.querySelectorAll('.sku-input').forEach(attachSkuAutocomplete);
 
             // Form validation
             const form = document.querySelector('form');
@@ -277,6 +284,31 @@
             }
         }
 
+        function attachSkuAutocomplete(input) {
+            const row = input.closest('tr');
+            const nameInput = row.querySelector('.product-input');
+            // Dropdown tetap di bawah nama_barang
+            const container = row.querySelector('.product-input-container');
+            const dropdown = container.querySelector('.product-dropdown');
+
+            input.addEventListener('input', function() {
+                const query = this.value.trim();
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (query.length >= 2) {
+                        searchProductsBySku(query, dropdown, input, nameInput);
+                    } else {
+                        dropdown.innerHTML = '';
+                        dropdown.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            input.addEventListener('focus', function() {
+                positionDropdown(nameInput, dropdown); // dropdown tetap di bawah nama_barang
+            });
+        }
+
         function positionDropdown(input, dropdown) {
             const rect = input.getBoundingClientRect();
             const dropdownHeight = 200; // max height
@@ -344,6 +376,39 @@
                     dropdown.innerHTML = '<div class="product-dropdown-item text-red-500">Error loading products: ' + error.message + '</div>';
                     dropdown.classList.remove('hidden');
                     positionDropdown(input, dropdown);
+                });
+        }
+
+        function searchProductsBySku(query, dropdown, skuInput, nameInput) {
+            dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">Loading...</div>';
+            dropdown.classList.remove('hidden');
+            positionDropdown(nameInput, dropdown); // dropdown tetap di bawah nama_barang
+            fetch(`{{ url('api/search-products') }}?sku=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<div class="product-dropdown-item text-gray-500">No products found</div>';
+                    } else {
+                        data.forEach(product => {
+                            const item = document.createElement('div');
+                            item.className = 'product-dropdown-item text-gray-900 dark:text-gray-900';
+                            item.innerHTML = `<div class=\"font-medium text-base\">${product.default_code}</div><div class=\"text-sm text-gray-500\">${product.name}</div>`;
+                            item.addEventListener('click', function() {
+                                skuInput.value = product.default_code || '';
+                                if (nameInput) nameInput.value = product.name;
+                                dropdown.classList.add('hidden');
+                            });
+                            dropdown.appendChild(item);
+                        });
+                    }
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(nameInput, dropdown); // dropdown tetap di bawah nama_barang
+                })
+                .catch(error => {
+                    dropdown.innerHTML = '<div class="product-dropdown-item text-red-500">Error loading products: ' + error.message + '</div>';
+                    dropdown.classList.remove('hidden');
+                    positionDropdown(nameInput, dropdown);
                 });
         }
 

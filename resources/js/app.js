@@ -33,7 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </td>
                 <td class="custom-td text-gray-900 dark:text-white">
-                    <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" readonly>
+                    <div class="sku-input-container">
+                        <input type="text" name="sku[]" class="form-control w-full dark:text-white dark:bg-gray-700 sku-input" placeholder="SKU" autocomplete="off">
+                        <div class="sku-dropdown product-dropdown hidden max-h-60 overflow-y-auto"></div>
+                    </div>
                 </td>
                 <td class="custom-td text-gray-900 dark:text-white">
                     <input type="number" name="qty[]" class="form-control dark:text-white dark:bg-gray-700" placeholder="Qty" style="width: 80px;" required>
@@ -50,6 +53,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (typeof attachProductAutocomplete === "function") {
                 const input = newRow.querySelector('.product-input');
                 if (input) attachProductAutocomplete(input);
+            }
+            if (typeof attachSkuAutocomplete === "function") {
+                const skuInput = newRow.querySelector('.sku-input');
+                if (skuInput) attachSkuAutocomplete(skuInput);
             }
         });
 

@@ -87,13 +87,10 @@ class SpkExport implements FromCollection, WithHeadings
         foreach ($spks as $spk) {
             // Get the first item if exists
             $firstItem = $spk->items->first();
-            
             $rows->push([
                 $spk->no_spk,
                 $spk->garage,
                 $spk->tanggal,
-                $spk->teknisi_1,
-                $spk->teknisi_2,
                 $spk->customer,
                 $spk->alamat,
                 $spk->no_hp,
@@ -108,15 +105,21 @@ class SpkExport implements FromCollection, WithHeadings
                 $spk->catatan_kerja,
                 $spk->teknisi_selesai,
                 $firstItem ? $firstItem->nama_barang : '',
-                $firstItem ? $firstItem->qty : ''
+                $firstItem ? $firstItem->qty : '',
+                $firstItem ? $firstItem->sku : '',
+                $firstItem && $firstItem->mekanik ? $firstItem->mekanik->name : '',
+                $firstItem ? $firstItem->waktu_pengerjaan_barang : ''
             ]);
 
             // Add remaining items starting from the second item
             foreach ($spk->items->slice(1) as $item) {
                 $rows->push([
-                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
                     $item->nama_barang,
-                    $item->qty
+                    $item->qty,
+                    $item->sku,
+                    $item->mekanik ? $item->mekanik->name : '',
+                    $item->waktu_pengerjaan_barang
                 ]);
             }
         }
@@ -148,8 +151,6 @@ class SpkExport implements FromCollection, WithHeadings
             'No SPK',
             'Garage',
             'Tanggal',
-            'Teknisi 1',
-            'Teknisi 2',
             'Customer',
             'Alamat',
             'No. HP',
@@ -164,7 +165,10 @@ class SpkExport implements FromCollection, WithHeadings
             'Catatan Kerja',
             'Teknisi Selesai',
             'Nama Barang',
-            'Qty'
+            'Qty',
+            'SKU',
+            'Mekanik',
+            'Waktu Pengerjaan Barang'
         ];
     }
 }

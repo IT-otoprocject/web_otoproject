@@ -91,10 +91,56 @@ class KerjaMekanikController extends Controller
             'waktu_pengerjaan_barang' => 'required'
         ]);
         $item = SpkItem::findOrFail($request->item_id);
-        // Simpan sebagai string durasi (HH:mm:ss)
-        $item->waktu_pengerjaan_barang = $request->waktu_pengerjaan_barang;
+
+        // Ambil semua item dengan spk_id yang sama dan urutkan berdasarkan waktu_pengerjaan_barang (null di akhir)
+        $allItems = SpkItem::where('spk_id', $item->spk_id)
+            ->orderBy('id')
+            ->get();
+
+        // Cari urutan item ini di antara item lain dengan spk_id yang sama
+        $currentIndex = $allItems->search(function($i) use ($item) {
+            return $i->id === $item->id;
+        });
+
+        // Default waktu_sebelumnya
+        $waktu_sebelumnya = '00:00:00';
+        if ($currentIndex > 0) {
+            // Cari item sebelumnya yang sudah punya waktu_pengerjaan_barang
+            for ($i = $currentIndex - 1; $i >= 0; $i--) {
+                if ($allItems[$i]->waktu_pengerjaan_barang) {
+                    $waktu_sebelumnya = $allItems[$i]->waktu_pengerjaan_barang;
+                    break;
+                }
+            }
+        }
+
+        // Hitung selisih waktu (format HH:mm:ss)
+        $waktu_pengerjaan = $request->waktu_pengerjaan_barang;
+        $selisih_waktu = $this->hitungSelisihWaktu($waktu_sebelumnya, $waktu_pengerjaan);
+
+        $item->waktu_sebelumnya = $waktu_sebelumnya;
+        $item->waktu_pengerjaan_barang = $waktu_pengerjaan;
+        $item->selisih_waktu = $selisih_waktu;
         $item->save();
 
         return response()->json(['success' => true, 'message' => 'Waktu pengerjaan barang berhasil disimpan']);
+    }
+
+    // Helper untuk menghitung selisih waktu format HH:mm:ss
+    private function hitungSelisihWaktu($start, $end)
+    {
+        try {
+            $startArr = explode(':', $start);
+            $endArr = explode(':', $end);
+            $startSeconds = ($startArr[0] * 3600) + ($startArr[1] * 60) + ($startArr[2] ?? 0);
+            $endSeconds = ($endArr[0] * 3600) + ($endArr[1] * 60) + ($endArr[2] ?? 0);
+            $diff = max(0, $endSeconds - $startSeconds);
+            $h = str_pad(floor($diff / 3600), 2, '0', STR_PAD_LEFT);
+            $m = str_pad(floor(($diff % 3600) / 60), 2, '0', STR_PAD_LEFT);
+            $s = str_pad($diff % 60, 2, '0', STR_PAD_LEFT);
+            return "$h:$m:$s";
+        } catch (\Exception $e) {
+            return '00:00:00';
+        }
     }
 }

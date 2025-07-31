@@ -295,69 +295,6 @@ class SpkController extends Controller
         return redirect()->route('mekanik.spk.show', $spk->id)->with('success', 'Barang berhasil diperbarui.');
     }
 
-    // public function updateBarang(Request $request, $spk_id)
-    // {
-    //     $spk = Spk::findOrFail($spk_id);
-
-    //     if ($spk->status !== 'Dalam Proses') {
-    //         return redirect()->back()->with('error', 'SPK hanya dapat diedit jika statusnya "Dalam Proses".');
-    //     }
-
-    //     $validatedData = $request->validate([
-    //         'nama_barang_baru' => 'nullable|array',
-    //         'nama_barang_baru.*' => 'nullable|string|max:255',
-    //         'qty_baru' => 'nullable|array',
-    //         'qty_baru.*' => 'nullable|integer|min:1',
-    //     ]);
-
-    //     // Ambil semua ID barang baru yang ada di database
-    //     $existingBarangIds = $spk->items()->where('is_new', true)->pluck('id')->toArray();
-
-    //     // Barang baru yang dikirimkan dalam permintaan
-    //     $submittedBarangIds = [];
-
-    //     if (!empty($validatedData['nama_barang_baru'])) {
-    //         foreach ($validatedData['nama_barang_baru'] as $index => $nama_barang) {
-    //             $qty = $validatedData['qty_baru'][$index];
-
-    //             // Periksa apakah barang sudah ada di database
-    //             $existingBarang = $spk->items()->where('is_new', true)
-    //                 ->where('nama_barang', $nama_barang)
-    //                 ->first();
-
-    //             if ($existingBarang) {
-    //                 // Perbarui barang yang sudah ada
-    //                 $existingBarang->update(['qty' => $qty]);
-    //                 $submittedBarangIds[] = $existingBarang->id;
-    //             } else {
-    //                 // Tambahkan barang baru
-    //                 $newBarang = SpkItem::create([
-    //                     'spk_id' => $spk->id,
-    //                     'nama_barang' => $nama_barang,
-    //                     'qty' => $qty,
-    //                     'is_new' => true,
-    //                 ]);
-    //                 $submittedBarangIds[] = $newBarang->id;
-    //             }
-    //         }
-    //     }
-
-    //     // Hapus barang baru yang tidak lagi dikirimkan dalam permintaan
-    //     $barangToDelete = array_diff($existingBarangIds, $submittedBarangIds);
-    //     SpkItem::whereIn('id', $barangToDelete)->delete();
-
-    //     session()->flash('message', 'Barang berhasil diperbarui.');
-    //     return redirect()->route('mekanik.spk.show', $spk->id);
-    // }
-    
-    // -----------------------------------------
-
-    // public function index()
-    // {
-    //     $spks = Spk::where('status', 'baru diterbitkan')->get();
-    //     return view('mekanik.spk.index', compact('spks'));
-    // }
-
     // controller untuk tombol cancel (detail SPK)
     public function cancel(Request $request, $id)
     {

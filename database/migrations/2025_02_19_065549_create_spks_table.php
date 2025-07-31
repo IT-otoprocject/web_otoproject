@@ -18,8 +18,6 @@ class CreateSpksTable extends Migration
             $table->string('no_spk')->unique();
             $table->string('garage');
             $table->date('tanggal');
-            $table->string('teknisi_1');
-            $table->string('teknisi_2')->nullable();
             $table->string('customer');
             $table->string('alamat');
             $table->string('no_hp');

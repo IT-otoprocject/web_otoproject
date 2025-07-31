@@ -22,6 +22,8 @@ class CreateSpkItemsTable extends Migration
             $table->unsignedBigInteger('mekanik_id')->nullable(); // Tambah kolom mekanik_id
             $table->string('waktu_pengerjaan_barang', 8)->nullable(); // Kolom baru untuk durasi HH:mm:ss
             $table->string('sku')->nullable(); // Kolom baru untuk SKU produk
+            $table->string('waktu_sebelumnya', 8)->nullable();
+            $table->string('selisih_waktu', 8)->nullable();
             // Jika ingin relasi ke tabel users:
             // $table->foreign('mekanik_id')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();

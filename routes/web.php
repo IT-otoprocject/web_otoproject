@@ -96,6 +96,13 @@ Route::get('/report/spk/barang', function() {
     return view('report.spk.report_spk_barang');
 })->name('report.spk.barang')->middleware(['auth']);
 
+// Report SPK Mekanik per Produk (Export Rata-rata Mekanik per Produk)
+Route::get('/report/spk/mekanik-product', function() {
+    return view('report.spk.report_spk_mekanik_product');
+})->name('report.spk.mekanik_product')->middleware(['auth']);
+
+Route::get('/report/spk/export-avg-mekanik-product', [\App\Http\Controllers\ReportSpkController::class, 'exportAvgMekanikProduct'])->name('report.spk.export_avg_mekanik_product')->middleware(['auth']);
+
 // Pilih mekanik untuk item SPK
 Route::get('/spk/{spk}/pilih-mekanik', [SpkItemMekanikController::class, 'form'])->name('spk.items.pilihMekanik');
 Route::post('/spk/{spk}/assign-mekanik', [SpkItemMekanikController::class, 'assign'])->name('spk.items.assignMekanik');

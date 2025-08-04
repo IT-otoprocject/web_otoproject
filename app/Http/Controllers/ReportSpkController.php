@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SpkExport;
 use App\Exports\SpkAvg;
+use App\Exports\SpkAvgMekanikProduct;
 
 class ReportSpkController extends Controller
 {
@@ -43,5 +44,16 @@ class ReportSpkController extends Controller
         $tanggalMulai = $request->tanggal_mulai;
         $tanggalAkhir = $request->tanggal_akhir;
         return \Maatwebsite\Excel\Facades\Excel::download(new SpkAvg($tanggalMulai, $tanggalAkhir), 'rata_rata_pengerjaan_barang.xlsx');
+    }
+
+    public function exportAvgMekanikProduct(Request $request)
+    {
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+        $tanggalMulai = $request->tanggal_mulai;
+        $tanggalAkhir = $request->tanggal_akhir;
+        return \Maatwebsite\Excel\Facades\Excel::download(new SpkAvgMekanikProduct($tanggalMulai, $tanggalAkhir), 'rata_rata_mekanik_per_produk.xlsx');
     }
 }

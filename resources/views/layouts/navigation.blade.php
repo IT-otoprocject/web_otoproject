@@ -61,6 +61,10 @@
                         <x-dropdown-link :href="route('report.spk.barang')" class="text-sm lg:text-base">
                             {{ __('Export Rata-rata Barang') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('report.spk.mekanik_product')" class="text-sm lg:text-base">
+                            {{ __('Export Rata-rata Mekanik per Produk') }}
+                        </x-dropdown-link>
+                        
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -120,6 +124,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('report.spk.barang')">
                         {{ __('Export Rata-rata Barang') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('report.spk.mekanik_product')">
+                        {{ __('Export Rata-rata Mekanik per Produk') }}
                     </x-responsive-nav-link>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">

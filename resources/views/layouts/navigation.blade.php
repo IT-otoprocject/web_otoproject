@@ -58,6 +58,9 @@
                         <x-dropdown-link :href="route('report.spk.index')" class="text-sm lg:text-base">
                             {{ __('Lihat Report SPK') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('report.spk.barang')" class="text-sm lg:text-base">
+                            {{ __('Export Rata-rata Barang') }}
+                        </x-dropdown-link>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -114,6 +117,9 @@
                     @if (in_array(Auth::user()->level, ['admin', 'headstore', 'manager']))
                     <x-responsive-nav-link :href="route('report.spk.index')">
                         {{ __('Lihat Report SPK') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('report.spk.barang')">
+                        {{ __('Export Rata-rata Barang') }}
                     </x-responsive-nav-link>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">

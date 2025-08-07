@@ -86,7 +86,12 @@ Route::get('mekanik/spk/kerja-mekanik/{spk_id}', [KerjaMekanikController::class,
 Route::post('mekanik/spk/kerja-selesai/{spk_id}', [KerjaMekanikController::class, 'selesai'])->name('kerja.selesai');
 
 // Route untuk halaman report SPK dan export ke Excel
-Route::get('/report/spk', [ReportSpkController::class, 'index'])->name('report.spk.index');
+Route::get('/report/spk', function() {
+    return view('report.spk.index');
+})->name('report.spk.index')->middleware(['auth']);
+Route::get('/report/spk/report_spk', function() {
+    return view('report.spk.report_spk');
+})->name('report.spk.report_spk')->middleware(['auth']);
 Route::get('/report/spk/export', [ReportSpkController::class, 'export'])->name('report.spk.export');
 // Route untuk export rata-rata waktu pengerjaan barang ke Excel
 Route::get('/report/spk/export-avg-barang', [ReportSpkController::class, 'exportAvgBarang'])->name('report.spk.export_avg_barang');

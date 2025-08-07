@@ -58,15 +58,7 @@
                         <x-dropdown-link :href="route('report.spk.index')" class="text-sm lg:text-base">
                             {{ __('Lihat Report SPK') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('report.spk.barang')" class="text-sm lg:text-base">
-                            {{ __('Export Rata-rata Barang') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('report.spk.mekanik_product')" class="text-sm lg:text-base">
-                            {{ __('Export Rata-rata Mekanik per Produk') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('report.spk.mekanik')" class="text-sm lg:text-base">
-                            {{ __('Export Rata-rata Kerja Mekanik') }}
-                        </x-dropdown-link>
+                        
                         
                         @endif
                         <form method="POST" action="{{ route('logout') }}">

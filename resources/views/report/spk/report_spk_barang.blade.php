@@ -9,6 +9,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"> -->
                 <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <div class="mb-6">
+                        <a href="{{ route('report.spk.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold text-xs uppercase tracking-widest shadow transition">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            Kembali ke Menu Report
+                        </a>
+                    </div>
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title mb-4">Export Rata-rata Waktu Pengerjaan Barang per SKU</h5>

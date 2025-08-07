@@ -64,6 +64,9 @@
                         <x-dropdown-link :href="route('report.spk.mekanik_product')" class="text-sm lg:text-base">
                             {{ __('Export Rata-rata Mekanik per Produk') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('report.spk.mekanik')" class="text-sm lg:text-base">
+                            {{ __('Export Rata-rata Kerja Mekanik') }}
+                        </x-dropdown-link>
                         
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
@@ -127,6 +130,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('report.spk.mekanik_product')">
                         {{ __('Export Rata-rata Mekanik per Produk') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('report.spk.mekanik')">
+                        {{ __('Export Rata-rata Kerja Mekanik') }}
                     </x-responsive-nav-link>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">

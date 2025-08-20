@@ -11,22 +11,21 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
 
-                    <!-- @if (Auth::user()->level == 'kasir')
-
-                    <a href="{{ route('spk.create') }}" class="btn btn-primary">Buat SPK</a>
-
-                    @endif -->
-                    <!-- @if (Auth::user()->level == 'mekanik')
-
-                    <a href="{{ route('spk.index') }}" class="btn btn-primary">Daftar SPK Baru</a>
-                    @endif -->
+                    {{--
+                    @if (Auth::user()->level == 'kasir')
+                        <a href="{{ route('spk.create') }}" class="btn btn-primary">Buat SPK</a>
+                    @endif
+                    @if (Auth::user()->level == 'mekanik')
+                        <a href="{{ route('spk.index') }}" class="btn btn-primary">Daftar SPK Baru</a>
+                    @endif
+                    --}}
 
 
                     @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
 
-                    @if (in_array(Auth::user()->level, ['kasir', 'mekanik', 'headstore']))
+                    @if (Auth::check() && in_array(Auth::user()->level, ['kasir', 'mekanik', 'headstore']))
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <!-- Tombol Filter -->
                         <button type="button" id="openFilter" class="btn btn-secondary">

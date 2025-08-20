@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-x2 text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Daftar SPK') }}
-            @if (in_array(Auth::user()->level, ['admin', 'kasir']))
+            @if (Auth::check() && in_array(Auth::user()->level, ['admin', 'kasir']))
             <a href="{{ route('spk.create') }}" class="btn btn-primary float-end">Buat SPK Baru</a>
             @endif
         </h2>

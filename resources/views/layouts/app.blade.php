@@ -27,25 +27,36 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        @include('layouts.navigation')
-
-        <!-- Page Heading -->
-        @isset($header)
-        <header class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-[95%] mx-auto py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
-                {{ $header }}
+    @if (!Auth::check())
+        <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded shadow text-center">
+                <h2 class="text-2xl font-bold text-red-600 mb-4">Anda harus login</h2>
+                <a href="{{ route('login') }}">
+                    <button class="bg-blue-600 text-white px-6 py-2 rounded text-lg">Login</button>
+                </a>
             </div>
-        </header>
-        @endisset
+        </div>
+    @else
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+            @include('layouts.navigation')
 
-        <!-- Page Content -->
-        <main class="py-4 sm:py-6 lg:py-8">
-            <div class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
-                {{ $slot }}
-            </div>
-        </main>
-    </div>
+            <!-- Page Heading -->
+            @isset($header)
+            <header class="bg-white dark:bg-gray-800 shadow">
+                <div class="max-w-[95%] mx-auto py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
+                    {{ $header }}
+                </div>
+            </header>
+            @endisset
+
+            <!-- Page Content -->
+            <main class="py-4 sm:py-6 lg:py-8">
+                <div class="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 xl:max-w-[85%] 2xl:max-w-[1700px]">
+                    {{ $slot }}
+                </div>
+            </main>
+        </div>
+    @endif
 </body>
 
 </html>

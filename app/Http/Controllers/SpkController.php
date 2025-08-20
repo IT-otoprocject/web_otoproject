@@ -6,6 +6,7 @@ use App\Models\Spk;
 use Illuminate\Http\Request;
 use App\Models\SpkItem;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class SpkController extends Controller
 {
@@ -81,6 +82,23 @@ class SpkController extends Controller
 
         // Redirect ke halaman untuk mekanik
         return redirect()->route('mekanik.spk.show', $spk->id)->with('success', 'SPK berhasil diterbitkan.');
+    }
+
+        /**
+     * Menampilkan daftar SPK untuk hari ini saja (daily),
+     * jika user punya garage, hanya tampilkan SPK untuk garage tersebut.
+     */
+    public function daily()
+    {
+        $user = Auth::user();
+        $today = Carbon::today();
+        $query = Spk::whereDate('created_at', $today)
+            ->whereIn('status', ['Baru Diterbitkan', 'Dalam Proses']);
+        if ($user && $user->garage) {
+            $query->where('garage', $user->garage);
+        }
+        $spks = $query->get();
+        return view('spk.daily_spk', compact('spks'));
     }
 
     // Menampilkan SPK untuk Mekanik

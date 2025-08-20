@@ -13,19 +13,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
 });
 
-
-
-
-
+// Route utama welcome
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Route dashboard utama (menu kotak SPK & PR)
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])->name('dashboard');
+// Route untuk menu SPK (daily_spk) - lebih profesional via controller
+Route::get('/spk/daily', [SpkController::class, 'daily'])->middleware(['auth'])->name('spk.daily');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

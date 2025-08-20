@@ -1,0 +1,156 @@
+
+<x-app-layout>
+	<x-slot name="header">
+		<h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+			{{ __('SPK Harian') }}
+		</h2>
+	</x-slot>
+	<meta http-equiv="refresh" content="10">
+
+	<div class="py-12">
+		<div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
+			<div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+				<div class="p-6 text-gray-900 dark:text-gray-100">
+
+					{{--
+					@if (Auth::user()->level == 'kasir')
+						<a href="{{ route('spk.create') }}" class="btn btn-primary">Buat SPK</a>
+					@endif
+					@if (Auth::user()->level == 'mekanik')
+						<a href="{{ route('spk.index') }}" class="btn btn-primary">Daftar SPK Baru</a>
+					@endif
+					--}}
+
+
+					@if(session('success'))
+					<div class="alert alert-success">{{ session('success') }}</div>
+					@endif
+
+					@if (Auth::check() && in_array(Auth::user()->level, ['admin', 'kasir', 'mekanik', 'headstore']))
+					<div class="d-flex justify-content-between align-items-center mb-4">
+						<!-- Tombol Filter -->
+						<button type="button" id="openFilter" class="btn btn-secondary">
+							<i class="fas fa-filter"></i> Filter
+						</button>
+						<!-- Search Bar -->
+						<!-- <form method="GET" action="{{ route('dashboard') }}" class="search-bar">
+							<input type="text" name="search" class="form-control" placeholder="Cari Customer, No. HP, atau No. Plat" value="{{ request('search') }}">
+							<button type="submit" class="btn btn-primary">Cari</button>
+						</form> -->
+					</div>
+
+
+					<!-- Popup Filter -->
+					<div id="filterPopup" class="filter-popup d-none">
+						<div class="filter-content dark:bg-gray-800">
+							<!-- Tombol "X" untuk menutup popup -->
+							<button type="button" id="closePopup" class="close-button">X</button>
+
+							<h5 class="mb-3 text-gray-900 dark:text-white"><i class="fas fa-filter"></i> Filter SPK</h5>
+							<form method="GET" action="{{ route('dashboard') }}">
+								<!-- Dropdown Garage -->
+								<div class="form-group">
+									<label for="garage" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Garage:</label>
+									<select name="garage" id="garage" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
+										<option value="" selected>-- Pilih Garage --</option>
+										<option value="Bandung" {{ request('garage') == 'Bandung' ? 'selected' : '' }}>Bandung</option>
+										<option value="Bekasi" {{ request('garage') == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
+										<option value="Bintaro" {{ request('garage') == 'Bintaro' ? 'selected' : '' }}>Bintaro</option>
+										<option value="Cengkareng" {{ request('garage') == 'Cengkareng' ? 'selected' : '' }}>Cengkareng</option>
+										<option value="Cibubur" {{ request('garage') == 'Cibubur' ? 'selected' : '' }}>Cibubur</option>
+										<option value="Surabaya" {{ request('garage') == 'Surabaya' ? 'selected' : '' }}>Surabaya</option>
+									</select>
+								</div>
+
+
+								<!-- Dropdown Status -->
+								<div class="form-group mt-3">
+									<label for="status" class="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Status:</label>
+									<select name="status" id="status" class="form-control w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-blue-300 dark:text-white dark:bg-gray-700">
+										<option value="" selected>-- Pilih Status --</option>
+										<option value="Baru Diterbitkan" {{ request('status') == 'Baru Diterbitkan' ? 'selected' : '' }}>Baru Diterbitkan</option>
+										<option value="Dalam Proses" {{ request('status') == 'Dalam Proses' ? 'selected' : '' }}>Dalam Proses</option>
+										<option value="Sudah Selesai" {{ request('status') == 'Sudah Selesai' ? 'selected' : '' }}>Sudah Selesai</option>
+									</select>
+								</div>
+
+								<!-- Tombol Aksi -->
+								<div class="mt-4 d-flex justify-content-between">
+									<a href="{{ route('dashboard') }}" class="btn btn-secondary">Reset</a>
+									<button type="submit" class="btn btn-primary">Apply Filter</button>
+								</div>
+
+
+							</form>
+						</div>
+					</div>
+
+					@php
+					$userGarage = Auth::user()->garage ?? null;
+					@endphp
+
+					<!-- Tabel Data SPK -->
+					@if ($spks->isNotEmpty())
+					<table class="table">
+						<thead>
+							<tr>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Garage</th>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Customer</th>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">No. Plat</th>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Status</th>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Durasi</th>
+								<th class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">Detail</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach ($spks as $spk)
+							@if (!$userGarage || $spk->garage == $userGarage)
+							<tr>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+									<span class="text-gray-900 dark:text-white">{{ $spk->garage }}</span>
+								</td>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+									<span class="text-gray-900 dark:text-white">{{ $spk->customer }}</span>
+								</td>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+									<span class="text-gray-900 dark:text-white">{{ $spk->no_plat }}</span>
+								</td>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 status-cell {{ strtolower(str_replace(' ', '-', $spk->status)) }}"
+									style="text-align: center; font-size: 0.85rem; padding: 4px 10px; border-radius: 0px;">
+									{{ $spk->status }}
+								</td>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+									<span class="text-gray-900 dark:text-white">{{ $spk->waktu_kerja }}</span>
+								</td>
+								<td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
+									<a href="{{ route('mekanik.spk.show', $spk->id) }}"
+										class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white dark:text-white rounded-lg transition-colors duration-200">
+										Lihat Detail
+									</a>
+								</td>
+							</tr>
+							@endif
+							@endforeach
+						</tbody>
+					</table>
+
+					@else
+					<br>
+					<p class="text-center text-gray-900 dark:text-white">Tidak ada data SPK.</p>
+					@endif
+					@endif
+
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		setTimeout(function() {
+			location.reload();
+		}, 9000); // 10000 milidetik = 10 detik
+	</script>
+
+</x-app-layout>

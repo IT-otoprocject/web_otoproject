@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'level', // Pastikan level ada di sini
         'garage', // Tambahkan garage agar bisa mass assignment
+        'system_access', // Tambahkan system_access
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'system_access' => 'array', // Cast JSON ke array
         ];
     }
 
@@ -54,5 +56,129 @@ class User extends Authenticatable
         static::created(function ($user) {
             Log::info('User created in database', ['user' => $user]);
         });
+    }
+
+    /**
+     * Check if user has access to a specific module/page
+     *
+     * @param string $module
+     * @return bool
+     */
+    public function hasAccess($module)
+    {
+        if (!$this->system_access || !is_array($this->system_access)) {
+            return false;
+        }
+
+        return in_array($module, $this->system_access);
+    }
+
+    /**
+     * Check if user has any of the specified accesses
+     *
+     * @param array $modules
+     * @return bool
+     */
+    public function hasAnyAccess(array $modules)
+    {
+        if (!$this->system_access || !is_array($this->system_access)) {
+            return false;
+        }
+
+        return !empty(array_intersect($modules, $this->system_access));
+    }
+
+    /**
+     * Check if user has all specified accesses
+     *
+     * @param array $modules
+     * @return bool
+     */
+    public function hasAllAccess(array $modules)
+    {
+        if (!$this->system_access || !is_array($this->system_access)) {
+            return false;
+        }
+
+        return empty(array_diff($modules, $this->system_access));
+    }
+
+    /**
+     * Get user's accessible modules
+     *
+     * @return array
+     */
+    public function getAccessibleModules()
+    {
+        return $this->system_access ?? [];
+    }
+
+    /**
+     * Add access to user
+     *
+     * @param string|array $modules
+     * @return void
+     */
+    public function addAccess($modules)
+    {
+        $modules = is_array($modules) ? $modules : [$modules];
+        $currentAccess = $this->system_access ?? [];
+        
+        $this->system_access = array_unique(array_merge($currentAccess, $modules));
+        $this->save();
+    }
+
+    /**
+     * Remove access from user
+     *
+     * @param string|array $modules
+     * @return void
+     */
+    public function removeAccess($modules)
+    {
+        $modules = is_array($modules) ? $modules : [$modules];
+        $currentAccess = $this->system_access ?? [];
+        
+        $this->system_access = array_diff($currentAccess, $modules);
+        $this->save();
+    }
+
+    /**
+     * Set user access (replace all existing access)
+     *
+     * @param array $modules
+     * @return void
+     */
+    public function setAccess(array $modules)
+    {
+        $this->system_access = array_unique($modules);
+        $this->save();
+    }
+
+    /**
+     * Check if user is admin (has all access or specific admin level)
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->level === 'admin' || $this->hasAccess('admin');
+    }
+
+    /**
+     * Get default access based on user level
+     *
+     * @return array
+     */
+    public function getDefaultAccessByLevel()
+    {
+        return match($this->level) {
+            'admin' => ['spk_garage', 'pr', 'dashboard', 'reports', 'users', 'settings'],
+            'manager' => ['spk_garage', 'pr', 'dashboard', 'reports'],
+            'kasir' => ['spk_garage', 'dashboard'],
+            'mekanik' => ['spk_garage', 'dashboard'],
+            'pr_user' => ['pr', 'dashboard'],
+            default => ['dashboard']
+        };
     }
 }

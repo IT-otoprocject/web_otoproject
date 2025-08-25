@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('level')->default('kasir');
             $table->string('garage')->nullable();
+            $table->json('system_access')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -50,6 +51,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('level');
             $table->dropColumn('garage');
+            $table->dropColumn('system_access');
         });
     }
 };

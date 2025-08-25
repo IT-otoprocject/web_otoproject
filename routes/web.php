@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\KerjaMekanikController;
 use App\Http\Controllers\ReportSpkController; // Tambahkan controller untuk report SPK
@@ -48,6 +49,17 @@ Route::get('/mekanik', function () {
 // Rute untuk dashboard admin
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+
+// Admin routes with middleware
+Route::middleware(['auth', 'system.access:users'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', AdminUserController::class);
+    Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+});
+
+// Test route for checking system access
+Route::middleware(['auth'])->get('/test-access', function () {
+    return view('test-access');
+})->name('test.access');
 
 // rute untuk SPK  
 // Route::get('/spk/create', function () {

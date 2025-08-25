@@ -53,7 +53,7 @@
                         </div>
                         <div class="px-6 py-6">
                             <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -63,7 +63,7 @@
                                     <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $user->name }}</dd>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
@@ -73,7 +73,7 @@
                                     <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $user->email }}</dd>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.25-4.5a2.25 2.25 0 00-3.181 0l-7.5 7.5a2.25 2.25 0 003.181 3.181l7.5-7.5a2.25 2.25 0 000-3.181z"></path>
@@ -97,7 +97,7 @@
                                     </dd>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -107,7 +107,7 @@
                                     <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $user->garage ?? 'Not assigned' }}</dd>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 7v2m-4 0h8m-4-3h4a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2z"></path>
@@ -117,7 +117,7 @@
                                     <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $user->created_at->format('F d, Y \a\t g:i A') }}</dd>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-750 rounded-lg p-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>

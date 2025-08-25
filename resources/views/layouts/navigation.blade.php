@@ -15,11 +15,38 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-base lg:text-lg">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @if (Auth::check() && in_array(Auth::user()->level, ['admin']))
-                    <!-- Tombol ke Produk Odoo -->
-                    <x-nav-link href="{{ route('odoo.products') }}" :active="request()->routeIs('odoo.products')" class="text-base lg:text-lg">
-                        <i class="fas fa-box"></i> Produk Odoo
-                    </x-nav-link>
+                    
+                    @if (Auth::check())
+                        {{-- Admin Dashboard - hanya muncul di halaman admin --}}
+                        @if (Auth::user()->level == 'admin')
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-base lg:text-lg">
+                                {{ __('Admin') }}
+                            </x-nav-link>
+                        @endif
+                        
+                        {{-- SPK Module Navigation - hanya muncul ketika sudah masuk ke modul SPK --}}
+                        @hasAccess('spk_garage')
+                            @if (request()->routeIs('spk.*') || request()->routeIs('report.spk.*') || request()->routeIs('kerja.*') || request()->routeIs('mekanik.spk.*'))
+                                <x-nav-link :href="route('spk.daily')" :active="request()->routeIs('spk.daily')" class="text-base lg:text-lg">
+                                    {{ __('Daily SPK') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('spk.index')" :active="request()->routeIs('spk.index', 'spk.create', 'spk.edit', 'spk.editBarang')" class="text-base lg:text-lg">
+                                    {{ __('Daftar SPK') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('report.spk.index')" :active="request()->routeIs('report.spk.*')" class="text-base lg:text-lg">
+                                    {{ __('Report') }}
+                                </x-nav-link>
+                            @endif
+                        @endhasAccess
+                        
+                        {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
+                        @hasAccess('pr')
+                            @if (request()->routeIs('pr.*'))
+                                <x-nav-link href="#" class="text-base lg:text-lg cursor-not-allowed opacity-50">
+                                    {{ __('Coming Soon') }}
+                                </x-nav-link>
+                            @endif
+                        @endhasAccess
                     @endif
                 </div>
             </div>
@@ -45,21 +72,7 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
                         @endif
-                        @if (Auth::user()->level == 'admin')
-                        <x-dropdown-link :href="route('admin.dashboard')" class="text-sm lg:text-base">
-                            {{ __('Admin Dashboard') }}
-                        </x-dropdown-link>
-                        @endif
-                        @if (in_array(Auth::user()->level, ['admin', 'kasir', 'mekanik', 'sales']))
-                        <x-dropdown-link :href="route('spk.index')" class="text-sm lg:text-base">
-                            {{ __('Daftar SPK') }}
-                        </x-dropdown-link>
-                        @endif
-                        @if (in_array(Auth::user()->level, ['admin', 'headstore', 'manager']))
-                        <x-dropdown-link :href="route('report.spk.index')" class="text-sm lg:text-base">
-                            {{ __('Lihat Report SPK') }}
-                        </x-dropdown-link>
-                        @endif
+                        
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
@@ -98,6 +111,39 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-base lg:text-lg">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            
+            @if (Auth::check())
+                {{-- Admin Dashboard - hanya muncul di halaman admin --}}
+                @if (Auth::user()->level == 'admin' && request()->routeIs('admin.*'))
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-base lg:text-lg">
+                        {{ __('Admin Dashboard') }}
+                    </x-responsive-nav-link>
+                @endif
+                
+                {{-- SPK Module Navigation - hanya muncul ketika sudah masuk ke modul SPK --}}
+                @hasAccess('spk_garage')
+                    @if (request()->routeIs('spk.*') || request()->routeIs('report.spk.*') || request()->routeIs('kerja.*') || request()->routeIs('mekanik.spk.*'))
+                        <x-responsive-nav-link :href="route('spk.daily')" :active="request()->routeIs('spk.daily')" class="text-base lg:text-lg">
+                            {{ __('Daily SPK') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('spk.index')" :active="request()->routeIs('spk.index', 'spk.create', 'spk.edit', 'spk.editBarang')" class="text-base lg:text-lg">
+                            {{ __('Daftar SPK') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('report.spk.index')" :active="request()->routeIs('report.spk.*')" class="text-base lg:text-lg">
+                            {{ __('Report') }}
+                        </x-responsive-nav-link>
+                    @endif
+                @endhasAccess
+                
+                {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
+                @hasAccess('pr')
+                    @if (request()->routeIs('pr.*'))
+                        <x-responsive-nav-link href="#" class="text-base lg:text-lg cursor-not-allowed opacity-50">
+                            {{ __('Coming Soon') }}
+                        </x-responsive-nav-link>
+                    @endif
+                @endhasAccess
+            @endif
         </div>
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             @if (Auth::check())

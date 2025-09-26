@@ -34,20 +34,30 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'level' => 'required|string',
             'garage' => 'nullable|string',
             'system_access' => 'nullable|array',
-        ]);
+        ];
+
+        // Divisi wajib kecuali untuk admin, CEO, dan CFO
+        if (!in_array($request->level, ['admin', 'ceo', 'cfo'])) {
+            $rules['divisi'] = 'required|string';
+        } else {
+            $rules['divisi'] = 'nullable|string';
+        }
+
+        $request->validate($rules);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'level' => $request->level,
+            'divisi' => $request->divisi,
             'garage' => $request->garage,
             'system_access' => $request->system_access ?? [],
         ]);
@@ -60,7 +70,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('admin.users.show', compact('user'));
+        $availableModules = $this->getAvailableModules();
+        return view('admin.users.show', compact('user', 'availableModules'));
     }
 
     /**
@@ -85,6 +96,13 @@ class UserController extends Controller
             'system_access' => 'nullable|array',
         ];
 
+        // Divisi wajib kecuali untuk admin, CEO, dan CFO
+        if (!in_array($request->level, ['admin', 'ceo', 'cfo'])) {
+            $rules['divisi'] = 'required|string';
+        } else {
+            $rules['divisi'] = 'nullable|string';
+        }
+
         // Add password validation if changing password
         if ($request->has('change_password') && $request->change_password) {
             $rules['password'] = 'required|string|min:8|confirmed';
@@ -96,6 +114,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'level' => $request->level,
+            'divisi' => $request->divisi,
             'garage' => $request->garage,
             'system_access' => $request->system_access ?? [],
         ];
@@ -111,30 +130,13 @@ class UserController extends Controller
     }
 
     /**
-     * Reset user password.
-     */
-    public function resetPassword(Request $request, User $user)
-    {
-        $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user->update([
-            'password' => Hash::make($request->password),
-        ]);
-
-        return redirect()->back()->with('success', 'Password berhasil direset!');
-    }
-
-    /**
      * Remove the specified user from storage.
      */
     public function destroy(User $user)
     {
-        // Prevent self-deletion
+        // Prevent deleting own account
         if ($user->id === Auth::id()) {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'You cannot delete your own account.');
+            return back()->with('error', 'Tidak dapat menghapus akun sendiri!');
         }
 
         $user->delete();
@@ -142,17 +144,18 @@ class UserController extends Controller
     }
 
     /**
-     * Get available modules for system access.
+     * Get available system modules
      */
     private function getAvailableModules()
     {
         return [
             'dashboard' => 'Dashboard',
-            'spk_garage' => 'SPK Garage',
+            'user_management' => 'User Management',
             'pr' => 'Purchase Request',
+            'spk_management' => 'SPK Management', 
+            'inventory' => 'Inventory',
             'reports' => 'Reports',
-            'users' => 'User Management',
-            'settings' => 'Settings',
+            'settings' => 'Settings'
         ];
     }
 }

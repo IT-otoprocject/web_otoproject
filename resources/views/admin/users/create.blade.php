@@ -80,10 +80,34 @@
                                     class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
                                     <option value="">Select User Level</option>
                                     <option value="admin" {{ old('level') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="ceo" {{ old('level') == 'ceo' ? 'selected' : '' }}>CEO</option>
+                                    <option value="cfo" {{ old('level') == 'cfo' ? 'selected' : '' }}>CFO</option>
                                     <option value="manager" {{ old('level') == 'manager' ? 'selected' : '' }}>Manager</option>
+                                    <option value="spv" {{ old('level') == 'spv' ? 'selected' : '' }}>SPV</option>
+                                    <option value="staff" {{ old('level') == 'staff' ? 'selected' : '' }}>Staff</option>
+                                    <option value="headstore" {{ old('level') == 'headstore' ? 'selected' : '' }}>Head Store</option>
                                     <option value="kasir" {{ old('level') == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                                    <option value="sales" {{ old('level') == 'sales' ? 'selected' : '' }}>Sales</option>
                                     <option value="mekanik" {{ old('level') == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
-                                    <option value="pr_user" {{ old('level') == 'pr_user' ? 'selected' : '' }}>PR User</option>
+                                </select>
+                            </div>
+
+                            <!-- Divisi -->
+                            <div>
+                                <label for="divisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Divisi</label>
+                                <select name="divisi" id="divisi" 
+                                    class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
+                                    <option value="">Pilih Divisi</option>
+                                    <option value="FACTORY" {{ old('divisi') == 'FACTORY' ? 'selected' : '' }}>Factory</option>
+                                    <option value="FAT" {{ old('divisi') == 'FAT' ? 'selected' : '' }}>FAT</option>
+                                    <option value="HCGA" {{ old('divisi') == 'HCGA' ? 'selected' : '' }}>HCGA</option>
+                                    <option value="RETAIL" {{ old('divisi') == 'RETAIL' ? 'selected' : '' }}>Retail</option>
+                                    <option value="PDCA" {{ old('divisi') == 'PDCA' ? 'selected' : '' }}>PDCA</option>
+                                    <option value="PURCHASING" {{ old('divisi') == 'PURCHASING' ? 'selected' : '' }}>Purchasing</option>
+                                    <option value="R&D" {{ old('divisi') == 'R&D' ? 'selected' : '' }}>R&D</option>
+                                    <option value="SALES" {{ old('divisi') == 'SALES' ? 'selected' : '' }}>Sales</option>
+                                    <option value="WAREHOUSE" {{ old('divisi') == 'WAREHOUSE' ? 'selected' : '' }}>Warehouse</option>
+                                    <option value="WAREHOUSE_SBY" {{ old('divisi') == 'WAREHOUSE_SBY' ? 'selected' : '' }}>Warehouse Surabaya</option>
                                 </select>
                             </div>
 
@@ -244,6 +268,30 @@
     </div>
 
     <script>
+        // Handle level change untuk admin, CEO, dan CFO
+        document.getElementById('level').addEventListener('change', function() {
+            const divisiSelect = document.getElementById('divisi');
+            const divisiLabel = divisiSelect.previousElementSibling;
+            
+            if (['admin', 'ceo', 'cfo'].includes(this.value)) {
+                // Untuk admin, CEO, dan CFO, divisi tidak wajib
+                divisiSelect.removeAttribute('required');
+                if (this.value === 'admin') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk Admin)';
+                } else if (this.value === 'ceo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CEO)';
+                } else if (this.value === 'cfo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CFO)';
+                }
+                divisiSelect.style.borderColor = '#d1d5db'; // Normal border
+            } else {
+                // Untuk non-admin/CEO/CFO, divisi wajib
+                divisiSelect.setAttribute('required', 'required');
+                divisiLabel.textContent = 'Divisi';
+                divisiSelect.style.borderColor = '#d1d5db'; // Normal border
+            }
+        });
+
         // Toggle password visibility
         function togglePasswordVisibility(fieldId) {
             const input = document.getElementById(fieldId);

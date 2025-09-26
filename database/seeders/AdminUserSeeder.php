@@ -23,7 +23,7 @@ class AdminUserSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'level' => 'admin',
                 'garage' => null,
-                'system_access' => ['spk_garage', 'pr', 'dashboard', 'reports', 'users', 'settings'],
+                'system_access' => ['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings'],
             ]);
 
             $this->command->info('Admin user created successfully!');

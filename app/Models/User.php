@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'level', // Pastikan level ada di sini
+        'divisi', // Tambahkan divisi
         'garage', // Tambahkan garage agar bisa mass assignment
         'system_access', // Tambahkan system_access
     ];
@@ -66,6 +67,11 @@ class User extends Authenticatable
      */
     public function hasAccess($module)
     {
+        // Admin always has access to everything
+        if ($this->level === 'admin') {
+            return true;
+        }
+        
         if (!$this->system_access || !is_array($this->system_access)) {
             return false;
         }
@@ -81,6 +87,11 @@ class User extends Authenticatable
      */
     public function hasAnyAccess(array $modules)
     {
+        // Admin always has access to everything
+        if ($this->level === 'admin') {
+            return true;
+        }
+        
         if (!$this->system_access || !is_array($this->system_access)) {
             return false;
         }
@@ -96,6 +107,11 @@ class User extends Authenticatable
      */
     public function hasAllAccess(array $modules)
     {
+        // Admin always has access to everything
+        if ($this->level === 'admin') {
+            return true;
+        }
+        
         if (!$this->system_access || !is_array($this->system_access)) {
             return false;
         }
@@ -110,6 +126,11 @@ class User extends Authenticatable
      */
     public function getAccessibleModules()
     {
+        // Admin has access to all modules
+        if ($this->level === 'admin') {
+            return ['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings'];
+        }
+        
         return $this->system_access ?? [];
     }
 

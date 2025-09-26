@@ -59,7 +59,7 @@
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Update user details, password, and system access permissions</p>
                 </div>
 
-                <form action="{{ route('admin.users.update', $user) }}" method="POST" class="px-6 py-6 space-y-6">
+                                <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-6">
                     @csrf
                     @method('PUT')
 
@@ -93,11 +93,36 @@
                                     class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
                                     <option value="">Select User Level</option>
                                     <option value="admin" {{ old('level', $user->level) == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="ceo" {{ old('level', $user->level) == 'ceo' ? 'selected' : '' }}>CEO</option>
+                                    <option value="cfo" {{ old('level', $user->level) == 'cfo' ? 'selected' : '' }}>CFO</option>
                                     <option value="manager" {{ old('level', $user->level) == 'manager' ? 'selected' : '' }}>Manager</option>
+                                    <option value="spv" {{ old('level', $user->level) == 'spv' ? 'selected' : '' }}>SPV</option>
+                                    <option value="staff" {{ old('level', $user->level) == 'staff' ? 'selected' : '' }}>Staff</option>
+                                    <option value="headstore" {{ old('level', $user->level) == 'headstore' ? 'selected' : '' }}>Head Store</option>
                                     <option value="kasir" {{ old('level', $user->level) == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                                    <option value="sales" {{ old('level', $user->level) == 'sales' ? 'selected' : '' }}>Sales</option>
                                     <option value="mekanik" {{ old('level', $user->level) == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
-                                    <option value="pr_user" {{ old('level', $user->level) == 'pr_user' ? 'selected' : '' }}>PR User</option>
                                 </select>
+                            </div>
+
+                            <!-- Divisi -->
+                            <div>
+                                <label for="divisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Divisi</label>
+                                <select name="divisi" id="divisi" 
+                                    class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
+                                    <option value="">Pilih Divisi</option>
+                                    <option value="FACTORY" {{ old('divisi', $user->divisi) == 'FACTORY' ? 'selected' : '' }}>Factory</option>
+                                    <option value="FAT" {{ old('divisi', $user->divisi) == 'FAT' ? 'selected' : '' }}>FAT</option>
+                                    <option value="HCGA" {{ old('divisi', $user->divisi) == 'HCGA' ? 'selected' : '' }}>HCGA</option>
+                                    <option value="RETAIL" {{ old('divisi', $user->divisi) == 'RETAIL' ? 'selected' : '' }}>Retail</option>
+                                    <option value="PDCA" {{ old('divisi', $user->divisi) == 'PDCA' ? 'selected' : '' }}>PDCA</option>
+                                    <option value="PURCHASING" {{ old('divisi', $user->divisi) == 'PURCHASING' ? 'selected' : '' }}>Purchasing</option>
+                                    <option value="R&D" {{ old('divisi', $user->divisi) == 'R&D' ? 'selected' : '' }}>R&D</option>
+                                    <option value="SALES" {{ old('divisi', $user->divisi) == 'SALES' ? 'selected' : '' }}>Sales</option>
+                                    <option value="WAREHOUSE" {{ old('divisi', $user->divisi) == 'WAREHOUSE' ? 'selected' : '' }}>Warehouse</option>
+                                    <option value="WAREHOUSE_SBY" {{ old('divisi', $user->divisi) == 'WAREHOUSE_SBY' ? 'selected' : '' }}>Warehouse Surabaya</option>
+                                </select>
+                            </div>
                             </div>
 
                             <!-- Garage -->
@@ -145,34 +170,43 @@
                         <div class="border-t border-green-200 dark:border-green-800 pt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick Access Presets</label>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" onclick="setAccess(['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'user_management', 'pr', 'spk_management', 'inventory', 'reports', 'pr_reports', 'spk_reports', 'inventory_reports', 'settings'])" 
                                     class="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                     </svg>
                                     Admin Access
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'spk_garage', 'pr', 'reports'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'spk_management', 'reports', 'pr_reports', 'spk_reports'])" 
                                     class="px-3 py-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
                                     </svg>
                                     Manager Access
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'spk_garage'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'spk_management', 'spk_reports'])" 
                                     class="px-3 py-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"></path>
                                     </svg>
                                     SPK Only
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'pr'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'pr_reports'])" 
                                     class="px-3 py-2 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-800 dark:text-yellow-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
                                     </svg>
-                                    PR Only
+                                    Purchase Request Only
+                                </button>
+                                <button type="button" onclick="setAccess(['dashboard', 'inventory'])" 
+                                    class="px-3 py-2 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 text-green-800 dark:text-green-200 rounded-lg text-xs font-medium transition-colors flex items-center">
+                                    <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h3V6a1 1 0 112 0v1h1a1 1 0 110 2H6a1 1 0 01-1-1z"></path>
+                                        <path d="M2 10a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z"></path>
+                                        <path d="M2 14a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z"></path>
+                                    </svg>
+                                    Inventory Only
                                 </button>
                                 <button type="button" onclick="setAccess(['dashboard'])" 
                                     class="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-xs font-medium transition-colors flex items-center">
@@ -216,16 +250,69 @@
     </div>
 
     <script>
+        // Handle level change untuk admin, CEO, dan CFO
+        document.getElementById('level').addEventListener('change', function() {
+            const divisiSelect = document.getElementById('divisi');
+            const divisiLabel = divisiSelect.previousElementSibling;
+            
+            if (['admin', 'ceo', 'cfo'].includes(this.value)) {
+                // Untuk admin, CEO, dan CFO, divisi tidak wajib
+                divisiSelect.removeAttribute('required');
+                if (this.value === 'admin') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk Admin)';
+                } else if (this.value === 'ceo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CEO)';
+                } else if (this.value === 'cfo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CFO)';
+                }
+                divisiSelect.style.borderColor = '#d1d5db'; // Normal border
+            } else {
+                // Untuk non-admin/CEO/CFO, divisi wajib
+                divisiSelect.setAttribute('required', 'required');
+                divisiLabel.textContent = 'Divisi';
+                divisiSelect.style.borderColor = '#d1d5db'; // Normal border
+            }
+        });
+
+        // Trigger saat halaman load untuk cek level yang sudah ada
+        document.addEventListener('DOMContentLoaded', function() {
+            const levelSelect = document.getElementById('level');
+            if (['admin', 'ceo', 'cfo'].includes(levelSelect.value)) {
+                const divisiSelect = document.getElementById('divisi');
+                const divisiLabel = divisiSelect.previousElementSibling;
+                divisiSelect.removeAttribute('required');
+                if (levelSelect.value === 'admin') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk Admin)';
+                } else if (levelSelect.value === 'ceo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CEO)';
+                } else if (levelSelect.value === 'cfo') {
+                    divisiLabel.textContent = 'Divisi (Optional untuk CFO)';
+                }
+            }
+        });
+
         // Access management functions
         function setAccess(modules) {
+            console.log('setAccess called with modules:', modules);
+            
             // Clear all checkboxes first
             const checkboxes = document.querySelectorAll('input[name="system_access[]"]');
-            checkboxes.forEach(checkbox => checkbox.checked = false);
+            console.log('Found checkboxes:', checkboxes.length);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                console.log('Cleared checkbox:', checkbox.id);
+            });
             
             // Check selected modules
             modules.forEach(module => {
                 const checkbox = document.getElementById('access_' + module);
-                if (checkbox) checkbox.checked = true;
+                console.log('Looking for checkbox with ID: access_' + module, checkbox);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    console.log('Checked checkbox:', checkbox.id);
+                } else {
+                    console.log('Checkbox not found for module:', module);
+                }
             });
         }
 

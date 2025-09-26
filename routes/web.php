@@ -51,7 +51,7 @@ Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('adm
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
 // Admin routes with middleware
-Route::middleware(['auth', 'system.access:users'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'system_access:user_management'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', AdminUserController::class);
     Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
 });
@@ -142,5 +142,13 @@ Route::get('/api/search-products', [App\Http\Controllers\Api\ProductSearchContro
 
 // Route untuk data barang (JSON) untuk kebutuhan AJAX reload produk di kerja_mekanik
 Route::get('/spk/{spk_id}/items/json', [SpkController::class, 'itemsJson'])->name('spk.items.json');
+
+// Routes untuk Purchase Request
+Route::middleware(['auth', 'system_access:pr'])->group(function () {
+    Route::resource('purchase-request', App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class);
+    Route::post('purchase-request/{purchaseRequest}/approve', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
+    Route::post('purchase-request/{purchaseRequest}/reject', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'reject'])->name('purchase-request.reject');
+    Route::post('purchase-request/{purchaseRequest}/update-status', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'updateStatus'])->name('purchase-request.update-status');
+});
 
 require __DIR__ . '/auth.php';

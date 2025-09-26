@@ -57,6 +57,39 @@
             </main>
         </div>
     @endif
+
+    <!-- Script untuk handle logout dan pembersihan sessionStorage -->
+    <script>
+        // Handle logout - clear sessionStorage agar notifikasi muncul lagi saat login
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cari semua form logout
+            const logoutForms = document.querySelectorAll('form[action*="logout"]');
+            
+            logoutForms.forEach(function(form) {
+                form.addEventListener('submit', function() {
+                    // Clear semua sessionStorage terkait notifikasi
+                    sessionStorage.removeItem('approval_notification_dismissed');
+                    sessionStorage.removeItem('purchasing_notification_dismissed');
+                    sessionStorage.removeItem('approval_info_dismissed');
+                    
+                    // Optional: clear semua sessionStorage
+                    // sessionStorage.clear();
+                });
+            });
+
+            // Handle logout via link (jika ada)
+            const logoutLinks = document.querySelectorAll('a[href*="logout"]');
+            
+            logoutLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    // Clear sessionStorage sebelum logout
+                    sessionStorage.removeItem('approval_notification_dismissed');
+                    sessionStorage.removeItem('purchasing_notification_dismissed');
+                    sessionStorage.removeItem('approval_info_dismissed');
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

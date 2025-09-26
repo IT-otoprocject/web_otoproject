@@ -106,7 +106,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">User</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Level & Divisi</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Garage</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">System Access</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Created</th>
@@ -135,19 +135,33 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm
-                                        @if($user->level == 'admin') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                        @elseif($user->level == 'manager') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
-                                        @elseif($user->level == 'kasir') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                        @elseif($user->level == 'mekanik') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                        @elseif($user->level == 'pr_user') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                        @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
-                                        @endif">
-                                        <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        {{ ucfirst($user->level) }}
-                                    </span>
+                                    <div class="space-y-1">
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm
+                                            @if($user->level == 'admin') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                            @elseif($user->level == 'manager') bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                            @elseif($user->level == 'kasir') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                            @elseif($user->level == 'mekanik') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                            @elseif($user->level == 'spv') bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200
+                                            @elseif($user->level == 'staff') bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                            @elseif($user->level == 'headstore') bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                            @elseif($user->level == 'sales') bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200
+                                            @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200
+                                            @endif">
+                                            <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            {{ ucfirst($user->level) }}
+                                        </span>
+                                        @if($user->divisi)
+                                            <br>
+                                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                                                <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z"></path>
+                                                </svg>
+                                                {{ $user->divisi }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                                     <span class="inline-flex items-center">

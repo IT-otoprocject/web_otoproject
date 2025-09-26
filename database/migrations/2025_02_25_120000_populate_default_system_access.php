@@ -39,11 +39,17 @@ return new class extends Migration
     private function getDefaultAccessByLevel($level)
     {
         return match($level) {
-            'admin' => ['spk_garage', 'pr', 'dashboard', 'reports', 'users', 'settings'],
-            'manager' => ['spk_garage', 'pr', 'dashboard', 'reports'],
+            'admin' => ['dashboard', 'spk_garage', 'pr', 'reports', 'pr_reports', 'spk_reports', 'inventory_reports', 'users', 'settings'],
+            'manager' => ['spk_garage', 'pr', 'dashboard', 'reports', 'pr_reports', 'spk_reports'],
+            'spv' => ['spk_garage', 'pr', 'dashboard', 'reports', 'pr_reports', 'spk_reports'],
+            'staff' => ['dashboard'],
+            'headstore' => ['spk_garage', 'dashboard', 'reports', 'spk_reports'],
             'kasir' => ['spk_garage', 'dashboard'],
+            'sales' => ['spk_garage', 'dashboard'],
             'mekanik' => ['spk_garage', 'dashboard'],
-            'pr_user' => ['pr', 'dashboard'],
+            'pr_user' => ['pr', 'dashboard', 'pr_reports'],
+            'purchasing' => ['pr', 'dashboard', 'reports', 'pr_reports'],
+            'ga' => ['pr', 'dashboard', 'reports', 'pr_reports'],
             default => ['dashboard']
         };
     }

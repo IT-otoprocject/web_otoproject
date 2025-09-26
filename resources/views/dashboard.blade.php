@@ -19,10 +19,10 @@
                 
                 <!-- Menu PR -->
                 @hasAccess('pr')
-                <a href="#" class="block bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center hover:bg-green-100 dark:hover:bg-green-700 transition aspect-square min-w-[140px] max-w-[220px] min-h-[140px] max-h-[220px] mx-auto">
+                <a href="{{ route('purchase-request.index') }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center hover:bg-green-100 dark:hover:bg-green-700 transition aspect-square min-w-[140px] max-w-[220px] min-h-[140px] max-h-[220px] mx-auto">
                     <div class="flex flex-col items-center justify-center">
                         <img src="https://i.pinimg.com/1200x/52/c2/13/52c213b67f558464e827e4c4500ae5ea.jpg" alt="PR Icon" class="h-16 w-16 mb-4 object-contain border-4 border-red-500" style="border-radius:16px;" />
-                        <span class="text-lg font-semibold text-gray-900 dark:text-white">PR</span>
+                        <span class="text-lg font-semibold text-gray-900 dark:text-white">Purchase Request</span>
                     </div>
                 </a>
                 @endhasAccess

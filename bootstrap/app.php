@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'level' => \App\Http\Middleware\CheckUserLevel::class,
-            'system.access' => \App\Http\Middleware\CheckSystemAccess::class,
+            'system_access' => \App\Http\Middleware\CheckSystemAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

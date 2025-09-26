@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Blade;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Set default timezone untuk Carbon
+        Carbon::setLocale('id');
+        date_default_timezone_set('Asia/Jakarta');
+        
         DB::listen(function ($query) {
             Log::info('SQL Query Executed', [
                 'sql' => $query->sql,

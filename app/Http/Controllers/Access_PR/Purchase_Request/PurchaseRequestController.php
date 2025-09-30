@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -56,28 +57,41 @@ class PurchaseRequestController extends Controller
         $user = Auth::user();
         $approvalLevels = PurchaseRequest::getAvailableApprovalLevels();
         $defaultApprovalFlow = PurchaseRequest::getApprovalFlowByDivisi($user->divisi);
+        
+        // Get active PR categories
+        $prCategories = \App\Models\Access_PR\PrCategory::active()->orderBy('name')->get();
 
-        return view('Access_PR.Purchase_Request.create', compact('approvalLevels', 'defaultApprovalFlow'));
+        return view('Access_PR.Purchase_Request.create', compact('approvalLevels', 'defaultApprovalFlow', 'prCategories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'category_id' => 'required|exists:pr_categories,id',
             'due_date' => 'nullable|date|after:today',
             'description' => 'required|string|max:1000',
             'location' => 'required|in:HQ,BRANCH,OTHER',
-            'approval_flow' => 'required|array|min:1',
-            'approval_flow.*' => 'required|string|in:dept_head,ga,finance_dept,ceo,cfo',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit' => 'nullable|string|max:50',
             'items.*.estimated_price' => 'nullable|numeric|min:0',
-            'items.*.notes' => 'nullable|string|max:500'
+            'items.*.notes' => 'nullable|string|max:500',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048' // max 2MB per file
         ]);
 
         DB::beginTransaction();
         try {
+            // Calculate total estimated price
+            $totalEstimatedPrice = collect($request->items)->sum(function($item) {
+                return (float)($item['estimated_price'] ?? 0);
+            });
+
+            // Get approval flow from selected category
+            $category = \App\Models\Access_PR\PrCategory::findOrFail($request->category_id);
+            $approvalFlow = $category->approval_rules;
+
             // Generate PR Number
             $prNumber = PurchaseRequest::generatePRNumber($request->location);
             
@@ -85,14 +99,16 @@ class PurchaseRequestController extends Controller
             $purchaseRequest = PurchaseRequest::create([
                 'pr_number' => $prNumber,
                 'user_id' => Auth::id(),
+                'category_id' => $request->category_id,
                 'request_date' => Carbon::now()->toDateString(),
                 'due_date' => $request->due_date,
                 'description' => $request->description,
                 'location' => $request->location,
                 'status' => 'SUBMITTED',
-                'approval_flow' => $request->approval_flow,
+                'approval_flow' => array_values($approvalFlow), // Reindex array
                 'approvals' => [],
-                'notes' => $request->notes
+                'notes' => $request->notes,
+                'total_estimated_price' => $totalEstimatedPrice
             ]);
 
             // Create Purchase Request Items
@@ -107,10 +123,30 @@ class PurchaseRequestController extends Controller
                 ]);
             }
 
+            // Handle file attachments
+            if ($request->hasFile('attachments')) {
+                $attachmentPaths = [];
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('purchase-requests/attachments', 'public');
+                    $attachmentPaths[] = [
+                        'original_name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'size' => $file->getSize(),
+                        'mime_type' => $file->getMimeType()
+                    ];
+                }
+                
+                // Update purchase request with attachment info
+                $purchaseRequest->update([
+                    'attachments' => $attachmentPaths
+                ]);
+            }
+
             DB::commit();
             
             return redirect()->route('purchase-request.show', $purchaseRequest)
-                ->with('success', 'Purchase Request berhasil dibuat dengan nomor: ' . $prNumber);
+                ->with('success', 'Purchase Request berhasil dibuat dengan nomor: ' . $prNumber . 
+                    ($totalEstimatedPrice > 5000000 ? ' (CEO approval tersedia opsional karena total > Rp 5.000.000)' : ''));
                 
         } catch (\Exception $e) {
             DB::rollback();
@@ -364,5 +400,115 @@ class PurchaseRequestController extends Controller
         
         return redirect()->route('purchase-request.index')
             ->with('success', 'Purchase Request berhasil dihapus.');
+    }
+
+    public function addAttachment(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        // Check authorization - only owner or admin can add attachments
+        if (Auth::user()->id !== $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        // Allow adding files in most statuses except COMPLETED or CANCELLED
+        if (in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED'])) {
+            return redirect()->back()->with('error', 'Tidak dapat menambah file pada PR dengan status ' . $purchaseRequest->status);
+        }
+
+        $currentAttachments = $purchaseRequest->attachments ?? [];
+        $currentCount = count($currentAttachments);
+
+        $request->validate([
+            'attachments' => 'required|array',
+            'attachments.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048' // max 2MB per file
+        ]);
+
+        // Check maximum file limit
+        $newFileCount = count($request->file('attachments'));
+        if ($currentCount + $newFileCount > 5) {
+            return redirect()->back()->with('error', 'Maksimal hanya dapat mengunggah 5 file. Saat ini sudah ada ' . $currentCount . ' file.');
+        }
+
+        $currentFileLogs = $purchaseRequest->file_logs ?? [];
+        
+        foreach ($request->file('attachments') as $file) {
+            $path = $file->store('purchase-requests/attachments', 'public');
+            
+            $attachmentData = [
+                'original_name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType()
+            ];
+            
+            $currentAttachments[] = $attachmentData;
+            
+            // Add to file logs
+            $currentFileLogs[] = [
+                'action' => 'added',
+                'message' => 'File "' . $file->getClientOriginalName() . '" ditambahkan oleh ' . Auth::user()->name,
+                'timestamp' => now()->setTimezone('Asia/Jakarta')->toISOString(),
+                'user_id' => Auth::id(),
+                'user_name' => Auth::user()->name
+            ];
+        }
+        
+        $purchaseRequest->update([
+            'attachments' => $currentAttachments,
+            'file_logs' => $currentFileLogs
+        ]);
+
+        return redirect()->back()->with('success', 'File berhasil ditambahkan.');
+    }
+
+    public function deleteAttachment(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        // Check authorization - only owner or admin can delete attachments
+        if (Auth::user()->id !== $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        // Allow deleting files in most statuses except COMPLETED or CANCELLED
+        if (in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED'])) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus file pada PR dengan status ' . $purchaseRequest->status);
+        }
+
+        $request->validate([
+            'file_index' => 'required|integer|min:0'
+        ]);
+
+        $attachments = $purchaseRequest->attachments ?? [];
+        $fileLogs = $purchaseRequest->file_logs ?? [];
+        $fileIndex = $request->file_index;
+        
+        if (!isset($attachments[$fileIndex])) {
+            return redirect()->back()->with('error', 'File tidak ditemukan.');
+        }
+
+        $fileToDelete = $attachments[$fileIndex];
+        
+        // Delete physical file from storage
+        if (isset($fileToDelete['path']) && Storage::disk('public')->exists($fileToDelete['path'])) {
+            Storage::disk('public')->delete($fileToDelete['path']);
+        }
+
+        // Add to file logs
+        $fileLogs[] = [
+            'action' => 'deleted',
+            'message' => 'File "' . ($fileToDelete['original_name'] ?? 'Unknown') . '" dihapus oleh ' . Auth::user()->name,
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->toISOString(),
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()->name
+        ];
+
+        // Remove from attachments array
+        unset($attachments[$fileIndex]);
+        $attachments = array_values($attachments); // Reindex array
+
+        $purchaseRequest->update([
+            'attachments' => $attachments,
+            'file_logs' => $fileLogs
+        ]);
+
+        return redirect()->back()->with('success', 'File berhasil dihapus.');
     }
 }

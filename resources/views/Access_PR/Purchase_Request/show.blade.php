@@ -238,11 +238,14 @@
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->notes ?? '-' }}</td>
                                     </tr>
                                     @endforeach
-                                    @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0)
+                                    @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0 || $purchaseRequest->total_estimated_price)
                                     <tr class="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
                                         <td colspan="4" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
                                         <td colspan="2" class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
-                                            Rp {{ number_format($purchaseRequest->items->sum('estimated_price'), 0, ',', '.') }}
+                                            @php
+                                                $total = $purchaseRequest->total_estimated_price ?? $purchaseRequest->items->sum('estimated_price');
+                                            @endphp
+                                            Rp {{ number_format($total, 0, ',', '.') }}
                                         </td>
                                     </tr>
                                     @endif
@@ -295,12 +298,166 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi:</span>
                                     <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                        Rp {{ number_format($purchaseRequest->items->sum('estimated_price'), 0, ',', '.') }}
+                                        Rp {{ number_format($purchaseRequest->total_estimated_price ?? $purchaseRequest->items->sum('estimated_price'), 0, ',', '.') }}
                                     </span>
                                 </div>
                             </div>
                             @endif
                         </div>
+                    </div>
+
+                    <!-- File Attachments Section -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
+
+                        
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-0 flex items-center">
+                                <i class="fas fa-paperclip mr-2 text-indigo-500"></i>
+                                File Lampiran 
+                                @if($purchaseRequest->attachments && count($purchaseRequest->attachments) > 0)
+                                    ({{ count($purchaseRequest->attachments) }} file)
+                                @endif
+                            </h3>
+                            @php
+                                $currentFileCount = count($purchaseRequest->attachments ?? []);
+                                $isOwner = Auth::user()->id === $purchaseRequest->user_id;
+                                $isAdmin = Auth::user()->level === 'admin';
+                                $statusOk = !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']);
+                                $fileCountOk = $currentFileCount < 5;
+                                $canAddFile = ($isOwner || $isAdmin) && $statusOk && $fileCountOk;
+                            @endphp
+                            
+
+                            
+                            @if($canAddFile)
+                                <button type="button"
+                                    onclick="showAddFileModal()"
+                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors inline-flex items-center">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Tambah File ({{ $currentFileCount }}/5)
+                                </button>
+                            @elseif($currentFileCount >= 5)
+                                <span class="px-3 py-2 bg-gray-400 text-white text-sm rounded-lg inline-flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Maksimal 5 file tercapai
+                                </span>
+                            @elseif(in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']))
+                                <span class="text-sm text-gray-500">Status: {{ $purchaseRequest->status }} - File tidak dapat ditambah</span>
+                            @elseif(Auth::user()->id !== $purchaseRequest->user_id && Auth::user()->level !== 'admin')
+                                <span class="text-sm text-gray-500">Hanya pemilik PR yang dapat menambah file</span>
+                            @endif
+                        </div>
+                        
+                        @if($purchaseRequest->attachments && count($purchaseRequest->attachments) > 0)
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                @foreach($purchaseRequest->attachments as $index => $attachment)
+                                    <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                                        @if(str_contains($attachment['mime_type'] ?? '', 'image'))
+                                            <!-- Image Preview -->
+                                            <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-700">
+                                                <img src="{{ asset('storage/' . ($attachment['path'] ?? '')) }}" 
+                                                     alt="{{ $attachment['original_name'] ?? 'Image' }}"
+                                                     class="w-full h-32 object-cover cursor-pointer image-preview"
+                                                     data-image-url="{{ asset('storage/' . ($attachment['path'] ?? '')) }}"
+                                                     data-image-name="{{ $attachment['original_name'] ?? 'Image' }}">
+                                            </div>
+                                        @else
+                                            <!-- File Icon for non-images -->
+                                            <div class="h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                @if(str_contains($attachment['mime_type'] ?? '', 'pdf'))
+                                                    <i class="fas fa-file-pdf text-red-500 text-4xl"></i>
+                                                @else
+                                                    <i class="fas fa-file text-gray-500 text-4xl"></i>
+                                                @endif
+                                            </div>
+                                        @endif
+                                        
+                                        <div class="p-3">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title="{{ $attachment['original_name'] ?? 'Unknown File' }}">
+                                                {{ $attachment['original_name'] ?? 'Unknown File' }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                {{ number_format(($attachment['size'] ?? 0) / 1024 / 1024, 2) }} MB
+                                            </div>
+                                            <div class="mt-2 flex flex-wrap gap-1">
+                                                <a href="{{ asset('storage/' . ($attachment['path'] ?? '')) }}" 
+                                                   target="_blank"
+                                                   class="inline-flex items-center px-2 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 text-xs rounded transition-colors">
+                                                    <i class="fas fa-eye mr-1"></i>
+                                                    Lihat
+                                                </a>
+                                                <a href="{{ asset('storage/' . ($attachment['path'] ?? '')) }}" 
+                                                   download="{{ $attachment['original_name'] ?? 'download' }}"
+                                                   class="inline-flex items-center px-2 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-800 dark:text-green-200 text-xs rounded transition-colors">
+                                                    <i class="fas fa-download mr-1"></i>
+                                                    Download
+                                                </a>
+                                                @if((Auth::user()->id === $purchaseRequest->user_id || Auth::user()->level === 'admin') && !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']))
+                                                    <button type="button"
+                                                        class="delete-file-btn inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-800 dark:text-red-200 text-xs rounded transition-colors"
+                                                        data-file-index="{{ $index }}"
+                                                        data-file-name="{{ $attachment['original_name'] ?? 'File' }}">
+                                                        <i class="fas fa-trash mr-1"></i>
+                                                        Hapus
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <i class="fas fa-inbox text-gray-400 text-3xl mb-3"></i>
+                                <p class="text-gray-500 dark:text-gray-400 mb-4">Belum ada file lampiran.</p>
+                                @php
+                                    $canAddFirstFile = (Auth::user()->id === $purchaseRequest->user_id || Auth::user()->level === 'admin') 
+                                                     && !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']);
+                                @endphp
+                                
+                                @if($canAddFirstFile)
+                                    <button type="button"
+                                        onclick="showAddFileModal()"
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors inline-flex items-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Tambah File Pertama (0/5)
+                                    </button>
+                                @elseif(in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']))
+                                    <p class="text-sm text-gray-500">File tidak dapat ditambah karena PR sudah {{ $purchaseRequest->status }}</p>
+                                @else
+                                    <p class="text-sm text-gray-500">Hanya pemilik PR yang dapat menambah file</p>
+                                @endif
+                            </div>
+                        @endif
+
+                        <!-- File Activity Log -->
+                        @if($purchaseRequest->file_logs && count($purchaseRequest->file_logs) > 0)
+                            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                    <i class="fas fa-history mr-2 text-gray-500"></i>
+                                    Riwayat Aktivitas File
+                                </h4>
+                                <div class="space-y-2">
+                                    @foreach($purchaseRequest->file_logs as $log)
+                                        <div class="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs">
+                                            <span class="flex-shrink-0">
+                                                @if($log['action'] === 'added')
+                                                    <i class="fas fa-plus text-green-500"></i>
+                                                @else
+                                                    <i class="fas fa-trash text-red-500"></i>
+                                                @endif
+                                            </span>
+                                            <span class="flex-1">
+                                                {{ $log['message'] }}
+                                            </span>
+                                            <span class="text-gray-500 dark:text-gray-400">
+                                                {{ \Carbon\Carbon::parse($log['timestamp'])->setTimezone('Asia/Jakarta')->format('d/m/Y H:i') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Status Updates (untuk Purchasing) -->
@@ -553,6 +710,107 @@
     </div>
     @endif
 
+    <!-- Image Preview Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="close-image-modal" class="absolute -top-10 right-0 text-white hover:text-gray-300 text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg shadow-lg">
+            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-3 rounded-b-lg">
+                <p id="modal-image-name" class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add File Modal -->
+    <div id="add-file-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-5 border w-[500px] shadow-lg rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <div class="mt-3">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-indigo-100 dark:bg-indigo-900 rounded-full">
+                    <i class="fas fa-paperclip text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                </div>
+                <div class="mt-3 text-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        Tambah File Lampiran
+                    </h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Pilih file yang ingin dilampirkan (JPG, JPEG, PNG, PDF - maksimal 2MB)
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <form action="{{ route('purchase-request.add-attachment', $purchaseRequest) }}" method="POST" enctype="multipart/form-data" id="add-file-form" class="mt-6">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <input type="file" 
+                               name="attachments[]" 
+                               id="file-input" 
+                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               accept=".jpg,.jpeg,.png,.pdf"
+                               multiple
+                               onchange="validateFileSize(this)"
+                               required>
+                        <div id="file-preview-add" class="mt-2 space-y-2"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-add-file"
+                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-white rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 flex items-center">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload File
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete File Confirmation Modal -->
+    <div id="delete-file-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-[400px] shadow-lg rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <div class="mt-3">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+                </div>
+                <div class="mt-3 text-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        Konfirmasi Hapus File
+                    </h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Apakah Anda yakin ingin menghapus file "<span id="file-to-delete"></span>"?
+                        </p>
+                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">
+                            File yang dihapus tidak dapat dikembalikan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <form action="{{ route('purchase-request.delete-attachment', $purchaseRequest) }}" method="POST" id="delete-file-form" class="mt-6">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="file_index" id="delete-file-index">
+                <div class="flex justify-center space-x-3">
+                    <button type="button" id="cancel-delete-file"
+                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-white rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-200 flex items-center">
+                        <i class="fas fa-trash mr-2"></i>
+                        Hapus File
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Modal functions untuk Approve
         function showApproveModal() {
@@ -582,6 +840,105 @@
             document.getElementById('update-status-modal').classList.add('hidden');
             document.getElementById('update_type').value = '';
             document.getElementById('update_description').value = '';
+        }
+
+        // Image preview modal functions
+        function showImageModal(imageUrl, imageName) {
+            const modal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalImageName = document.getElementById('modal-image-name');
+            
+            modalImage.src = imageUrl;
+            modalImage.alt = imageName;
+            modalImageName.textContent = imageName;
+            modal.classList.remove('hidden');
+        }
+
+        function hideImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Add file modal functions
+        function showAddFileModal() {
+            document.getElementById('add-file-modal').classList.remove('hidden');
+        }
+
+        function hideAddFileModal() {
+            document.getElementById('add-file-modal').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+            document.getElementById('file-preview-add').innerHTML = '';
+        }
+
+        // Delete file modal functions
+        function confirmDeleteFile(fileIndex, fileName) {
+            document.getElementById('file-to-delete').textContent = fileName;
+            document.getElementById('delete-file-index').value = fileIndex;
+            document.getElementById('delete-file-modal').classList.remove('hidden');
+        }
+
+        function hideDeleteFileModal() {
+            document.getElementById('delete-file-modal').classList.add('hidden');
+        }
+
+        // Validate file size and type for add file modal
+        function validateFileSize(input) {
+            const files = input.files;
+            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            const previewContainer = document.getElementById('file-preview-add');
+            
+            // Get current file count from existing attachment cards
+            const attachmentCards = document.querySelectorAll('.bg-gray-50.dark\\:bg-gray-700.border.border-gray-200.dark\\:border-gray-600.rounded-lg.overflow-hidden');
+            const currentFileCount = attachmentCards.length;
+            const maxFiles = 5;
+            
+            previewContainer.innerHTML = ''; // Clear previous previews
+            
+            // Check total file limit
+            if (currentFileCount + files.length > maxFiles) {
+                alert(`Maksimal hanya dapat mengunggah ${maxFiles} file. Saat ini sudah ada ${currentFileCount} file. Anda hanya dapat menambah ${maxFiles - currentFileCount} file lagi.`);
+                input.value = '';
+                return false;
+            }
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Check file type
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`File ${file.name} tidak didukung. Hanya JPG, JPEG, PNG, dan PDF yang diperbolehkan.`);
+                    input.value = '';
+                    return false;
+                }
+                
+                // Check file size
+                if (file.size > maxSize) {
+                    alert(`File ${file.name} terlalu besar. Maksimal ukuran file adalah 2MB.`);
+                    input.value = '';
+                    return false;
+                }
+                
+                // Create file preview
+                const filePreview = document.createElement('div');
+                filePreview.className = 'flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded';
+                
+                const fileIcon = file.type.includes('image') ? '🖼️' : '📄';
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                filePreview.innerHTML = `
+                    <span class="text-lg">${fileIcon}</span>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">${file.name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${fileSize} MB</p>
+                    </div>
+                    <span class="text-green-500">✓</span>
+                `;
+                
+                previewContainer.appendChild(filePreview);
+            }
+            
+            return true;
         }
 
         // Event listeners
@@ -633,6 +990,73 @@
                     }
                 });
             }
+
+            // Image preview modal event listeners
+            const imageModal = document.getElementById('image-modal');
+            const closeImageModal = document.getElementById('close-image-modal');
+            
+            // Image preview clicks
+            document.querySelectorAll('.image-preview').forEach(img => {
+                img.addEventListener('click', function() {
+                    const imageUrl = this.getAttribute('data-image-url');
+                    const imageName = this.getAttribute('data-image-name');
+                    showImageModal(imageUrl, imageName);
+                });
+            });
+            
+            // Close image modal
+            if (closeImageModal) {
+                closeImageModal.addEventListener('click', hideImageModal);
+            }
+            
+            if (imageModal) {
+                imageModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideImageModal();
+                    }
+                });
+            }
+
+            // Add file modal event listeners
+            const addFileModal = document.getElementById('add-file-modal');
+            const cancelAddFile = document.getElementById('cancel-add-file');
+            
+            if (cancelAddFile) {
+                cancelAddFile.addEventListener('click', hideAddFileModal);
+            }
+            
+            if (addFileModal) {
+                addFileModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideAddFileModal();
+                    }
+                });
+            }
+
+            // Delete file modal event listeners
+            const deleteFileModal = document.getElementById('delete-file-modal');
+            const cancelDeleteFile = document.getElementById('cancel-delete-file');
+            
+            // Delete file button clicks
+            document.querySelectorAll('.delete-file-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fileIndex = this.getAttribute('data-file-index');
+                    const fileName = this.getAttribute('data-file-name');
+                    confirmDeleteFile(fileIndex, fileName);
+                });
+            });
+            
+            if (cancelDeleteFile) {
+                cancelDeleteFile.addEventListener('click', hideDeleteFileModal);
+            }
+            
+            if (deleteFileModal) {
+                deleteFileModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideDeleteFileModal();
+                    }
+                });
+            }
         });
 
         // Close modals dengan ESC key
@@ -641,6 +1065,9 @@
                 hideApproveModal();
                 hideRejectModal();
                 hideUpdateStatusModal();
+                hideImageModal();
+                hideAddFileModal();
+                hideDeleteFileModal();
             }
         });
     </script>

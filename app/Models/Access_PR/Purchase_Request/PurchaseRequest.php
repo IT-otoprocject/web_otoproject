@@ -14,6 +14,7 @@ class PurchaseRequest extends Model
     protected $fillable = [
         'pr_number',
         'user_id',
+        'category_id',
         'request_date',
         'due_date',
         'description',
@@ -21,22 +22,27 @@ class PurchaseRequest extends Model
         'status',
         'approval_flow',
         'approvals',
-        'notes'
+        'notes',
+        'total_estimated_price',
+        'attachments',
+        'file_logs'
     ];
 
     protected $casts = [
         'request_date' => 'date',
         'due_date' => 'date',
         'approval_flow' => 'array',
-        'approvals' => 'array'
+        'approvals' => 'array',
+        'attachments' => 'array',
+        'file_logs' => 'array'
     ];
 
     // Get default approval flow based on user divisi
     public static function getApprovalFlowByDivisi($divisi)
     {
-        // Semua divisi menggunakan alur yang sama:
-        // User buat -> Dept Head -> GA -> Finance Dept -> CEO -> CFO (optional)
-        return ['dept_head', 'ga', 'finance_dept', 'ceo', 'cfo'];
+        // Default flow tanpa CEO dan CFO (CEO hanya diperlukan jika total > 5 juta)
+        // User buat -> Dept Head -> GA -> Finance Dept
+        return ['dept_head', 'ga', 'finance_dept'];
     }
 
     // Get detailed approval flow configuration
@@ -121,6 +127,12 @@ class PurchaseRequest extends Model
     public function statusUpdates()
     {
         return $this->hasMany(PurchaseRequestStatusUpdate::class);
+    }
+
+    // Relationship dengan PR Category
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Access_PR\PrCategory::class, 'category_id');
     }
 
     // Generate PR Number dengan format PO/DDMMYY1

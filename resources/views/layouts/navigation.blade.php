@@ -41,10 +41,15 @@
                         
                         {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                         @hasAccess('pr')
-                            @if (request()->routeIs('pr.*'))
-                                <x-nav-link href="#" class="text-base lg:text-lg cursor-not-allowed opacity-50">
-                                    {{ __('Coming Soon') }}
+                            @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*'))
+                                <x-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
+                                    {{ __('Purchase Request') }}
                                 </x-nav-link>
+                                @if (Auth::user()->divisi === 'FAT' && in_array(Auth::user()->level, ['manager', 'spv']))
+                                    <x-nav-link :href="route('pr-categories.index')" :active="request()->routeIs('pr-categories.*')" class="text-base lg:text-lg">
+                                        {{ __('Configuration') }}
+                                    </x-nav-link>
+                                @endif
                             @endif
                         @endhasAccess
                     @endif
@@ -137,10 +142,15 @@
                 
                 {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                 @hasAccess('pr')
-                    @if (request()->routeIs('pr.*'))
-                        <x-responsive-nav-link href="#" class="text-base lg:text-lg cursor-not-allowed opacity-50">
-                            {{ __('Coming Soon') }}
+                    @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*'))
+                        <x-responsive-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
+                            {{ __('Purchase Request') }}
                         </x-responsive-nav-link>
+                        @if (Auth::user()->divisi === 'FAT' && in_array(Auth::user()->level, ['manager', 'spv']))
+                            <x-responsive-nav-link :href="route('pr-categories.index')" :active="request()->routeIs('pr-categories.*')" class="text-base lg:text-lg">
+                                {{ __('Configuration') }}
+                            </x-responsive-nav-link>
+                        @endif
                     @endif
                 @endhasAccess
             @endif

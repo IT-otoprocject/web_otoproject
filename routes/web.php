@@ -149,6 +149,12 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::post('purchase-request/{purchaseRequest}/approve', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
     Route::post('purchase-request/{purchaseRequest}/reject', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'reject'])->name('purchase-request.reject');
     Route::post('purchase-request/{purchaseRequest}/update-status', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'updateStatus'])->name('purchase-request.update-status');
+    Route::post('purchase-request/{purchaseRequest}/add-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'addAttachment'])->name('purchase-request.add-attachment');
+    Route::delete('purchase-request/{purchaseRequest}/delete-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'deleteAttachment'])->name('purchase-request.delete-attachment');
+    
+    // Routes untuk PR Categories (hanya FAT manager dan SPV)
+    Route::resource('pr-categories', App\Http\Controllers\Access_PR\PrCategoryController::class);
+    Route::post('pr-categories/{prCategory}/toggle-status', [App\Http\Controllers\Access_PR\PrCategoryController::class, 'toggleStatus'])->name('pr-categories.toggle-status');
 });
 
 require __DIR__ . '/auth.php';

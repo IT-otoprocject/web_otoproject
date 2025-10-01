@@ -23,12 +23,12 @@ class PurchaseRequestController extends Controller
         // Admin dan purchasing bisa lihat semua PR
         if ($user->level === 'admin' || 
             ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']))) {
-            $purchaseRequests = PurchaseRequest::with(['user', 'items'])
+            $purchaseRequests = PurchaseRequest::with(['user', 'items', 'location', 'category'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
             // Untuk user lain, gunakan method helper untuk filter
-            $allPRs = PurchaseRequest::with(['user', 'items'])
+            $allPRs = PurchaseRequest::with(['user', 'items', 'location', 'category'])
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->filter(function($pr) use ($user) {
@@ -60,8 +60,11 @@ class PurchaseRequestController extends Controller
         
         // Get active PR categories
         $prCategories = \App\Models\Access_PR\PrCategory::active()->orderBy('name')->get();
+        
+        // Get active master locations
+        $masterLocations = \App\Models\MasterLocation::getActiveLocations();
 
-        return view('Access_PR.Purchase_Request.create', compact('approvalLevels', 'defaultApprovalFlow', 'prCategories'));
+        return view('Access_PR.Purchase_Request.create', compact('approvalLevels', 'defaultApprovalFlow', 'prCategories', 'masterLocations'));
     }
 
     public function store(Request $request)
@@ -70,7 +73,7 @@ class PurchaseRequestController extends Controller
             'category_id' => 'required|exists:pr_categories,id',
             'due_date' => 'nullable|date|after:today',
             'description' => 'required|string|max:1000',
-            'location' => 'required|in:HQ,BRANCH,OTHER',
+            'location_id' => 'required|exists:master_locations,id',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
@@ -92,8 +95,11 @@ class PurchaseRequestController extends Controller
             $category = \App\Models\Access_PR\PrCategory::findOrFail($request->category_id);
             $approvalFlow = $category->approval_rules;
 
-            // Generate PR Number
-            $prNumber = PurchaseRequest::generatePRNumber($request->location);
+            // Get location for PR number generation
+            $location = \App\Models\MasterLocation::findOrFail($request->location_id);
+
+            // Generate PR Number based on location code
+            $prNumber = PurchaseRequest::generatePRNumber($location->code);
             
             // Create Purchase Request
             $purchaseRequest = PurchaseRequest::create([
@@ -103,7 +109,7 @@ class PurchaseRequestController extends Controller
                 'request_date' => Carbon::now()->toDateString(),
                 'due_date' => $request->due_date,
                 'description' => $request->description,
-                'location' => $request->location,
+                'location_id' => $request->location_id,
                 'status' => 'SUBMITTED',
                 'approval_flow' => array_values($approvalFlow), // Reindex array
                 'approvals' => [],
@@ -156,7 +162,7 @@ class PurchaseRequestController extends Controller
 
     public function show(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['user', 'items', 'statusUpdates.updatedBy']);
+        $purchaseRequest->load(['user', 'items', 'statusUpdates.updatedBy', 'location', 'category']);
         
         // Check authorization menggunakan method helper dari model
         $user = Auth::user();
@@ -325,10 +331,14 @@ class PurchaseRequestController extends Controller
         }
 
         $approvalLevels = PurchaseRequest::getAvailableApprovalLevels();
+        
+        // Get PR categories and Master Locations
+        $prCategories = \App\Models\Access_PR\PrCategory::getActiveCategories();
+        $masterLocations = \App\Models\MasterLocation::getActiveLocations();
 
         $purchaseRequest->load('items');
 
-        return view('Access_PR.Purchase_Request.edit', compact('purchaseRequest', 'approvalLevels'));
+        return view('Access_PR.Purchase_Request.edit', compact('purchaseRequest', 'approvalLevels', 'prCategories', 'masterLocations'));
     }
 
     public function update(Request $request, PurchaseRequest $purchaseRequest)
@@ -341,9 +351,8 @@ class PurchaseRequestController extends Controller
         $request->validate([
             'due_date' => 'nullable|date|after:today',
             'description' => 'required|string|max:1000',
-            'location' => 'required|in:HQ,BRANCH,OTHER',
-            'approval_flow' => 'required|array|min:1',
-            'approval_flow.*' => 'required|string|in:manager,spv,headstore,ga,finance_dept,ceo,cfo',
+            'location_id' => 'required|exists:master_locations,id',
+            'category_id' => 'required|exists:pr_categories,id',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
@@ -358,8 +367,8 @@ class PurchaseRequestController extends Controller
             $purchaseRequest->update([
                 'due_date' => $request->due_date,
                 'description' => $request->description,
-                'location' => $request->location,
-                'approval_flow' => $request->approval_flow,
+                'location_id' => $request->location_id,
+                'category_id' => $request->category_id,
                 'notes' => $request->notes
             ]);
 

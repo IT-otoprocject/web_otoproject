@@ -12,16 +12,8 @@ class PrCategoryController extends Controller
 {
     public function __construct()
     {
-        // Hanya FAT manager dan SPV yang bisa akses
-        $this->middleware(function ($request, $next) {
-            $user = Auth::user();
-            
-            if (!($user->divisi === 'FAT' && in_array($user->level, ['manager', 'spv']))) {
-                abort(403, 'Unauthorized. Hanya FAT Manager dan SPV yang dapat mengakses Rules Kategori PR.');
-            }
-            
-            return $next($request);
-        });
+        // Apply system access middleware for PR categories
+        $this->middleware('system_access:pr_categories');
     }
 
     /**

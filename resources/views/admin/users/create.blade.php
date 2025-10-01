@@ -196,7 +196,7 @@
                         <div class="mb-6">
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Quick presets:</p>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" onclick="setAccess(['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'spk_garage', 'pr', 'pr_categories', 'master_location', 'reports', 'users', 'settings'])" 
                                     class="px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 text-sm rounded-full transition-colors">
                                     All Access
                                 </button>
@@ -208,7 +208,7 @@
                                     class="px-3 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 text-green-800 dark:text-green-200 text-sm rounded-full transition-colors">
                                     SPK Only
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'reports'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'pr_categories', 'master_location', 'reports'])" 
                                     class="px-3 py-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm rounded-full transition-colors">
                                     PR Only
                                 </button>

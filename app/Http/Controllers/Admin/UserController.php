@@ -152,6 +152,8 @@ class UserController extends Controller
             'dashboard' => 'Dashboard',
             'user_management' => 'User Management',
             'pr' => 'Purchase Request',
+            'pr_categories' => 'Rules Kategori PR',
+            'master_location' => 'Master Location',
             'spk_management' => 'SPK Management', 
             'inventory' => 'Inventory',
             'reports' => 'Reports',

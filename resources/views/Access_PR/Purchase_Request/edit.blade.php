@@ -57,14 +57,31 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <label for="location" class="form-label">Lokasi <span class="text-danger">*</span></label>
-                                            <select name="location" id="location" class="form-select @error('location') is-invalid @enderror" required>
+                                            <label for="location_id" class="form-label">Lokasi <span class="text-danger">*</span></label>
+                                            <select name="location_id" id="location_id" class="form-select @error('location_id') is-invalid @enderror" required>
                                                 <option value="">Pilih Lokasi</option>
-                                                <option value="HQ" {{ (old('location', $purchaseRequest->location) === 'HQ') ? 'selected' : '' }}>HQ</option>
-                                                <option value="BRANCH" {{ (old('location', $purchaseRequest->location) === 'BRANCH') ? 'selected' : '' }}>Branch</option>
-                                                <option value="OTHER" {{ (old('location', $purchaseRequest->location) === 'OTHER') ? 'selected' : '' }}>Other</option>
+                                                @foreach($masterLocations as $location)
+                                                    <option value="{{ $location->id }}" {{ (old('location_id', $purchaseRequest->location_id) == $location->id) ? 'selected' : '' }}>
+                                                        {{ $location->name }} ({{ $location->code }})
+                                                    </option>
+                                                @endforeach
                                             </select>
-                                            @error('location')
+                                            @error('location_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="category_id" class="form-label">Kategori PR <span class="text-danger">*</span></label>
+                                            <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
+                                                <option value="">Pilih Kategori</option>
+                                                @foreach($prCategories as $category)
+                                                    <option value="{{ $category->id }}" {{ (old('category_id', $purchaseRequest->category_id) == $category->id) ? 'selected' : '' }}>
+                                                        {{ $category->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('category_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>

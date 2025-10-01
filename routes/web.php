@@ -155,6 +155,11 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     // Routes untuk PR Categories (hanya FAT manager dan SPV)
     Route::resource('pr-categories', App\Http\Controllers\Access_PR\PrCategoryController::class);
     Route::post('pr-categories/{prCategory}/toggle-status', [App\Http\Controllers\Access_PR\PrCategoryController::class, 'toggleStatus'])->name('pr-categories.toggle-status');
+    
+    // Routes untuk Master Location dalam PR Module
+    Route::resource('master-locations', App\Http\Controllers\Access_PR\MasterLocationController::class);
+    Route::post('master-locations/{masterLocation}/toggle-status', [App\Http\Controllers\Access_PR\MasterLocationController::class, 'toggleStatus'])->name('master-locations.toggle-status');
+    Route::get('api/master-locations', [App\Http\Controllers\Access_PR\MasterLocationController::class, 'getLocations'])->name('api.master-locations');
 });
 
 require __DIR__ . '/auth.php';

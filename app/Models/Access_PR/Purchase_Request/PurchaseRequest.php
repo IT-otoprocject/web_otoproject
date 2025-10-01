@@ -18,7 +18,7 @@ class PurchaseRequest extends Model
         'request_date',
         'due_date',
         'description',
-        'location',
+        'location_id',
         'status',
         'approval_flow',
         'approvals',
@@ -117,6 +117,18 @@ class PurchaseRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Relationship dengan PR Category
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Access_PR\PrCategory::class, 'category_id');
+    }
+
+    // Relationship dengan Master Location
+    public function location()
+    {
+        return $this->belongsTo(\App\Models\MasterLocation::class, 'location_id');
+    }
+
     // Relationship dengan Purchase Request Items
     public function items()
     {
@@ -127,12 +139,6 @@ class PurchaseRequest extends Model
     public function statusUpdates()
     {
         return $this->hasMany(PurchaseRequestStatusUpdate::class);
-    }
-
-    // Relationship dengan PR Category
-    public function category()
-    {
-        return $this->belongsTo(\App\Models\Access_PR\PrCategory::class, 'category_id');
     }
 
     // Generate PR Number dengan format PO/DDMMYY1

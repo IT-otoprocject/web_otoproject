@@ -41,14 +41,53 @@
                         
                         {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                         @hasAccess('pr')
-                            @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*'))
+                            @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*'))
                                 <x-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
                                     {{ __('Purchase Request') }}
                                 </x-nav-link>
-                                @if (Auth::user()->divisi === 'FAT' && in_array(Auth::user()->level, ['manager', 'spv']))
-                                    <x-nav-link :href="route('pr-categories.index')" :active="request()->routeIs('pr-categories.*')" class="text-base lg:text-lg">
-                                        {{ __('Configuration') }}
-                                    </x-nav-link>
+                                
+                                {{-- Configuration Dropdown Menu - muncul jika user punya akses ke salah satu konfigurasi --}}
+                                @php
+                                    $canAccessPrCategories = Auth::user()->hasAccess('pr_categories');
+                                    $canAccessMasterLocation = Auth::user()->hasAccess('master_location');
+                                    $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation;
+                                @endphp
+                                
+                                @if ($showConfiguration)
+                                    <div class="relative">
+                                        <x-dropdown align="left" width="48">
+                                            <x-slot name="trigger">
+                                                <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none 
+                                                    {{ request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*') 
+                                                        ? 'border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 focus:border-indigo-700' 
+                                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700' 
+                                                    }} text-base lg:text-lg">
+                                                    {{ __('Configuration') }}
+                                                    <div class="ms-1">
+                                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 0 010-1.414z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                </button>
+                                            </x-slot>
+
+                                            <x-slot name="content">
+                                                @if ($canAccessPrCategories)
+                                                    <x-dropdown-link :href="route('pr-categories.index')" class="flex items-center">
+                                                        <i class="fas fa-tags mr-2 text-blue-500"></i>
+                                                        {{ __('Rules Kategori PR') }}
+                                                    </x-dropdown-link>
+                                                @endif
+                                                
+                                                @if ($canAccessMasterLocation)
+                                                    <x-dropdown-link :href="route('master-locations.index')" class="flex items-center">
+                                                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                                                        {{ __('Master Location') }}
+                                                    </x-dropdown-link>
+                                                @endif
+                                            </x-slot>
+                                        </x-dropdown>
+                                    </div>
                                 @endif
                             @endif
                         @endhasAccess
@@ -142,14 +181,36 @@
                 
                 {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                 @hasAccess('pr')
-                    @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*'))
+                    @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*'))
                         <x-responsive-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
                             {{ __('Purchase Request') }}
                         </x-responsive-nav-link>
-                        @if (Auth::user()->divisi === 'FAT' && in_array(Auth::user()->level, ['manager', 'spv']))
-                            <x-responsive-nav-link :href="route('pr-categories.index')" :active="request()->routeIs('pr-categories.*')" class="text-base lg:text-lg">
-                                {{ __('Configuration') }}
-                            </x-responsive-nav-link>
+                        
+                        {{-- Configuration submenu for mobile --}}
+                        @php
+                            $canAccessPrCategories = Auth::user()->hasAccess('pr_categories');
+                            $canAccessMasterLocation = Auth::user()->hasAccess('master_location');
+                            $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation;
+                        @endphp
+                        
+                        @if ($showConfiguration)
+                            <div class="pl-4 border-l-2 border-gray-300 dark:border-gray-700 ml-4">
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 py-2">Configuration</div>
+                                
+                                @if ($canAccessPrCategories)
+                                    <x-responsive-nav-link :href="route('pr-categories.index')" :active="request()->routeIs('pr-categories.*')" class="text-sm pl-4">
+                                        <i class="fas fa-tags mr-2 text-blue-500"></i>
+                                        {{ __('Rules Kategori PR') }}
+                                    </x-responsive-nav-link>
+                                @endif
+                                
+                                @if ($canAccessMasterLocation)
+                                    <x-responsive-nav-link :href="route('master-locations.index')" :active="request()->routeIs('master-locations.*')" class="text-sm pl-4">
+                                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                                        {{ __('Master Location') }}
+                                    </x-responsive-nav-link>
+                                @endif
+                            </div>
                         @endif
                     @endif
                 @endhasAccess

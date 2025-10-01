@@ -170,14 +170,14 @@
                         <div class="border-t border-green-200 dark:border-green-800 pt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick Access Presets</label>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" onclick="setAccess(['dashboard', 'user_management', 'pr', 'spk_management', 'inventory', 'reports', 'pr_reports', 'spk_reports', 'inventory_reports', 'settings'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'user_management', 'pr', 'pr_categories', 'master_location', 'spk_management', 'inventory', 'reports', 'pr_reports', 'spk_reports', 'inventory_reports', 'settings'])" 
                                     class="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                     </svg>
                                     Admin Access
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'spk_management', 'reports', 'pr_reports', 'spk_reports'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'pr_categories', 'master_location', 'spk_management', 'reports', 'pr_reports', 'spk_reports'])" 
                                     class="px-3 py-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
@@ -191,7 +191,7 @@
                                     </svg>
                                     SPK Only
                                 </button>
-                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'pr_reports'])" 
+                                <button type="button" onclick="setAccess(['dashboard', 'pr', 'pr_categories', 'master_location', 'pr_reports'])" 
                                     class="px-3 py-2 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-800 dark:text-yellow-200 rounded-lg text-xs font-medium transition-colors flex items-center">
                                     <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>

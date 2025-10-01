@@ -64,3 +64,27 @@ if (!function_exists('can_access_pr')) {
         return user_has_access('pr');
     }
 }
+
+if (!function_exists('can_access_master_location')) {
+    /**
+     * Check if current user can access Master Location
+     *
+     * @return bool
+     */
+    function can_access_master_location()
+    {
+        return user_has_access('master_location');
+    }
+}
+
+if (!function_exists('can_access_pr_categories')) {
+    /**
+     * Check if current user can access PR Categories
+     *
+     * @return bool
+     */
+    function can_access_pr_categories()
+    {
+        return user_has_access('pr_categories');
+    }
+}

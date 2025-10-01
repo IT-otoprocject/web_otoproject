@@ -91,19 +91,21 @@
                                 </h3>
                                 <div class="space-y-4">
                                     <div>
-                                        <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label for="location_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Lokasi <span class="text-red-500">*</span>
                                         </label>
-                                        <select name="location" 
-                                                id="location" 
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('location') border-red-500 @enderror" 
+                                        <select name="location_id" 
+                                                id="location_id" 
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('location_id') border-red-500 @enderror" 
                                                 required>
                                             <option value="">Pilih Lokasi</option>
-                                            <option value="HQ" {{ old('location') === 'HQ' ? 'selected' : '' }}>HQ</option>
-                                            <option value="BRANCH" {{ old('location') === 'BRANCH' ? 'selected' : '' }}>Branch</option>
-                                            <option value="OTHER" {{ old('location') === 'OTHER' ? 'selected' : '' }}>Other</option>
+                                            @foreach($masterLocations as $location)
+                                                <option value="{{ $location->id }}" {{ old('location_id') == $location->id ? 'selected' : '' }}>
+                                                    {{ $location->name }} ({{ $location->code }}) - {{ $location->company }}
+                                                </option>
+                                            @endforeach
                                         </select>
-                                        @error('location')
+                                        @error('location_id')
                                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -518,7 +520,7 @@
     <!-- Scripts -->
     <script>
         let itemIndex = 1;
-        const approvalLevels = @json($approvalLevels);
+        const approvalLevels = @json($approvalLevels ?? []);
 
         // Debug form submission
         document.addEventListener('DOMContentLoaded', function() {

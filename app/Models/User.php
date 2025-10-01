@@ -128,7 +128,7 @@ class User extends Authenticatable
     {
         // Admin has access to all modules
         if ($this->level === 'admin') {
-            return ['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings'];
+            return ['dashboard', 'spk_garage', 'pr', 'reports', 'users', 'settings', 'master_location'];
         }
         
         return $this->system_access ?? [];
@@ -194,8 +194,8 @@ class User extends Authenticatable
     public function getDefaultAccessByLevel()
     {
         return match($this->level) {
-            'admin' => ['spk_garage', 'pr', 'dashboard', 'reports', 'users', 'settings'],
-            'manager' => ['spk_garage', 'pr', 'dashboard', 'reports'],
+            'admin' => ['spk_garage', 'pr', 'dashboard', 'reports', 'users', 'settings', 'master_location'],
+            'manager' => ['spk_garage', 'pr', 'dashboard', 'reports', 'master_location'],
             'kasir' => ['spk_garage', 'dashboard'],
             'mekanik' => ['spk_garage', 'dashboard'],
             'pr_user' => ['pr', 'dashboard'],

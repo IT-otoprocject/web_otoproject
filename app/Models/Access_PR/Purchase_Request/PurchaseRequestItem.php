@@ -15,12 +15,36 @@ class PurchaseRequestItem extends Model
         'quantity',
         'unit',
         'estimated_price',
-        'notes'
+        'notes',
+        'item_status',
+        'purchasing_notes'
     ];
 
     protected $casts = [
         'estimated_price' => 'decimal:2'
     ];
+
+    // Get item status labels
+    public static function getItemStatusLabels()
+    {
+        return [
+            'PENDING' => 'Pending',
+            'VENDOR_SEARCH' => 'Pencarian Vendor',
+            'PRICE_COMPARISON' => 'Perbandingan Harga',
+            'PO_CREATED' => 'PO ke Vendor',
+            'GOODS_RECEIVED' => 'Barang Diterima',
+            'GOODS_RETURNED' => 'Barang Dikembalikan',
+            'TERSEDIA_DI_GA' => 'Tersedia di GA',
+            'REJECTED' => 'Ditolak',
+            'CLOSED' => 'Selesai'
+        ];
+    }
+
+    public function getItemStatusLabelAttribute()
+    {
+        $labels = self::getItemStatusLabels();
+        return $labels[$this->item_status] ?? $this->item_status;
+    }
 
     // Relationship dengan Purchase Request
     public function purchaseRequest()

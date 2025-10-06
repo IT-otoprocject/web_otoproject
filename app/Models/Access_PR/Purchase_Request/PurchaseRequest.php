@@ -95,6 +95,15 @@ class PurchaseRequest extends Model
                               ->where('name', 'LIKE', '%CFO%')
                               ->get();
                 }
+            ],
+            'tersedia_di_ga' => [
+                'name' => 'Tersedia di GA',
+                'description' => 'Barang sudah tersedia di GA',
+                'get_approvers' => function($pr) {
+                    return User::where('divisi', 'HCGA')
+                              ->whereIn('level', ['manager', 'spv', 'staff'])
+                              ->get();
+                }
             ]
         ];
     }
@@ -106,6 +115,7 @@ class PurchaseRequest extends Model
             'dept_head' => 'Department Head',
             'ga' => 'GA',
             'finance_dept' => 'Finance Department',
+            'tersedia_di_ga' => 'Tersedia di GA',
             'ceo' => 'CEO',
             'cfo' => 'CFO',
         ];
@@ -404,5 +414,24 @@ class PurchaseRequest extends Model
         }
         
         return false;
+    }
+
+    // Check if all items are in final status (completed, rejected, or available at GA)
+    public function areAllItemsCompleted()
+    {
+        // Final statuses: items that don't need further processing
+        $finalStatuses = ['CLOSED', 'GOODS_RECEIVED', 'REJECTED', 'TERSEDIA_DI_GA'];
+        
+        $incompleteItems = $this->items()
+            ->whereNotIn('item_status', $finalStatuses)
+            ->count();
+            
+        return $incompleteItems === 0;
+    }
+
+    // Check if PR should be auto-completed
+    public function shouldAutoComplete()
+    {
+        return $this->status === 'APPROVED' && $this->areAllItemsCompleted();
     }
 }

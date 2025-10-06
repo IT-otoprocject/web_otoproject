@@ -38,12 +38,14 @@ class PurchaseRequestStatusUpdate extends Model
     public static function getUpdateTypeLabels()
     {
         return [
+            'ITEMS_PROCESSED' => 'Proses Items Purchasing',
             'VENDOR_SEARCH' => 'Pencarian Vendor',
             'PRICE_COMPARISON' => 'Perbandingan Harga',
             'PO_CREATED' => 'PO ke Vendor',
             'GOODS_RECEIVED' => 'Barang Diterima',
             'GOODS_RETURNED' => 'Barang Dikembalikan',
-            'CLOSED' => 'Closed'
+            'TERSEDIA_DI_GA' => 'Tersedia di GA',
+            'CLOSED' => 'Selesai'
         ];
     }
 

@@ -256,33 +256,48 @@
                         </div>
 
                         <!-- Items -->
-                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
-                                    <i class="fas fa-boxes mr-2 text-orange-500"></i>
-                                    Item yang Diminta <span class="text-red-500 ml-1">*</span>
-                                </h3>
-                                <button type="button" 
-                                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors duration-200"
-                                        onclick="addItem()">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Tambah Item
-                                </button>
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            <!-- Header Section -->
+                            <div class="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-b border-gray-200 dark:border-gray-600 p-6 rounded-t-lg">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                                            <i class="fas fa-boxes mr-2 text-orange-500"></i>
+                                            Item yang Diminta <span class="text-red-500 ml-1">*</span>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Masukkan detail item yang diperlukan beserta estimasi harga satuan
+                                        </p>
+                                    </div>
+                                    <button type="button" 
+                                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"
+                                            onclick="addItem()">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Tambah Item
+                                    </button>
+                                </div>
+                                
+                                <!-- Total Estimasi -->
+                                <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mt-4">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                        <div>
+                                            <h4 class="text-sm font-medium text-yellow-900 dark:text-yellow-100 flex items-center">
+                                                <i class="fas fa-calculator mr-2"></i>
+                                                Total Estimasi Harga:
+                                            </h4>
+                                            <!-- <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                                CEO approval diperlukan jika total > Rp 5.000.000
+                                            </p> -->
+                                        </div>
+                                        <div class="text-xl font-bold text-yellow-900 dark:text-yellow-100" id="totalEstimation">
+                                            Rp 0
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <!-- Total Estimasi -->
-                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-4">
-                                <h4 class="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">
-                                    <i class="fas fa-calculator mr-1"></i>
-                                    Total Estimasi Harga:
-                                </h4>
-                                <div class="text-lg font-bold text-yellow-900 dark:text-yellow-100" id="totalEstimation">
-                                    Rp 0
-                                </div>
-                                <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                                    Total akan dihitung otomatis berdasarkan estimasi harga item. CEO approval dapat dipilih jika total > Rp 5.000.000
-                                </p>
-                            </div>
+                            <!-- Items Content -->
+                            <div class="p-6">
                             
                             <div id="itemsContainer" class="space-y-4">
                                 @if(old('items'))
@@ -310,7 +325,8 @@
                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.quantity') border-red-500 @enderror" 
                                                            min="1" 
                                                            required
-                                                           value="{{ $item['quantity'] ?? '' }}">
+                                                           value="{{ $item['quantity'] ?? '' }}"
+                                                           onchange="calculateTotal()">
                                                     @error('items.'.$index.'.quantity')
                                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                                     @enderror
@@ -327,7 +343,7 @@
                                                     @enderror
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga</label>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
                                                     <input type="number" 
                                                            name="items[{{ $index }}][estimated_price]" 
                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.estimated_price') border-red-500 @enderror" 
@@ -380,7 +396,8 @@
                                                        name="items[0][quantity]" 
                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                                        min="1" 
-                                                       required>
+                                                       required
+                                                       onchange="calculateTotal()">
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Satuan</label>
@@ -390,12 +407,12 @@
                                                        placeholder="pcs, kg, dll">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga</label>
-                                                <input type="number" 
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
+                                                <input type="text" 
                                                        name="items[0][estimated_price]" 
-                                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                                       step="0.01" 
-                                                       min="0"
+                                                       class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                       placeholder="0"
+                                                       oninput="formatPriceInput(this)"
                                                        onchange="calculateTotal()">
                                             </div>
                                             <div class="flex items-end">
@@ -417,8 +434,9 @@
                                 @endif
                             </div>
                             @error('items')
-                                <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
+                                <p class="mt-4 text-sm text-red-500">{{ $message }}</p>
                             @enderror
+                            </div>
                         </div>
 
                         <!-- Submit Buttons -->
@@ -537,6 +555,16 @@
             form.addEventListener('submit', function(e) {
                 console.log('Form submission started');
                 
+                // Convert formatted prices back to plain numbers before submission
+                const priceInputs = document.querySelectorAll('.price-input');
+                priceInputs.forEach(function(input) {
+                    if (input.value) {
+                        // Remove thousand separators and convert to plain number
+                        const numericValue = input.value.replace(/[.,]/g, '');
+                        input.value = numericValue;
+                    }
+                });
+                
                 // Add more debugging
                 const formData = new FormData(this);
                 console.log('Form data:');
@@ -614,7 +642,8 @@
                                    name="items[${itemIndex}][quantity]" 
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                    min="1" 
-                                   required>
+                                   required
+                                   onchange="calculateTotal()">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Satuan</label>
@@ -624,12 +653,12 @@
                                    placeholder="pcs, kg, dll">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga</label>
-                            <input type="number" 
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
+                            <input type="text" 
                                    name="items[${itemIndex}][estimated_price]" 
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                   step="0.01" 
-                                   min="0"
+                                   class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   placeholder="0"
+                                   oninput="formatPriceInput(this)"
                                    onchange="calculateTotal()">
                         </div>
                         <div class="flex items-end">
@@ -669,11 +698,22 @@
         // Calculate total estimation and update CEO approval requirement
         function calculateTotal() {
             let total = 0;
-            const estimatedPriceInputs = document.querySelectorAll('input[name*="[estimated_price]"]');
+            const itemContainers = document.querySelectorAll('.item-container, .space-y-6 > div:not(.bg-gray-50)');
             
-            estimatedPriceInputs.forEach(function(input) {
-                const value = parseFloat(input.value) || 0;
-                total += value;
+            // Find all item rows/containers
+            const allItems = document.querySelectorAll('input[name*="[quantity]"]');
+            
+            allItems.forEach(function(quantityInput) {
+                const quantity = parseFloat(quantityInput.value) || 0;
+                // Find corresponding price input
+                const itemIndex = quantityInput.name.match(/\[(\d+)\]/)[1];
+                const priceInput = document.querySelector(`input[name="items[${itemIndex}][estimated_price]"]`);
+                // Remove thousand separators before parsing
+                const priceValue = priceInput ? priceInput.value.replace(/[.,]/g, '') : '0';
+                const unitPrice = parseFloat(priceValue) || 0;
+                
+                const itemTotal = quantity * unitPrice;
+                total += itemTotal;
             });
             
             // Update total display
@@ -697,6 +737,22 @@
                     // Don't auto-check CEO, let user decide
                 }
             }
+        }
+
+        // Format price input with thousand separators
+        function formatPriceInput(input) {
+            // Remove all non-numeric characters except decimal point
+            let value = input.value.replace(/[^\d]/g, '');
+            
+            // Convert to number and format with thousand separators
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+            
+            // Add thousand separators
+            const formattedValue = parseInt(value).toLocaleString('id-ID');
+            input.value = formattedValue;
         }
 
         // Validate file size and type

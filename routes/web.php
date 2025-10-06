@@ -149,6 +149,9 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::post('purchase-request/{purchaseRequest}/approve', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
     Route::post('purchase-request/{purchaseRequest}/reject', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'reject'])->name('purchase-request.reject');
     Route::post('purchase-request/{purchaseRequest}/update-status', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'updateStatus'])->name('purchase-request.update-status');
+    Route::post('purchase-request/{purchaseRequest}/bulk-update-item-status', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'bulkUpdateItemStatus'])->name('purchase-request.bulk-update-item-status');
+    Route::post('purchase-request/{purchaseRequest}/ga-approve-with-items', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'gaApproveWithItemSelection'])->name('purchase-request.ga-approve-with-items');
+    Route::post('purchase-request/{purchaseRequest}/purchasing-partial-approval', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'purchasingPartialApproval'])->name('purchase-request.purchasing-partial-approval');
     Route::post('purchase-request/{purchaseRequest}/add-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'addAttachment'])->name('purchase-request.add-attachment');
     Route::delete('purchase-request/{purchaseRequest}/delete-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'deleteAttachment'])->name('purchase-request.delete-attachment');
     

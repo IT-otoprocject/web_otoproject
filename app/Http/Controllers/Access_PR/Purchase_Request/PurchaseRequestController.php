@@ -86,9 +86,11 @@ class PurchaseRequestController extends Controller
 
         DB::beginTransaction();
         try {
-            // Calculate total estimated price
+            // Calculate total estimated price (quantity × unit price for each item)
             $totalEstimatedPrice = collect($request->items)->sum(function($item) {
-                return (float)($item['estimated_price'] ?? 0);
+                $quantity = (float)($item['quantity'] ?? 0);
+                $unitPrice = (float)($item['estimated_price'] ?? 0);
+                return $quantity * $unitPrice;
             });
 
             // Get approval flow from selected category
@@ -291,7 +293,7 @@ class PurchaseRequestController extends Controller
     public function updateStatus(Request $request, PurchaseRequest $purchaseRequest)
     {
         $request->validate([
-            'update_type' => 'required|in:VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,CLOSED',
+            'update_type' => 'required|in:ITEMS_PROCESSED,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,CLOSED',
             'description' => 'required|string|max:1000',
             'data' => 'nullable|array'
         ]);
@@ -363,13 +365,21 @@ class PurchaseRequestController extends Controller
 
         DB::beginTransaction();
         try {
+            // Calculate total estimated price (quantity × unit price for each item)
+            $totalEstimatedPrice = collect($request->items)->sum(function($item) {
+                $quantity = (float)($item['quantity'] ?? 0);
+                $unitPrice = (float)($item['estimated_price'] ?? 0);
+                return $quantity * $unitPrice;
+            });
+
             // Update Purchase Request
             $purchaseRequest->update([
                 'due_date' => $request->due_date,
                 'description' => $request->description,
                 'location_id' => $request->location_id,
                 'category_id' => $request->category_id,
-                'notes' => $request->notes
+                'notes' => $request->notes,
+                'total_estimated_price' => $totalEstimatedPrice
             ]);
 
             // Delete existing items and create new ones
@@ -519,5 +529,525 @@ class PurchaseRequestController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'File berhasil dihapus.');
+    }
+
+    public function bulkUpdateItemStatus(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $request->validate([
+            'item_ids' => 'required|array',
+            'item_ids.*' => 'exists:purchase_request_items,id',
+            'item_status' => 'required|in:PENDING,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,TERSEDIA_DI_GA,CLOSED',
+            'purchasing_notes' => 'nullable|string|max:1000'
+        ]);
+
+        $user = Auth::user();
+        
+        // Only purchasing team can update item status (except for items with status "TERSEDIA_DI_GA")
+        if (!($user->level === 'admin' || 
+              ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff'])))) {
+            return back()->with('error', 'Hanya tim Purchasing yang dapat mengupdate status item.');
+        }
+
+        // Check if PR is fully approved
+        if (!$purchaseRequest->isFullyApproved() || $purchaseRequest->status !== 'APPROVED') {
+            return back()->with('error', 'PR harus fully approved sebelum dapat mengupdate status item.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Get items that can be updated (exclude completed/final status items)
+            $items = PurchaseRequestItem::where('purchase_request_id', $purchaseRequest->id)
+                ->whereIn('id', $request->item_ids)
+                ->whereNotIn('item_status', ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'])
+                ->get();
+
+            if ($items->isEmpty()) {
+                return back()->with('error', 'Tidak ada item yang bisa diupdate. Item yang dipilih mungkin sudah selesai, tersedia di GA, atau sudah final.');
+            }
+
+            // Update selected items
+            foreach ($items as $item) {
+                $item->update([
+                    'item_status' => $request->item_status,
+                    'purchasing_notes' => $request->purchasing_notes
+                ]);
+            }
+
+            // Create detailed description for bulk update
+            $itemDescriptions = $items->map(function($item) {
+                return "• {$item->description} (Qty: {$item->quantity})";
+            })->join("\n");
+            
+            $statusLabel = PurchaseRequestItem::getItemStatusLabels()[$request->item_status] ?? $request->item_status;
+            
+            $description = "Bulk update status menjadi \"{$statusLabel}\" untuk " . count($items) . " item:\n" . $itemDescriptions;
+            if ($request->purchasing_notes) {
+                $description .= "\n\nCatatan Purchasing: " . $request->purchasing_notes;
+            }
+
+            // Add status update log
+            PurchaseRequestStatusUpdate::create([
+                'purchase_request_id' => $purchaseRequest->id,
+                'update_type' => $request->item_status,
+                'description' => $description,
+                'data' => [
+                    'item_ids' => $items->pluck('id')->toArray(),
+                    'item_descriptions' => $items->pluck('description')->toArray(),
+                    'purchasing_notes' => $request->purchasing_notes,
+                    'bulk_update' => true,
+                    'updated_items_count' => count($items)
+                ],
+                'updated_by' => $user->id
+            ]);
+
+            // Check if PR should be auto-completed
+            if ($purchaseRequest->shouldAutoComplete()) {
+                $purchaseRequest->update(['status' => 'COMPLETED']);
+                
+                // Add status update record for PR completion
+                PurchaseRequestStatusUpdate::create([
+                    'purchase_request_id' => $purchaseRequest->id,
+                    'update_type' => 'CLOSED',
+                    'description' => 'Purchase Request otomatis diselesaikan karena semua item telah selesai diproses atau tersedia di GA',
+                    'updated_by' => $user->id
+                ]);
+            }
+
+            DB::commit();
+            
+            // Refresh the purchase request to get updated items
+            $purchaseRequest->refresh();
+            $purchaseRequest->load(['items', 'statusUpdates']);
+            
+            return back()->with('success', 'Status item berhasil diupdate untuk ' . count($items) . ' item.');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal mengupdate status item: ' . $e->getMessage());
+        }
+    }
+
+    public function gaApproveWithItemSelection(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $request->validate([
+            'notes' => 'nullable|string|max:500',
+            'available_items' => 'nullable|array',
+            'available_items.*' => 'exists:purchase_request_items,id',
+            'available_quantities' => 'nullable|array',
+            'available_quantities.*' => 'nullable|integer|min:1'
+        ]);
+
+        $user = Auth::user();
+        
+        // Check if user is from GA and can approve
+        if (!($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']))) {
+            return back()->with('error', 'Hanya tim GA yang dapat melakukan approval ini.');
+        }
+
+        // Check if this is GA approval level
+        $currentApprovalLevel = $purchaseRequest->getCurrentApprovalLevel();
+        if ($currentApprovalLevel !== 'ga') {
+            return back()->with('error', 'Approval level saat ini bukan GA.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $approvals = $purchaseRequest->approvals ?? [];
+            
+            // Handle item selection if any items are available at GA
+            if (!empty($request->available_items)) {
+                $availableItems = PurchaseRequestItem::whereIn('id', $request->available_items)
+                    ->where('purchase_request_id', $purchaseRequest->id)
+                    ->get();
+
+                $availableQuantities = $request->available_quantities ?? [];
+                $splitItemsInfo = [];
+
+                foreach ($availableItems as $item) {
+                    $availableQty = $availableQuantities[$item->id] ?? $item->quantity;
+                    $availableQty = min($availableQty, $item->quantity); // Ensure not exceeding original quantity
+                    
+                    if ($availableQty == $item->quantity) {
+                        // Full quantity available - just update status
+                        $item->update([
+                            'item_status' => 'TERSEDIA_DI_GA',
+                            'purchasing_notes' => 'Barang tersedia di GA pada approval ' . now()->format('d/m/Y H:i')
+                        ]);
+                        
+                        $splitItemsInfo[] = [
+                            'description' => $item->description,  
+                            'available_qty' => $availableQty,
+                            'total_qty' => $item->quantity,
+                            'type' => 'full'
+                        ];
+                    } else {
+                        // Partial quantity - split the item
+                        $remainingQty = $item->quantity - $availableQty;
+                        
+                        // Update original item to available quantity and mark as available
+                        $item->update([
+                            'quantity' => $availableQty,
+                            'item_status' => 'TERSEDIA_DI_GA',
+                            'purchasing_notes' => 'Sebagian barang tersedia di GA (' . $availableQty . ' dari ' . ($availableQty + $remainingQty) . ') pada ' . now()->format('d/m/Y H:i')
+                        ]);
+                        
+                        // Create new item for remaining quantity
+                        PurchaseRequestItem::create([
+                            'purchase_request_id' => $purchaseRequest->id,
+                            'description' => $item->description,
+                            'quantity' => $remainingQty,
+                            'unit' => $item->unit,
+                            'estimated_price' => $item->estimated_price,
+                            'notes' => $item->notes . ' - Split dari item original',
+                            'item_status' => 'PENDING',
+                            'purchasing_notes' => 'Sisa dari split item untuk melanjutkan proses PR'
+                        ]);
+                        
+                        $splitItemsInfo[] = [
+                            'description' => $item->description,
+                            'available_qty' => $availableQty,
+                            'remaining_qty' => $remainingQty,
+                            'total_qty' => $availableQty + $remainingQty,
+                            'type' => 'partial'
+                        ];
+                    }
+                }
+
+                // Check if all items are now available at GA
+                $allItemsAvailable = $purchaseRequest->items()
+                    ->where('item_status', '!=', 'TERSEDIA_DI_GA')
+                    ->count() === 0;
+
+                if ($allItemsAvailable) {
+                    // All items available - complete the approval with "tersedia_di_ga" level
+                    $approvals['ga'] = [
+                        'approved' => true,
+                        'approved_at' => Carbon::now('Asia/Jakarta')->toISOString(),
+                        'approved_by' => $user->id,
+                        'approved_by_name' => $user->name,
+                        'approved_by_divisi' => $user->divisi,
+                        'approved_by_level' => $user->level,
+                        'notes' => $request->notes . ' - Semua barang tersedia di GA'
+                    ];
+
+                    // Add "tersedia_di_ga" as the final approval level
+                    $approvals['tersedia_di_ga'] = [
+                        'approved' => true,
+                        'approved_at' => Carbon::now('Asia/Jakarta')->toISOString(),
+                        'approved_by' => $user->id,
+                        'approved_by_name' => $user->name,
+                        'approved_by_divisi' => $user->divisi,
+                        'approved_by_level' => $user->level,
+                        'notes' => 'Semua barang tersedia di GA'
+                    ];
+
+                    // Set the approval flow to only include approved levels plus "tersedia_di_ga"
+                    $newApprovalFlow = ['tersedia_di_ga'];
+                    
+                    $purchaseRequest->update([
+                        'approvals' => $approvals,
+                        'status' => 'COMPLETED',
+                        'approval_flow' => $newApprovalFlow
+                    ]);
+
+                    // Prepare success message with item details
+                    $message = 'Semua barang tersedia di GA. PR status menjadi COMPLETED.';
+                    if (!empty($splitItemsInfo)) {
+                        $message .= ' Detail pemilihan: ';
+                        foreach ($splitItemsInfo as $info) {
+                            if ($info['type'] == 'full') {
+                                $message .= $info['description'] . ' (Qty: ' . $info['available_qty'] . ' - Full), ';
+                            } else {
+                                $message .= $info['description'] . ' (Qty: ' . $info['available_qty'] . ' dari ' . $info['total_qty'] . ' - Partial), ';
+                            }
+                        }
+                        $message = rtrim($message, ', ');
+                    }
+
+                    DB::commit();
+                    return back()->with('success', $message);
+                }
+            }
+
+            // Normal GA approval process
+            $approvals['ga'] = [
+                'approved' => true,
+                'approved_at' => Carbon::now('Asia/Jakarta')->toISOString(),
+                'approved_by' => $user->id,
+                'approved_by_name' => $user->name,
+                'approved_by_divisi' => $user->divisi,
+                'approved_by_level' => $user->level,
+                'notes' => $request->notes
+            ];
+
+            // Check if all levels are approved
+            $flow = $purchaseRequest->approval_flow;
+            $allApproved = true;
+            foreach ($flow as $level) {
+                if (!isset($approvals[$level]['approved']) || !$approvals[$level]['approved']) {
+                    $allApproved = false;
+                    break;
+                }
+            }
+
+            $newStatus = $allApproved ? 'APPROVED' : 'SUBMITTED';
+
+            $purchaseRequest->update([
+                'approvals' => $approvals,
+                'status' => $newStatus
+            ]);
+
+            // Prepare success message with item details if items were selected
+            $message = '';
+            if (!empty($splitItemsInfo)) {
+                $itemsMessage = ' Detail pemilihan: ';
+                foreach ($splitItemsInfo as $info) {
+                    if ($info['type'] == 'full') {
+                        $itemsMessage .= $info['description'] . ' (Qty: ' . $info['available_qty'] . ' - Full), ';
+                    } else {
+                        $itemsMessage .= $info['description'] . ' (Qty: ' . $info['available_qty'] . ' dari ' . $info['total_qty'] . ' - Partial), ';
+                    }
+                }
+                $itemsMessage = rtrim($itemsMessage, ', ');
+            } else {
+                $itemsMessage = '';
+            }
+
+            // Add status update record if items were processed
+            if (!empty($splitItemsInfo)) {
+                $itemsDescription = '';
+                foreach ($splitItemsInfo as $info) {
+                    if ($info['type'] == 'full') {
+                        $itemsDescription .= 'Item: ' . $info['description'] . ' qty: ' . $info['available_qty'] . ' tersedia di GA (Full), ';
+                    } else {
+                        $itemsDescription .= 'Item: ' . $info['description'] . ' qty: ' . $info['available_qty'] . ' tersedia di GA, sisa qty: ' . $info['remaining_qty'] . ' dibuat list baru (Partial), ';
+                    }
+                }
+                $itemsDescription = rtrim($itemsDescription, ', ');
+                
+                PurchaseRequestStatusUpdate::create([
+                    'purchase_request_id' => $purchaseRequest->id,
+                    'update_type' => 'TERSEDIA_DI_GA',
+                    'updated_by' => $user->id,
+                    'description' => $itemsDescription
+                ]);
+            }
+
+            DB::commit();
+            
+            if ($allApproved) {
+                $message = 'Purchase Request berhasil disetujui dan telah mencapai persetujuan final!' . $itemsMessage;
+                return back()->with('success', $message);
+            } else {
+                $message = 'Purchase Request berhasil disetujui. Menunggu persetujuan dari level berikutnya.' . $itemsMessage;
+                return back()->with('success', $message);
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal melakukan approval: ' . $e->getMessage());
+        }
+    }
+
+    public function purchasingPartialApproval(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $user = auth()->user();
+        
+        // Validasi user adalah purchasing dengan logic yang sama seperti show method
+        $canUpdateStatus = ($user->level === 'admin' || $user->level === 'ceo' || $user->level === 'cfo') || 
+                          ($user->divisi === 'PURCHASING' && 
+                           in_array($user->level, ['manager', 'spv', 'staff']) && 
+                           $purchaseRequest->isFullyApproved() && 
+                           $purchaseRequest->status === 'APPROVED');
+                           
+        if (!$canUpdateStatus) {
+            abort(403, 'Unauthorized. Hanya divisi Purchasing yang dapat memproses PR ini.');
+        }
+
+        // Validasi PR status harus APPROVED
+        if ($purchaseRequest->status !== 'APPROVED') {
+            return back()->with('error', 'Purchase Request harus dalam status APPROVED untuk diproses.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $user = auth()->user();
+            $actions = $request->actions ?? [];
+            $quantities = $request->quantities ?? [];
+            $reasons = $request->reasons ?? [];
+            $processedItemsInfo = [];
+            $hasProcessedItems = false;
+
+            foreach ($actions as $itemId => $action) {
+                if (empty($action)) continue;
+
+                $item = PurchaseRequestItem::where('id', $itemId)
+                    ->where('purchase_request_id', $purchaseRequest->id)
+                    ->whereNotIn('item_status', ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'])
+                    ->first();
+
+                if (!$item) continue; // Skip if item not found or already in final status
+
+                $hasProcessedItems = true;
+
+                switch ($action) {
+                    case 'approve':
+                        // Setujui full quantity - mulai dengan status VENDOR_SEARCH
+                        $item->update([
+                            'item_status' => 'VENDOR_SEARCH',
+                            'purchasing_notes' => 'Item disetujui purchasing dan mulai pencarian vendor pada ' . now()->format('d/m/Y H:i')
+                        ]);
+                        
+                        $processedItemsInfo[] = [
+                            'description' => $item->description,
+                            'action' => 'approve',
+                            'quantity' => $item->quantity,
+                            'type' => 'full'
+                        ];
+                        break;
+
+                    case 'partial':
+                        // Proses sebagian quantity
+                        $approvedQty = $quantities[$itemId] ?? 0;
+                        $approvedQty = min($approvedQty, $item->quantity);
+                        
+                        if ($approvedQty <= 0) {
+                            continue 2; // Skip item ini
+                        }
+
+                        if ($approvedQty == $item->quantity) {
+                            // Ternyata full quantity
+                            $item->update([
+                                'item_status' => 'VENDOR_SEARCH',
+                                'purchasing_notes' => 'Item disetujui purchasing dan mulai pencarian vendor pada ' . now()->format('d/m/Y H:i')
+                            ]);
+                            
+                            $processedItemsInfo[] = [
+                                'description' => $item->description,
+                                'action' => 'approve',
+                                'quantity' => $approvedQty,
+                                'type' => 'full'
+                            ];
+                        } else {
+                            // Partial quantity - split item
+                            $remainingQty = $item->quantity - $approvedQty;
+                            
+                            // Update original item untuk approved quantity
+                            $item->update([
+                                'quantity' => $approvedQty,
+                                'item_status' => 'VENDOR_SEARCH',
+                                'purchasing_notes' => 'Sebagian item disetujui (' . $approvedQty . ' dari ' . ($approvedQty + $remainingQty) . ') dan mulai pencarian vendor pada ' . now()->format('d/m/Y H:i')
+                            ]);
+                            
+                            // Create new item untuk remaining quantity
+                            PurchaseRequestItem::create([
+                                'purchase_request_id' => $purchaseRequest->id,
+                                'description' => $item->description,
+                                'quantity' => $remainingQty,
+                                'unit' => $item->unit,
+                                'estimated_price' => $item->estimated_price,
+                                'notes' => $item->notes . ' - Split dari item original',
+                                'item_status' => 'PENDING',
+                                'purchasing_notes' => 'Sisa quantity dari partial approval purchasing'
+                            ]);
+                            
+                            $processedItemsInfo[] = [
+                                'description' => $item->description,
+                                'action' => 'partial',
+                                'approved_qty' => $approvedQty,
+                                'remaining_qty' => $remainingQty,
+                                'total_qty' => $approvedQty + $remainingQty,
+                                'type' => 'partial'
+                            ];
+                        }
+                        break;
+
+                    case 'reject':
+                        // Tolak item
+                        $reason = $reasons[$itemId] ?? 'Tidak ada alasan';
+                        $item->update([
+                            'item_status' => 'REJECTED',
+                            'purchasing_notes' => 'Item ditolak: ' . $reason . ' (pada ' . now()->format('d/m/Y H:i') . ')'
+                        ]);
+                        
+                        $processedItemsInfo[] = [
+                            'description' => $item->description,
+                            'action' => 'reject',
+                            'quantity' => $item->quantity,
+                            'reason' => $reason,
+                            'type' => 'reject'
+                        ];
+                        break;
+                }
+            }
+
+            if (!$hasProcessedItems) {
+                DB::rollback();
+                return back()->with('error', 'Tidak ada item yang dipilih untuk diproses.');
+            }
+
+            // Add status update record
+            $itemsDescription = 'Purchasing memproses item dengan detail sebagai berikut: ';
+            $itemDetails = [];
+            
+            foreach ($processedItemsInfo as $info) {
+                if ($info['type'] == 'full') {
+                    $itemDetails[] = '• ' . $info['description'] . ' - Qty: ' . $info['quantity'] . ' (' . ($info['action'] == 'approve' ? 'Diproses (Full)' : ucfirst($info['action'])) . ')';
+                } elseif ($info['type'] == 'partial') {
+                    $itemDetails[] = '• ' . $info['description'] . ' - Qty: ' . $info['approved_qty'] . ' dari ' . $info['total_qty'] . ' (Diproses Sebagian, sisa ' . $info['remaining_qty'] . ' tetap pending)';
+                } else {
+                    $itemDetails[] = '• ' . $info['description'] . ' - Qty: ' . $info['quantity'] . ' (Ditolak' . (isset($info['reason']) ? ': ' . $info['reason'] : '') . ')';
+                }
+            }
+            
+            $itemsDescription .= implode('; ', $itemDetails);
+            
+            // Add general purchasing notes if provided
+            if ($request->purchasing_notes) {
+                $itemsDescription .= '. Catatan Purchasing: ' . $request->purchasing_notes;
+            }
+            
+            PurchaseRequestStatusUpdate::create([
+                'purchase_request_id' => $purchaseRequest->id,
+                'update_type' => 'ITEMS_PROCESSED',
+                'updated_by' => $user->id,
+                'description' => $itemsDescription
+            ]);
+
+            // Prepare success message
+            $message = 'Purchasing telah memproses item terpilih. Detail: ';
+            foreach ($processedItemsInfo as $info) {
+                if ($info['type'] == 'full') {
+                    $message .= $info['description'] . ' (' . ucfirst($info['action']) . ' - Qty: ' . $info['quantity'] . '), ';
+                } elseif ($info['type'] == 'partial') {
+                    $message .= $info['description'] . ' (Partial - Qty: ' . $info['approved_qty'] . ' dari ' . $info['total_qty'] . '), ';
+                } else {
+                    $message .= $info['description'] . ' (Ditolak), ';
+                }
+            }
+            $message = rtrim($message, ', ');
+
+            // Check if PR should be auto-completed after processing
+            if ($purchaseRequest->shouldAutoComplete()) {
+                $purchaseRequest->update(['status' => 'COMPLETED']);
+                
+                // Add status update record for PR completion
+                PurchaseRequestStatusUpdate::create([
+                    'purchase_request_id' => $purchaseRequest->id,
+                    'update_type' => 'CLOSED',
+                    'description' => 'Purchase Request otomatis diselesaikan karena semua item telah selesai diproses atau tersedia di GA',
+                    'updated_by' => $user->id
+                ]);
+                
+                $message .= ' PR telah otomatis diselesaikan karena semua item telah diproses.';
+            }
+
+            DB::commit();
+            return back()->with('success', $message);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal memproses purchasing: ' . $e->getMessage());
+        }
     }
 }

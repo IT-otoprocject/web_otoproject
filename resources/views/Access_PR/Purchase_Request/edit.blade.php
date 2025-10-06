@@ -205,7 +205,7 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label class="form-label">Estimasi Harga</label>
+                                                        <label class="form-label">Estimasi Harga Satuan</label>
                                                         <input type="number" 
                                                                name="items[{{ $index }}][estimated_price]" 
                                                                class="form-control @error('items.'.$index.'.estimated_price') is-invalid @enderror" 
@@ -267,7 +267,7 @@
                                                                value="{{ $item->unit }}">
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label class="form-label">Estimasi Harga</label>
+                                                        <label class="form-label">Estimasi Harga Satuan</label>
                                                         <input type="number" 
                                                                name="items[{{ $index }}][estimated_price]" 
                                                                class="form-control" 
@@ -348,7 +348,7 @@
                             <input type="text" name="items[${itemIndex}][unit]" class="form-control" placeholder="pcs, kg, dll">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Estimasi Harga</label>
+                            <label class="form-label">Estimasi Harga Satuan</label>
                             <input type="number" name="items[${itemIndex}][estimated_price]" class="form-control" step="0.01" min="0">
                         </div>
                         <div class="col-md-1">

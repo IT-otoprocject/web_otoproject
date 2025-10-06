@@ -213,17 +213,38 @@
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
+                                        @if($canUpdateStatus)
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        </th>
+                                        @endif
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Deskripsi</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Qty</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Satuan</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Harga Est.</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Harga Est. Satuan</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Harga Barang</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status Barang</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan Purchasing</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                     @foreach($purchaseRequest->items as $index => $item)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        @if($canUpdateStatus)
+                                        <td class="px-4 py-3 text-sm">
+                                            @php
+                                                $completedStatuses = ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'];
+                                                $canSelectItem = !in_array($item->item_status, $completedStatuses);
+                                            @endphp
+                                            @if($canSelectItem)
+                                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            @else
+                                            <span class="text-xs text-gray-400 italic">Selesai</span>
+                                            @endif
+                                        </td>
+                                        @endif
                                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $item->description }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ number_format($item->quantity) }}</td>
@@ -235,15 +256,51 @@
                                             <span class="text-gray-400">-</span>
                                             @endif
                                         </td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            @if($item->estimated_price)
+                                            @php
+                                                $itemTotal = $item->quantity * $item->estimated_price;
+                                            @endphp
+                                            Rp {{ number_format($itemTotal, 0, ',', '.') }}
+                                            @else
+                                            <span class="text-gray-400">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-sm">
+                                            @php
+                                                $statusClass = match($item->item_status ?? 'PENDING') {
+                                                    'PENDING' => 'bg-gray-100 text-gray-800',
+                                                    'VENDOR_SEARCH' => 'bg-yellow-100 text-yellow-800',
+                                                    'PRICE_COMPARISON' => 'bg-blue-100 text-blue-800',
+                                                    'PO_CREATED' => 'bg-purple-100 text-purple-800',
+                                                    'GOODS_RECEIVED' => 'bg-green-100 text-green-800',
+                                                    'GOODS_RETURNED' => 'bg-red-100 text-red-800',
+                                                    'TERSEDIA_DI_GA' => 'bg-emerald-100 text-emerald-800',
+                                                    'REJECTED' => 'bg-red-500 text-white font-medium',
+                                                    'CLOSED' => 'bg-gray-100 text-gray-800',
+                                                    default => 'bg-gray-100 text-gray-800'
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
+                                                {{ $item->item_status_label ?? 'Pending' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $item->purchasing_notes ?? '-' }}
+                                        </td>
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->notes ?? '-' }}</td>
                                     </tr>
                                     @endforeach
                                     @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0 || $purchaseRequest->total_estimated_price)
                                     <tr class="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
-                                        <td colspan="4" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
-                                        <td colspan="2" class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
+                                        <td colspan="{{ $canUpdateStatus ? 7 : 6 }}" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
+                                        <td colspan="{{ $canUpdateStatus ? 4 : 3 }}" class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
                                             @php
-                                                $total = $purchaseRequest->total_estimated_price ?? $purchaseRequest->items->sum('estimated_price');
+                                                // Calculate total based on quantity × unit price for each item
+                                                $calculatedTotal = $purchaseRequest->items->sum(function($item) {
+                                                    return $item->quantity * ($item->estimated_price ?? 0);
+                                                });
+                                                $total = $purchaseRequest->total_estimated_price ?? $calculatedTotal;
                                             @endphp
                                             Rp {{ number_format($total, 0, ',', '.') }}
                                         </td>
@@ -261,6 +318,17 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                                         Item #{{ $index + 1 }}
                                     </span>
+                                    @if($canUpdateStatus)
+                                    @php
+                                        $completedStatuses = ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'];
+                                        $canSelectItem = !in_array($item->item_status, $completedStatuses);
+                                    @endphp
+                                    @if($canSelectItem)
+                                    <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    @else
+                                    <span class="text-xs text-gray-400 italic">Selesai</span>
+                                    @endif
+                                    @endif
                                 </div>
                                 <div class="space-y-2">
                                     <div>
@@ -273,7 +341,7 @@
                                             <p class="text-sm text-gray-900 dark:text-gray-100">{{ number_format($item->quantity) }} {{ $item->unit ?? '' }}</p>
                                         </div>
                                         <div>
-                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Harga Est.:</span>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Harga Est. Satuan:</span>
                                             <p class="text-sm text-gray-900 dark:text-gray-100">
                                                 @if($item->estimated_price)
                                                 Rp {{ number_format($item->estimated_price, 0, ',', '.') }}
@@ -282,6 +350,49 @@
                                                 @endif
                                             </p>
                                         </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-2 mt-2">
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Harga Barang:</span>
+                                            <p class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                                @if($item->estimated_price)
+                                                @php
+                                                    $itemTotal = $item->quantity * $item->estimated_price;
+                                                @endphp
+                                                Rp {{ number_format($itemTotal, 0, ',', '.') }}
+                                                @else
+                                                <span class="text-gray-400">-</span>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-2">
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Status Barang:</span>
+                                            @php
+                                                $statusClass = match($item->item_status ?? 'PENDING') {
+                                                    'PENDING' => 'bg-gray-100 text-gray-800',
+                                                    'VENDOR_SEARCH' => 'bg-yellow-100 text-yellow-800',
+                                                    'PRICE_COMPARISON' => 'bg-blue-100 text-blue-800',
+                                                    'PO_CREATED' => 'bg-purple-100 text-purple-800',
+                                                    'GOODS_RECEIVED' => 'bg-green-100 text-green-800',
+                                                    'GOODS_RETURNED' => 'bg-red-100 text-red-800',
+                                                    'TERSEDIA_DI_GA' => 'bg-emerald-100 text-emerald-800',
+                                                    'REJECTED' => 'bg-red-500 text-white font-medium',
+                                                    'CLOSED' => 'bg-gray-100 text-gray-800',
+                                                    default => 'bg-gray-100 text-gray-800'
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }} mt-1">
+                                                {{ $item->item_status_label ?? 'Pending' }}
+                                            </span>
+                                        </div>
+                                        @if($item->purchasing_notes)
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Catatan Purchasing:</span>
+                                            <p class="text-sm text-gray-900 dark:text-gray-100">{{ $item->purchasing_notes }}</p>
+                                        </div>
+                                        @endif
                                     </div>
                                     @if($item->notes)
                                     <div>
@@ -298,12 +409,127 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi:</span>
                                     <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                        Rp {{ number_format($purchaseRequest->total_estimated_price ?? $purchaseRequest->items->sum('estimated_price'), 0, ',', '.') }}
+                                        @php
+                                            // Calculate total based on quantity × unit price for each item
+                                            $calculatedTotal = $purchaseRequest->items->sum(function($item) {
+                                                return $item->quantity * ($item->estimated_price ?? 0);
+                                            });
+                                            $total = $purchaseRequest->total_estimated_price ?? $calculatedTotal;
+                                        @endphp
+                                        Rp {{ number_format($total, 0, ',', '.') }}
                                     </span>
                                 </div>
                             </div>
                             @endif
                         </div>
+
+                        <!-- Purchasing Actions (untuk Purchasing) -->
+                        @if($canUpdateStatus)
+                        @php
+                            // Filter items yang belum final status untuk purchasing
+                            $finalStatuses = ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'];
+                            $purchasingItems = $purchaseRequest->items->whereNotIn('item_status', $finalStatuses);
+                            $hasItemsToProcess = $purchasingItems->count() > 0;
+                        @endphp
+                        
+                        @if($hasItemsToProcess)
+                        @php
+                            // Check if user has processed any items (by checking if any items have VENDOR_SEARCH status from pending)
+                            $hasProcessedItems = $purchaseRequest->items->where('item_status', 'VENDOR_SEARCH')->count() > 0;
+                        @endphp
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                            <!-- Step 1: Proses Items -->
+                            <div id="processItemsSection" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-4 {{ $hasProcessedItems ? 'step1-minimized' : '' }}">
+                                <div class="flex items-center justify-between cursor-pointer" onclick="toggleProcessItemsSection()">
+                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">1</span>
+                                        <i class="fas fa-clipboard-check mr-2 text-blue-600"></i>
+                                        Proses Items (Langkah Pertama)
+                                        @if($hasProcessedItems)
+                                        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                            <i class="fas fa-check mr-1"></i>Sudah Diproses
+                                        </span>
+                                        @endif
+                                    </h4>
+                                    <div class="flex items-center">
+                                        @if($hasProcessedItems)
+                                        <span class="text-xs text-blue-600 mr-2">Klik untuk expand/minimize</span>
+                                        @endif
+                                        <i id="processItemsToggle" class="fas {{ $hasProcessedItems ? 'fa-chevron-down' : 'fa-chevron-up' }} text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div id="processItemsContent" class="{{ $hasProcessedItems ? 'hidden' : '' }}">
+                                    <div class="mb-4 {{ $hasProcessedItems ? 'mt-3' : '' }}">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Pilih item yang akan diproses. Item yang disetujui akan mulai dengan status "Pencarian Vendor".
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $purchasingItems->count() }} item tersedia untuk diproses (item yang sudah selesai tidak ditampilkan)
+                                        </p>
+                                    </div>
+                                    <button type="button" onclick="showSimplifiedPurchasingModal()" 
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors inline-flex items-center">
+                                        <i class="fas fa-play mr-2"></i>
+                                        Mulai Proses Items
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Update Status Barang (Bulk) -->
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                    <span class="bg-yellow-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span>
+                                    <i class="fas fa-edit mr-2 text-yellow-600"></i>
+                                    Update Status Barang (Langkah Lanjutan)
+                                </h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Setelah memproses items, gunakan form ini untuk update status sesuai progress (Vendor ditemukan → PO dibuat → Barang diterima)
+                                </p>
+                                <form id="bulkUpdateForm" action="{{ route('purchase-request.bulk-update-item-status', $purchaseRequest) }}" method="POST">
+                                    @csrf
+                                    <!-- Hidden container for selected item IDs -->
+                                    <div id="selectedItemsContainer"></div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div>
+                                            <label for="item_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Barang</label>
+                                            <select name="item_status" id="item_status" required class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="">Pilih Status</option>
+                                                @foreach(\App\Models\Access_PR\Purchase_Request\PurchaseRequestItem::getItemStatusLabels() as $value => $label)
+                                                    @if(!in_array($value, ['TERSEDIA_DI_GA', 'PENDING', 'CLOSED', 'REJECTED']))
+                                                    <option value="{{ $value }}">{{ $label }}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="purchasing_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keterangan dari Purchasing</label>
+                                            <textarea name="purchasing_notes" id="purchasing_notes" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Masukkan keterangan (opsional)"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                        <div class="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
+                                            <span id="selectedCount">0</span> item dipilih
+                                        </div>
+                                        <button type="submit" id="bulkUpdateBtn" disabled class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors inline-flex items-center">
+                                            <i class="fas fa-save mr-2"></i>
+                                            Update Status Item Terpilih
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @else
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle mr-2 text-green-500"></i>
+                                    <span class="text-sm">Semua item sudah tersedia di GA. Tidak ada yang perlu diproses purchasing.</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @endif
                     </div>
 
                     <!-- File Attachments Section -->
@@ -463,19 +689,11 @@
                     <!-- Status Updates (untuk Purchasing) -->
                     @if($purchaseRequest->statusUpdates->count() > 0 || $canUpdateStatus)
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-0 flex items-center">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                                 <i class="fas fa-clipboard-list mr-2 text-orange-500"></i>
                                 Update Status Purchasing
                             </h3>
-                            @if($canUpdateStatus)
-                            <button type="button"
-                                onclick="showUpdateStatusModal()"
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors inline-flex items-center">
-                                <i class="fas fa-plus mr-2"></i>
-                                Tambah Update
-                            </button>
-                            @endif
                         </div>
 
                         @if($purchaseRequest->statusUpdates->count() > 0)
@@ -557,7 +775,7 @@
     <!-- Approve Modal -->
     @if($canApprove)
     <div id="approve-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <div class="relative top-10 mx-auto p-5 border w-[600px] shadow-lg rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <div class="mt-3">
                 <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full">
                     <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
@@ -567,9 +785,73 @@
                     Anda akan menyetujui Purchase Request <strong>#{{ $purchaseRequest->pr_number }}</strong>
                 </p>
 
+                @php
+                    $currentApprovalLevel = $purchaseRequest->getCurrentApprovalLevel();
+                    $isGAApproval = $currentApprovalLevel === 'ga' && Auth::user()->divisi === 'HCGA';
+                @endphp
+
                 <div class="mt-6">
-                    <form action="{{ route('purchase-request.approve', $purchaseRequest) }}" method="POST">
+                    <form action="{{ $isGAApproval ? route('purchase-request.ga-approve-with-items', $purchaseRequest) : route('purchase-request.approve', $purchaseRequest) }}" method="POST">
                         @csrf
+                        
+                        @if($isGAApproval)
+                        <!-- GA Item Selection with Quantity -->
+                        <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                <i class="fas fa-boxes mr-2 text-blue-600"></i>
+                                Pilih Barang yang Tersedia di GA (Opsional)
+                            </h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                                Centang barang yang tersedia di GA dan tentukan jumlah yang tersedia. Jika hanya sebagian, sisa barang akan dilanjutkan ke proses selanjutnya.
+                            </p>
+                            <div class="space-y-3 max-h-60 overflow-y-auto">
+                                @foreach($purchaseRequest->items as $item)
+                                <div class="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                    <div class="flex items-start space-x-3">
+                                        <input type="checkbox" 
+                                               name="available_items[]" 
+                                               value="{{ $item->id }}" 
+                                               class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 item-checkbox-ga"
+                                               id="item_{{ $item->id }}"
+                                               onchange="toggleQuantityInput({{ $item->id }})">
+                                        <div class="flex-1 min-w-0">
+                                            <label for="item_{{ $item->id }}" class="cursor-pointer">
+                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    {{ $item->description }}
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    Total diminta: {{ number_format($item->quantity) }} {{ $item->unit ?? '' }}
+                                                    @if($item->estimated_price)
+                                                    | Harga satuan: Rp {{ number_format($item->estimated_price, 0, ',', '.') }}
+                                                    @endif
+                                                </div>
+                                            </label>
+                                            <div class="mt-2 hidden" id="qty_input_{{ $item->id }}">
+                                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Qty Tersedia di GA:
+                                                </label>
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="number" 
+                                                           name="available_quantities[{{ $item->id }}]" 
+                                                           min="1" 
+                                                           max="{{ $item->quantity }}"
+                                                           class="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                           placeholder="{{ $item->quantity }}">
+                                                    <span class="text-xs text-gray-500">dari {{ number_format($item->quantity) }} {{ $item->unit ?? '' }}</span>
+                                                </div>
+                                                <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                                    <i class="fas fa-info-circle mr-1"></i>
+                                                    Kosongkan jika semua quantity tersedia
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="mb-4">
                             <label for="approve_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Catatan Persetujuan (opsional)
@@ -1059,6 +1341,105 @@
             }
         });
 
+        // Bulk item update functionality
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            const selectedCountSpan = document.getElementById('selectedCount');
+            const bulkUpdateBtn = document.getElementById('bulkUpdateBtn');
+            const selectedItemsContainer = document.getElementById('selectedItemsContainer');
+            
+            if (selectedCountSpan) {
+                selectedCountSpan.textContent = count;
+            }
+            
+            if (bulkUpdateBtn) {
+                bulkUpdateBtn.disabled = count === 0;
+            }
+            
+            // Update hidden inputs for selected item IDs
+            if (selectedItemsContainer) {
+                selectedItemsContainer.innerHTML = '';
+                checkboxes.forEach(checkbox => {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'item_ids[]';
+                    hiddenInput.value = checkbox.value;
+                    selectedItemsContainer.appendChild(hiddenInput);
+                });
+            }
+        }
+
+        // Select All functionality
+        document.getElementById('selectAll')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+
+        // Individual checkbox change
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedCount();
+                
+                // Update select all checkbox
+                const allCheckboxes = document.querySelectorAll('.item-checkbox');
+                const checkedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
+                const selectAllCheckbox = document.getElementById('selectAll');
+                
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = allCheckboxes.length === checkedCheckboxes.length && allCheckboxes.length > 0;
+                    selectAllCheckbox.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
+                }
+            });
+        });
+
+        // Handle bulk update form submission
+        document.getElementById('bulkUpdateForm')?.addEventListener('submit', function(e) {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                alert('Pilih minimal satu item untuk diupdate.');
+                return false;
+            }
+            
+            // Update hidden inputs before submission
+            updateSelectedCount();
+            
+            // Confirm submission
+            const itemStatus = document.getElementById('item_status').value;
+            const statusLabel = document.getElementById('item_status').selectedOptions[0].text;
+            
+            if (!confirm(`Apakah Anda yakin ingin mengupdate ${checkboxes.length} item menjadi status "${statusLabel}"?`)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // GA approval quantity input toggle
+        function toggleQuantityInput(itemId) {
+            const checkbox = document.getElementById(`item_${itemId}`);
+            const quantityDiv = document.getElementById(`qty_input_${itemId}`);
+            
+            if (checkbox.checked) {
+                quantityDiv.classList.remove('hidden');
+            } else {
+                quantityDiv.classList.add('hidden');
+                // Clear the quantity input when unchecked
+                const quantityInput = quantityDiv.querySelector('input[type="number"]');
+                if (quantityInput) {
+                    quantityInput.value = '';
+                }
+            }
+        }
+
+        // Initialize count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSelectedCount();
+        });
+
         // Close modals dengan ESC key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -1068,7 +1449,163 @@
                 hideImageModal();
                 hideAddFileModal();
                 hideDeleteFileModal();
+                closeSimplifiedPurchasingModal();
             }
         });
+
+        // Minimize/expand functionality for Process Items section
+        function toggleProcessItemsSection() {
+            const content = document.getElementById('processItemsContent');
+            const chevronIcon = document.getElementById('processItemsToggle');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevronIcon.classList.remove('fa-chevron-down');
+                chevronIcon.classList.add('fa-chevron-up');
+            } else {
+                content.classList.add('hidden');
+                chevronIcon.classList.remove('fa-chevron-up');
+                chevronIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Simplified purchasing modal functions
+        function showSimplifiedPurchasingModal() {
+            document.getElementById('simplifiedPurchasingModal').classList.remove('hidden');
+        }
+
+        function closeSimplifiedPurchasingModal() {
+            document.getElementById('simplifiedPurchasingModal').classList.add('hidden');
+        }
+
+        function toggleSimplePurchasingAction(itemId) {
+            const actionSelect = document.getElementById(`simple_action_${itemId}`);
+            const quantityDiv = document.getElementById(`simple_qty_input_${itemId}`);
+            const reasonDiv = document.getElementById(`simple_reason_input_${itemId}`);
+            
+            // Hide all first
+            quantityDiv.classList.add('hidden');
+            reasonDiv.classList.add('hidden');
+            
+            if (actionSelect.value === 'partial') {
+                quantityDiv.classList.remove('hidden');
+            } else if (actionSelect.value === 'reject') {
+                reasonDiv.classList.remove('hidden');
+            }
+        }
     </script>
+
+    <!-- Simplified Purchasing Modal -->
+    <div id="simplifiedPurchasingModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-11/12 max-w-5xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div class="mt-3">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <i class="fas fa-shopping-cart mr-2 text-blue-600"></i>
+                        Proses Items Purchasing
+                    </h3>
+                    <button onclick="closeSimplifiedPurchasingModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3 mb-4">
+                        <div class="text-sm text-blue-800 dark:text-blue-200">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span class="font-semibold">Alur Proses:</span>
+                            </div>
+                            <ul class="text-xs space-y-1 ml-4">
+                                <li><strong>• Proses (Full):</strong> Item akan dimulai dengan status "Pencarian Vendor"</li>
+                                <li><strong>• Sebagian:</strong> Qty yang disetujui mulai "Pencarian Vendor", sisanya tetap pending</li>
+                                <li><strong>• Tolak:</strong> Item ditolak dengan alasan yang diberikan</li>
+                                <li class="text-blue-600"><strong>• Selanjutnya:</strong> Gunakan "Update Status Barang (Bulk)" untuk lanjutkan proses vendor → PO → diterima</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('purchase-request.purchasing-partial-approval', $purchaseRequest) }}" method="POST">
+                        @csrf
+                        <div class="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg">
+                            @php
+                                $finalStatuses = ['TERSEDIA_DI_GA', 'CLOSED', 'GOODS_RECEIVED', 'REJECTED'];
+                                $purchasingItems = $purchaseRequest->items->whereNotIn('item_status', $finalStatuses);
+                            @endphp
+                            
+                            @foreach($purchasingItems as $item)
+                            <div class="p-4 border-b border-gray-100 dark:border-gray-600 {{ $loop->last ? 'border-b-0' : '' }}">
+                                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+                                    <!-- Item Info -->
+                                    <div class="lg:col-span-1">
+                                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ $item->description }}</div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                            Diminta: <span class="font-semibold">{{ $item->quantity }} {{ $item->unit }}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-400 mt-1">Status: {{ $item->item_status_label }}</div>
+                                    </div>
+                                    
+                                    <!-- Action Select -->
+                                    <div class="lg:col-span-1">
+                                        <select name="actions[{{ $item->id }}]" id="simple_action_{{ $item->id }}" 
+                                            onchange="toggleSimplePurchasingAction({{ $item->id }})"
+                                            class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                            <option value="">-- Pilih Action --</option>
+                                            <option value="approve">Proses (Full)</option>
+                                            <option value="partial">Sebagian</option>
+                                            <option value="reject">Tolak</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Quantity/Reason Input -->
+                                    <div class="lg:col-span-2">
+                                        <!-- Quantity Input for Partial -->
+                                        <div id="simple_qty_input_{{ $item->id }}" class="hidden">
+                                            <div class="flex items-center space-x-2">
+                                                <input type="number" name="quantities[{{ $item->id }}]" 
+                                                    min="1" max="{{ $item->quantity }}" 
+                                                    class="flex-1 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                                    placeholder="Qty yang bisa dipenuhi">
+                                                <span class="text-sm text-gray-500">/ {{ $item->quantity }}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Reason Input for Reject -->
+                                        <div id="simple_reason_input_{{ $item->id }}" class="hidden">
+                                            <input type="text" name="reasons[{{ $item->id }}]" 
+                                                class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                                placeholder="Alasan penolakan (misal: tidak tersedia, discontinued, dll)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        
+                        <div class="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Catatan Purchasing (Opsional)
+                                </label>
+                                <textarea name="purchasing_notes" rows="2" 
+                                    class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                    placeholder="Catatan umum untuk proses ini (vendor info, estimasi waktu, dll)"></textarea>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="closeSimplifiedPurchasingModal()" 
+                                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg">
+                                    Batal
+                                </button>
+                                <button type="submit" 
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                                    <i class="fas fa-cog mr-2"></i>Proses Items
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

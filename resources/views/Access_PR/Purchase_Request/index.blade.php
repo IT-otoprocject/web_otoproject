@@ -329,9 +329,15 @@
 
                                         <div class="flex flex-col items-center space-y-1">
                                             @if($currentLevel)
-                                            <span class="inline-block px-2 py-1 bg-yellow-500 text-white text-xs rounded">
-                                                {{ ucwords(str_replace('_', ' ', $currentLevel)) }}
-                                            </span>
+                                                @if($currentLevel === 'tersedia_di_ga')
+                                                <span class="inline-block px-2 py-1 bg-blue-500 text-white text-xs rounded">
+                                                    Tersedia di GA
+                                                </span>
+                                                @else
+                                                <span class="inline-block px-2 py-1 bg-yellow-500 text-white text-xs rounded">
+                                                    {{ ucwords(str_replace('_', ' ', $currentLevel)) }}
+                                                </span>
+                                                @endif
                                             @else
                                             <span class="inline-block px-2 py-1 bg-green-500 text-white text-xs rounded">Fully Approved</span>
                                             @endif

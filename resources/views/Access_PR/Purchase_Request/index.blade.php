@@ -228,8 +228,8 @@
                 </div>
             </div>
 
-            <!-- Info untuk GA (existing info box - make it more specific) -->
-            @if(auth()->user()->level === 'ga' || (auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager', 'spv', 'staff'])))
+            <!-- Info untuk GA (existing info box - more specific and includes pending asset numbering) -->
+            @if(auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager', 'spv', 'staff']))
             <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
                 <div class="flex items-center">
                     <i class="fas fa-check-circle text-green-500 mr-3"></i>
@@ -239,6 +239,24 @@
                             Anda dapat melihat: PR milik Anda sendiri, PR yang membutuhkan approval GA, dan semua PR yang masih dalam proses approval.
                             PR yang memerlukan action Anda akan ditandai dengan badge merah berkedip.
                         </p>
+                        @if(isset($gaAssetPendingCount) && $gaAssetPendingCount > 0)
+                        <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
+                            <p class="text-yellow-800 dark:text-yellow-200 text-sm">
+                                <i class="fas fa-barcode mr-1"></i>
+                                Ada <strong>{{ $gaAssetPendingCount }}</strong> PR yang memerlukan <strong>Generate Nomor Asset</strong> (purchasing selesai dan ada item asset).
+                            </p>
+                            <p class="text-yellow-700 dark:text-yellow-300 text-xs mt-1">Buka detail PR tersebut, isi kode dasar (mis. A1), lalu klik Generate.</p>
+                        </div>
+                        @endif
+                        @if(isset($gaAssetPendingCount) && $gaAssetPendingCount > 0)
+                        <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
+                            <p class="text-yellow-800 dark:text-yellow-200 text-sm">
+                                <i class="fas fa-barcode mr-1"></i>
+                                Ada <strong>{{ $gaAssetPendingCount }}</strong> PR yang memerlukan <strong>Generate Nomor Asset</strong> karena purchasing sudah selesai dan terdapat item bertipe asset.
+                            </p>
+                            <p class="text-yellow-700 dark:text-yellow-300 text-xs mt-1">Buka detail PR tersebut untuk mengisi kode dasar, lalu klik Generate.</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -319,6 +337,17 @@
                                                 <i class="fas fa-shopping-cart mr-1"></i>Perlu Proses
                                             </span>
                                             @endif
+                                            @if(auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager','spv','staff']))
+                                                @if(isset($pr->needs_asset_numbers) && $pr->needs_asset_numbers)
+                                                <span class="inline-block px-2 py-1 bg-yellow-500 text-white text-xs rounded animate-pulse border border-yellow-600">
+                                                    <i class="fas fa-barcode mr-1"></i>Generate Asset
+                                                </span>
+                                                @elseif(isset($pr->has_asset_numbers) && $pr->has_asset_numbers)
+                                                <span class="inline-block px-2 py-1 bg-green-600 text-white text-xs rounded">
+                                                    <i class="fas fa-barcode mr-1"></i>Asset Ada
+                                                </span>
+                                                @endif
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="border-collapse border border-gray-300 dark:border-gray-600 text-center">
@@ -356,6 +385,24 @@
                                                 title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+
+                                            @if(auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager','spv','staff']))
+                                                @if(isset($pr->needs_asset_numbers) && $pr->needs_asset_numbers)
+                                                <a href="{{ route('purchase-request.show', $pr) }}#asset-section"
+                                                   class="inline-block px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors duration-200"
+                                                   title="Generate Nomor Asset">
+                                                    <i class="fas fa-magic"></i>
+                                                </a>
+                                                @endif
+                                            @endif
+
+                                            @if(isset($pr->has_asset_numbers) && $pr->has_asset_numbers)
+                                            <a href="{{ route('purchase-request.show', $pr) }}#asset-section"
+                                               class="inline-block px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded transition-colors duration-200"
+                                               title="Lihat Nomor Asset">
+                                                <i class="fas fa-barcode"></i>
+                                            </a>
+                                            @endif
 
                                             @if($pr->user_id === auth()->id() && $pr->status === 'DRAFT')
                                             <a href="{{ route('purchase-request.edit', $pr) }}"

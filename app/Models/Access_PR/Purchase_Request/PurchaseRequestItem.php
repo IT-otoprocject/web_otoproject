@@ -16,8 +16,9 @@ class PurchaseRequestItem extends Model
         'unit',
         'estimated_price',
         'notes',
-        'item_status',
-        'purchasing_notes'
+    'item_status',
+    'purchasing_notes',
+    'is_asset'
     ];
 
     protected $casts = [
@@ -50,5 +51,10 @@ class PurchaseRequestItem extends Model
     public function purchaseRequest()
     {
         return $this->belongsTo(PurchaseRequest::class);
+    }
+
+    public function assets()
+    {
+        return $this->hasMany(PurchaseRequestItemAsset::class, 'purchase_request_item_id');
     }
 }

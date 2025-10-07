@@ -49,7 +49,25 @@ class PurchaseRequestController extends Controller
             );
         }
 
-        return view('Access_PR.Purchase_Request.index', compact('purchaseRequests'));
+        // For GA users, compute PRs that need asset number generation
+        $gaAssetPendingCount = 0;
+        $isGA = ($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']));
+        if ($isGA) {
+            // Attach computed flags per PR (needsAssetNumbers, hasAssetNumbers)
+            foreach ($purchaseRequests as $pr) {
+                // Sum required assets = sum of quantities for asset items
+                $required = $pr->items->where('is_asset', true)->sum(function($it){ return (int) $it->quantity; });
+                // Current generated assets for this PR
+                $current = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_id', $pr->id)->count();
+                $pr->required_asset_count = $required;
+                $pr->current_asset_count = $current;
+                $pr->needs_asset_numbers = ($required > 0) && ($current < $required) && $pr->areAllItemsCompleted();
+                $pr->has_asset_numbers = $current > 0;
+                if ($pr->needs_asset_numbers) { $gaAssetPendingCount++; }
+            }
+        }
+
+        return view('Access_PR.Purchase_Request.index', compact('purchaseRequests', 'gaAssetPendingCount'));
     }
 
     public function create()
@@ -193,9 +211,22 @@ class PurchaseRequestController extends Controller
 
     public function approve(Request $request, PurchaseRequest $purchaseRequest)
     {
-        $request->validate([
-            'notes' => 'nullable|string|max:500'
-        ]);
+        $user = Auth::user();
+        $currentApprovalLevel = $purchaseRequest->getCurrentApprovalLevel();
+        $isFATApproval = $currentApprovalLevel === 'finance_dept' && $user->divisi === 'FAT';
+        
+        // Validation rules - different for FAT approval
+        $rules = ['notes' => 'nullable|string|max:500'];
+        
+        if ($isFATApproval) {
+            $rules['fat_department'] = 'required|string|max:100';
+            $rules['other_department'] = 'nullable|required_if:fat_department,LAINNYA|string|max:100';
+            // Per-item classification: asset or non-asset
+            $rules['fat_item_types'] = 'required|array';
+            $rules['fat_item_types.*'] = 'required|in:asset,non_asset';
+        }
+        
+        $request->validate($rules);
 
         $user = Auth::user();
         
@@ -215,7 +246,7 @@ class PurchaseRequestController extends Controller
         $currentApprovalLevel = $purchaseRequest->getCurrentApprovalLevel();
         
         // Update approval untuk level yang sedang pending
-        $approvals[$currentApprovalLevel] = [
+        $approvalData = [
             'approved' => true,
             'approved_at' => Carbon::now('Asia/Jakarta')->toISOString(),
             'approved_by' => $user->id,
@@ -224,6 +255,30 @@ class PurchaseRequestController extends Controller
             'approved_by_level' => $user->level,
             'notes' => $request->notes
         ];
+        
+        // Add FAT-specific data if this is FAT approval
+        if ($isFATApproval) {
+            $fatDepartment = $request->fat_department;
+            if ($fatDepartment === 'LAINNYA') {
+                $fatDepartment = $request->other_department;
+            }
+            
+            $approvalData['fat_department'] = $fatDepartment;
+            // Persist per-item asset flags
+            $itemTypes = $request->input('fat_item_types', []);
+            $anyAsset = false;
+            foreach ($purchaseRequest->items as $item) {
+                if (isset($itemTypes[$item->id])) {
+                    $isAsset = $itemTypes[$item->id] === 'asset';
+                    $item->update(['is_asset' => $isAsset]);
+                    if ($isAsset) $anyAsset = true;
+                }
+            }
+            // Set PR-level flag for display: if any item asset, mark asset, else cost
+            $approvalData['fat_approval_type'] = $anyAsset ? 'asset' : 'cost';
+        }
+        
+        $approvals[$currentApprovalLevel] = $approvalData;
 
         // Check if all levels are approved
         $flow = $purchaseRequest->approval_flow;
@@ -238,10 +293,25 @@ class PurchaseRequestController extends Controller
         // Update status PR
         $newStatus = $allApproved ? 'APPROVED' : 'SUBMITTED';
 
-        $purchaseRequest->update([
+        $updateData = [
             'approvals' => $approvals,
             'status' => $newStatus
-        ]);
+        ];
+        
+        // Add FAT fields to PR record if this is FAT approval
+        if ($isFATApproval) {
+            $fatDepartment = $request->fat_department;
+            if ($fatDepartment === 'LAINNYA') {
+                $fatDepartment = $request->other_department;
+            }
+            
+            $updateData['fat_department'] = $fatDepartment;
+            // If any item is asset, set asset; else cost
+            $anyAsset = $purchaseRequest->items()->where('is_asset', true)->exists();
+            $updateData['fat_approval_type'] = $anyAsset ? 'asset' : 'cost';
+        }
+
+        $purchaseRequest->update($updateData);
 
         if ($allApproved) {
             return back()->with('success', 'Purchase Request berhasil disetujui dan telah mencapai persetujuan final!');
@@ -691,7 +761,7 @@ class PurchaseRequestController extends Controller
                             'purchasing_notes' => 'Sebagian barang tersedia di GA (' . $availableQty . ' dari ' . ($availableQty + $remainingQty) . ') pada ' . now()->format('d/m/Y H:i')
                         ]);
                         
-                        // Create new item for remaining quantity
+                        // Create new item for remaining quantity (propagate is_asset)
                         PurchaseRequestItem::create([
                             'purchase_request_id' => $purchaseRequest->id,
                             'description' => $item->description,
@@ -700,7 +770,8 @@ class PurchaseRequestController extends Controller
                             'estimated_price' => $item->estimated_price,
                             'notes' => $item->notes . ' - Split dari item original',
                             'item_status' => 'PENDING',
-                            'purchasing_notes' => 'Sisa dari split item untuk melanjutkan proses PR'
+                            'purchasing_notes' => 'Sisa dari split item untuk melanjutkan proses PR',
+                            'is_asset' => $item->is_asset,
                         ]);
                         
                         $splitItemsInfo[] = [
@@ -851,7 +922,7 @@ class PurchaseRequestController extends Controller
 
     public function purchasingPartialApproval(Request $request, PurchaseRequest $purchaseRequest)
     {
-        $user = auth()->user();
+    $user = Auth::user();
         
         // Validasi user adalah purchasing dengan logic yang sama seperti show method
         $canUpdateStatus = ($user->level === 'admin' || $user->level === 'ceo' || $user->level === 'cfo') || 
@@ -871,7 +942,7 @@ class PurchaseRequestController extends Controller
 
         DB::beginTransaction();
         try {
-            $user = auth()->user();
+            $user = Auth::user();
             $actions = $request->actions ?? [];
             $quantities = $request->quantities ?? [];
             $reasons = $request->reasons ?? [];
@@ -939,7 +1010,7 @@ class PurchaseRequestController extends Controller
                                 'purchasing_notes' => 'Sebagian item disetujui (' . $approvedQty . ' dari ' . ($approvedQty + $remainingQty) . ') dan mulai pencarian vendor pada ' . now()->format('d/m/Y H:i')
                             ]);
                             
-                            // Create new item untuk remaining quantity
+                            // Create new item untuk remaining quantity (propagate is_asset)
                             PurchaseRequestItem::create([
                                 'purchase_request_id' => $purchaseRequest->id,
                                 'description' => $item->description,
@@ -948,7 +1019,8 @@ class PurchaseRequestController extends Controller
                                 'estimated_price' => $item->estimated_price,
                                 'notes' => $item->notes . ' - Split dari item original',
                                 'item_status' => 'PENDING',
-                                'purchasing_notes' => 'Sisa quantity dari partial approval purchasing'
+                                'purchasing_notes' => 'Sisa quantity dari partial approval purchasing',
+                                'is_asset' => $item->is_asset,
                             ]);
                             
                             $processedItemsInfo[] = [
@@ -1048,6 +1120,135 @@ class PurchaseRequestController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Gagal memproses purchasing: ' . $e->getMessage());
+        }
+    }
+
+    // GA assigns asset numbers per item with auto-incrementing sequences
+    public function assignAssetNumbers(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $user = Auth::user();
+        if (!($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']))) {
+            return back()->with('error', 'Hanya tim GA yang dapat menginput nomor asset.');
+        }
+
+        if (!$purchaseRequest->areAllItemsCompleted()) {
+            return back()->with('error', 'Nomor asset hanya dapat diinput setelah purchasing selesai.');
+        }
+
+        // Validate payload: base_code per item id
+        $request->validate([
+            'asset_bases' => 'required|array',
+            'asset_bases.*' => 'nullable|string|max:20|regex:/^[A-Za-z0-9\-_]+$/',
+        ], [
+            'asset_bases.*.regex' => 'Kode dasar asset hanya boleh huruf, angka, dash (-), underscore (_).',
+        ]);
+
+        $items = $purchaseRequest->items()->where('is_asset', true)->get();
+        if ($items->isEmpty()) {
+            return back()->with('error', 'Tidak ada item bertipe asset pada PR ini.');
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($items as $item) {
+                $qty = (int) $item->quantity;
+                if ($qty <= 0) continue;
+
+                $base = $request->input("asset_bases.".$item->id);
+                if (!$base) continue; // skip if GA didn't provide base
+
+                $base = strtoupper($base);
+
+                // Determine how many assets already generated for this item (any base)
+                $existingForItem = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->count();
+
+                // Determine starting sequence globally across all PRs for this base code
+                $last = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('base_code', $base)
+                    ->orderByDesc('sequence_no')
+                    ->first();
+                $startSeq = $last ? ($last->sequence_no + 1) : 1;
+
+                // Generate only the remaining quantities for this item
+                $toGenerate = max(0, $qty - $existingForItem);
+                if ($toGenerate === 0) { continue; }
+
+                // Generate asset codes for remaining units: BASE-001, BASE-002, ...
+                for ($i = 0; $i < $toGenerate; $i++) {
+                    $seq = $startSeq + $i;
+                    $assetCode = sprintf('%s-%03d', $base, $seq);
+
+                    \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::create([
+                        'purchase_request_id' => $purchaseRequest->id,
+                        'purchase_request_item_id' => $item->id,
+                        'item_description' => $item->description,
+                        'base_code' => $base,
+                        'asset_code' => $assetCode,
+                        'sequence_no' => $seq,
+                        'created_by' => $user->id,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return back()->with('success', 'Nomor asset berhasil digenerate untuk item asset.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal generate nomor asset: ' . $e->getMessage());
+        }
+    }
+
+    public function updateAssetNumber(Request $request, $id)
+    {
+        try {
+            $purchaseRequest = PurchaseRequest::findOrFail($id);
+            
+            // Authorization: only GA users can update asset numbers
+            if (Auth::user()->divisi !== 'HCGA') {
+                return back()->with('error', 'Hanya GA yang dapat mengelola Asset Number.');
+            }
+            
+            // Validation: PR must be asset type and purchasing complete
+            if ($purchaseRequest->fat_approval_type !== 'asset') {
+                return back()->with('error', 'Asset Number hanya dapat ditetapkan untuk item dengan tipe Asset.');
+            }
+            
+            if (!$purchaseRequest->areAllItemsCompleted()) {
+                return back()->with('error', 'Asset Number hanya dapat ditetapkan setelah purchasing selesai.');
+            }
+            
+            // Validate asset number format and uniqueness
+            $request->validate([
+                'asset_number' => [
+                    'required',
+                    'string',
+                    'max:50',
+                    'unique:purchase_requests,asset_number,' . $id,
+                    'regex:/^[A-Z0-9\-_]+$/' // Only uppercase letters, numbers, hyphens, underscores
+                ]
+            ], [
+                'asset_number.required' => 'Asset Number wajib diisi.',
+                'asset_number.unique' => 'Asset Number sudah digunakan untuk PR lain.',
+                'asset_number.regex' => 'Asset Number hanya boleh menggunakan huruf besar, angka, tanda hubung (-) dan underscore (_).',
+                'asset_number.max' => 'Asset Number tidak boleh lebih dari 50 karakter.'
+            ]);
+            
+            // Update asset number
+            $purchaseRequest->update([
+                'asset_number' => strtoupper($request->asset_number)
+            ]);
+            
+            // Log the asset number assignment
+            PurchaseRequestStatusUpdate::create([
+                'purchase_request_id' => $purchaseRequest->id,
+                'update_type' => 'ASSET_NUMBER_ASSIGNED',
+                'description' => 'Asset Number ditetapkan: ' . $purchaseRequest->asset_number,
+                'updated_by' => Auth::id()
+            ]);
+            
+            return back()->with('success', 'Asset Number berhasil ditetapkan: ' . $purchaseRequest->asset_number);
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menetapkan Asset Number: ' . $e->getMessage());
         }
     }
 }

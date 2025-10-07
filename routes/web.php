@@ -154,6 +154,8 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::post('purchase-request/{purchaseRequest}/purchasing-partial-approval', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'purchasingPartialApproval'])->name('purchase-request.purchasing-partial-approval');
     Route::post('purchase-request/{purchaseRequest}/add-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'addAttachment'])->name('purchase-request.add-attachment');
     Route::delete('purchase-request/{purchaseRequest}/delete-attachment', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'deleteAttachment'])->name('purchase-request.delete-attachment');
+    Route::post('purchase-request/{purchaseRequest}/update-asset-number', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'updateAssetNumber'])->name('purchase-request.update-asset-number');
+    Route::post('purchase-request/{purchaseRequest}/assign-asset-numbers', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'assignAssetNumbers'])->name('purchase-request.assign-asset-numbers');
     
     // Routes untuk PR Categories (hanya FAT manager dan SPV)
     Route::resource('pr-categories', App\Http\Controllers\Access_PR\PrCategoryController::class);

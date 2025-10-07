@@ -119,6 +119,25 @@
                                             ({{ $approvalData['approved_by_divisi'] }} - {{ ucfirst($approvalData['approved_by_level']) }})
                                             @endif
                                         </div>
+                                        @if($level === 'finance_dept' && isset($approvalData['fat_department']))
+                                        <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                            <span class="font-semibold">Perusahaan:</span> {{ $approvalData['fat_department'] }}
+                                        </div>
+                                        <div class="text-xs text-blue-600 dark:text-blue-400">
+                                            <span class="font-semibold">Jenis:</span> 
+                                            @if($approvalData['fat_approval_type'] === 'asset')
+                                            <span class="bg-green-100 text-green-800 px-1 rounded">Asset</span>
+                                            @else
+                                            <span class="bg-blue-100 text-blue-800 px-1 rounded">Cost</span>
+                                            @endif
+                                        </div>
+                                        @if($approvalData['fat_approval_type'] === 'asset' && $purchaseRequest->asset_number)
+                                        <div class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            <span class="font-semibold">Asset Number:</span> 
+                                            <span class="bg-green-100 text-green-800 px-1 rounded font-mono">{{ $purchaseRequest->asset_number }}</span>
+                                        </div>
+                                        @endif
+                                        @endif
                                         @endif
                                         @if(isset($status['notes']) && $status['notes'])
                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -181,6 +200,8 @@
                         </div>
                     </div>
 
+                    
+
                     <!-- Deskripsi -->
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
@@ -202,11 +223,17 @@
                     </div>
 
                     <!-- Items yang Diminta -->
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
+                    <div id="asset-section" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-list-ul mr-2 text-blue-500"></i>
                             Items yang Diminta
                         </h3>
+
+                        @php
+                            // Flags for GA and completion, reused in desktop & mobile rows
+                            $isGAUserInline = Auth::user()->divisi === 'HCGA';
+                            $isPurchasingCompleteInline = $purchaseRequest->areAllItemsCompleted();
+                        @endphp
 
                         <!-- Desktop View -->
                         <div class="hidden lg:block overflow-x-auto">
@@ -227,6 +254,10 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status Barang</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan Purchasing</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan</th>
+                                        @php $gaShowCol = Auth::user()->divisi === 'HCGA'; @endphp
+                                        @if($gaShowCol)
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">No Asset</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
@@ -289,12 +320,48 @@
                                             {{ $item->purchasing_notes ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->notes ?? '-' }}</td>
+                                        @if($gaShowCol)
+                                        <td class="px-4 py-3 text-sm">
+                                            @if($item->is_asset)
+                                                @php
+                                                    $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
+                                                    $assetCount = count($assetCodes);
+                                                    $alreadyGenerated = $assetCount > 0;
+                                                    $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
+                                                @endphp
+                                                @php
+                                                    $canGenerateMore = $assetCount < $item->quantity;
+                                                    $btnLabel = !$alreadyGenerated ? 'Generate' : ($canGenerateMore ? 'Lanjut' : 'Lihat');
+                                                    $btnColor = $canGenerateMore ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
+                                                    $dataCanGenerate = ($canGenerateMore && $canClickGenerate) ? '1' : '0';
+                                                @endphp
+                                                <button type="button"
+                                                    class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $btnColor }} {{ $canClickGenerate ? '' : 'opacity-60 pointer-events-none' }}"
+                                                    data-item-id="{{ $item->id }}"
+                                                    data-item-name="{{ $item->description }}"
+                                                    data-qty="{{ $item->quantity }}"
+                                                    data-can-generate="{{ $dataCanGenerate }}"
+                                                    data-assets="{{ $alreadyGenerated ? implode(', ', $assetCodes) : '' }}"
+                                                    data-existing-count="{{ $assetCount }}"
+                                                    data-purchasing-complete="{{ $isPurchasingCompleteInline ? '1' : '0' }}"
+                                                    onclick="openNoAssetModal(this)">
+                                                    <i class="fas fa-barcode mr-1"></i> {{ $btnLabel }}
+                                                </button>
+                                            @else
+                                                <span class="text-xs text-gray-400">-</span>
+                                            @endif
+                                        </td>
+                                        @endif
                                     </tr>
                                     @endforeach
                                     @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0 || $purchaseRequest->total_estimated_price)
                                     <tr class="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
-                                        <td colspan="{{ $canUpdateStatus ? 7 : 6 }}" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
-                                        <td colspan="{{ $canUpdateStatus ? 4 : 3 }}" class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
+                                        @php
+                                            // align the label cells so that the numeric total sits under Total Harga Barang column
+                                            $leadingCols =  ($canUpdateStatus ? 6 : 5); // until before Harga Est. Satuan
+                                        @endphp
+                                        <td colspan="{{ $leadingCols }}" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
+                                        <td class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
                                             @php
                                                 // Calculate total based on quantity × unit price for each item
                                                 $calculatedTotal = $purchaseRequest->items->sum(function($item) {
@@ -304,6 +371,11 @@
                                             @endphp
                                             Rp {{ number_format($total, 0, ',', '.') }}
                                         </td>
+                                        @php
+                                            // fill the rest of the row with empty cells matching remaining columns after Total Harga Barang
+                                            $trailingCols =  ($gaShowCol ? 4 : 3); // Status, Catatan Purchasing, Catatan, [No Asset optional]
+                                        @endphp
+                                        <td colspan="{{ $trailingCols }}"></td>
                                     </tr>
                                     @endif
                                 </tbody>
@@ -386,6 +458,26 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }} mt-1">
                                                 {{ $item->item_status_label ?? 'Pending' }}
                                             </span>
+                                            @if($isGAUserInline && ($item->is_asset ?? false))
+                                                @php
+                                                    $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
+                                                    $assetCount = count($assetCodes);
+                                                    $alreadyGenerated = $assetCount > 0;
+                                                    $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
+                                                @endphp
+                                                <div class="mt-2">
+                                                    <button type="button"
+                                                        class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $alreadyGenerated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700' }} {{ $canClickGenerate ? '' : 'opacity-60 pointer-events-none' }}"
+                                                        data-item-id="{{ $item->id }}"
+                                                        data-item-name="{{ $item->description }}"
+                                                        data-qty="{{ $item->quantity }}"
+                                                        data-can-generate="{{ $alreadyGenerated ? '0' : '1' }}"
+                                                        data-assets="{{ $alreadyGenerated ? implode(', ', $assetCodes) : '' }}"
+                                                        onclick="openNoAssetModal(this)">
+                                                        <i class="fas fa-barcode mr-1"></i> {{ $alreadyGenerated ? 'Lihat No Asset' : 'No Asset' }}
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
                                         @if($item->purchasing_notes)
                                         <div>
@@ -852,6 +944,73 @@
                         </div>
                         @endif
 
+                        @php
+                            $isFATApproval = $currentApprovalLevel === 'finance_dept' && Auth::user()->divisi === 'FAT';
+                        @endphp
+
+                        @if($isFATApproval)
+                        <!-- FAT Approval Fields -->
+                        <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>
+                                Informasi FAT Approval
+                            </h4>
+                            
+                            <!-- Company Selection -->
+                            <div class="mb-3">
+                                <label for="fat_department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Perusahaan <span class="text-red-500">*</span>
+                                </label>
+                                <select name="fat_department" id="fat_department" required onchange="handleFATDepartmentChange()"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="">Pilih Perusahaan</option>
+                                    <option value="PIS">PIS</option>
+                                    <option value="MMI">MMI</option>
+                                    <option value="AOS">AOS</option>
+                                    <option value="LAINNYA">Lainnya</option>
+                                </select>
+                            </div>
+
+                            <!-- Other Company Input (shown when "Lainnya" is selected) -->
+                            <div class="mb-3 hidden" id="other_department_div">
+                                <label for="other_department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Sebutkan Perusahaan
+                                </label>
+                                <input type="text" name="other_department" id="other_department"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    placeholder="Masukkan nama perusahaan">
+                            </div>
+
+                            <!-- Per-item Asset/Non-Asset Classification -->
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Klasifikasi Item (Asset / Non-Asset) <span class="text-red-500">*</span>
+                                </label>
+                                <div class="space-y-2 max-h-56 overflow-auto pr-1">
+                                    @foreach($purchaseRequest->items as $prItem)
+                                    <div class="flex items-center justify-between bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-3 py-2">
+                                        <div class="text-xs text-gray-700 dark:text-gray-200 flex-1 pr-2">
+                                            <div class="font-medium">{{ $prItem->description }}</div>
+                                            <div class="text-[11px] text-gray-500">Qty: {{ $prItem->quantity }} {{ $prItem->unit ?? '' }}</div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <label class="inline-flex items-center text-xs">
+                                                <input type="radio" name="fat_item_types[{{ $prItem->id }}]" value="asset" class="mr-1">
+                                                Asset
+                                            </label>
+                                            <label class="inline-flex items-center text-xs">
+                                                <input type="radio" name="fat_item_types[{{ $prItem->id }}]" value="non_asset" class="mr-1" checked>
+                                                Non-Asset
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Jika item di-split saat proses berikutnya, status Asset/Non-Asset akan mengikuti item asal.</p>
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="mb-4">
                             <label for="approve_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Catatan Persetujuan (opsional)
@@ -927,6 +1086,40 @@
         </div>
     </div>
     @endif
+
+    <!-- No Asset Modal (kept globally, triggered from item rows) -->
+    <div id="no-asset-modal" class="fixed inset-0 bg-gray-900/50 hidden z-50">
+        <div class="bg-white dark:bg-gray-800 w-[560px] max-w-[92vw] mx-auto mt-24 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100"><i class="fas fa-barcode mr-2 text-green-600"></i><span id="noAssetTitle">No Asset</span></h4>
+                <button class="text-gray-500 hover:text-gray-700" onclick="closeNoAssetModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-3">
+                <div>
+                    <div class="text-sm font-medium text-gray-800 dark:text-gray-100" id="noAssetItemName"></div>
+                    <div class="text-xs text-gray-500" id="noAssetQty"></div>
+                </div>
+
+                <form id="noAssetForm" action="{{ route('purchase-request.assign-asset-numbers', $purchaseRequest) }}" method="POST" class="space-y-3">
+                    @csrf
+                    <input type="hidden" name="__single_item_id" id="noAssetItemId" />
+                    <div id="noAssetInputRow" class="flex items-center gap-3">
+                        <label class="text-sm text-gray-700 dark:text-gray-300 w-32">Kode Dasar</label>
+                        <input type="text" id="noAssetBaseCode" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white" placeholder="Contoh: A1">
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Format hasil: BASE-001, BASE-002, ... sesuai qty.</div>
+                    <div class="flex justify-end">
+                        <button type="submit" id="noAssetSubmitBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm">Generate</button>
+                    </div>
+                </form>
+
+                <div id="noAssetList" class="hidden">
+                    <h5 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-2">Nomor Asset</h5>
+                    <div id="noAssetListGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Update Status Modal -->
     @if($canUpdateStatus)
@@ -1124,6 +1317,24 @@
             document.getElementById('update_description').value = '';
         }
 
+        // FAT Department selection handler
+        function handleFATDepartmentChange() {
+            const departmentSelect = document.getElementById('fat_department');
+            const otherDepartmentDiv = document.getElementById('other_department_div');
+            const otherDepartmentInput = document.getElementById('other_department');
+            
+            if (departmentSelect && otherDepartmentDiv && otherDepartmentInput) {
+                if (departmentSelect.value === 'LAINNYA') {
+                    otherDepartmentDiv.classList.remove('hidden');
+                    otherDepartmentInput.required = true;
+                } else {
+                    otherDepartmentDiv.classList.add('hidden');
+                    otherDepartmentInput.required = false;
+                    otherDepartmentInput.value = '';
+                }
+            }
+        }
+
         // Image preview modal functions
         function showImageModal(imageUrl, imageName) {
             const modal = document.getElementById('image-modal');
@@ -1161,6 +1372,63 @@
 
         function hideDeleteFileModal() {
             document.getElementById('delete-file-modal').classList.add('hidden');
+        }
+
+        // ========= No Asset Modal (GA) =========
+        function openNoAssetModal(btn) {
+            const modal = document.getElementById('no-asset-modal');
+            const itemId = btn.getAttribute('data-item-id');
+            const itemName = btn.getAttribute('data-item-name');
+            const qty = btn.getAttribute('data-qty');
+            const canGenerate = btn.getAttribute('data-can-generate') === '1';
+            const assetsStr = btn.getAttribute('data-assets') || '';
+
+            // Populate header
+            document.getElementById('noAssetItemName').textContent = itemName;
+            document.getElementById('noAssetQty').textContent = `Qty: ${qty}`;
+
+            // Configure form for single item
+            const input = document.getElementById('noAssetBaseCode');
+            input.value = '';
+            input.setAttribute('name', `asset_bases[${itemId}]`);
+            const formRow = document.getElementById('noAssetInputRow');
+            const submitBtn = document.getElementById('noAssetSubmitBtn');
+            const form = document.getElementById('noAssetForm');
+
+            const listWrap = document.getElementById('noAssetList');
+            const listGrid = document.getElementById('noAssetListGrid');
+            listGrid.innerHTML = '';
+
+            if (canGenerate) {
+                // Show form for base input; hide list
+                formRow.classList.remove('hidden');
+                submitBtn.classList.remove('hidden');
+                form.classList.remove('pointer-events-none', 'opacity-60');
+                listWrap.classList.add('hidden');
+                document.getElementById('noAssetTitle').textContent = 'Generate No Asset';
+            } else {
+                // View mode only
+                formRow.classList.add('hidden');
+                submitBtn.classList.add('hidden');
+                form.classList.add('pointer-events-none', 'opacity-60');
+                document.getElementById('noAssetTitle').textContent = 'Daftar No Asset';
+
+                // Render existing asset codes
+                const codes = assetsStr ? assetsStr.split(',') : [];
+                codes.forEach(c => {
+                    const el = document.createElement('div');
+                    el.className = 'text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 font-mono text-green-700 dark:text-green-300';
+                    el.textContent = c.trim();
+                    listGrid.appendChild(el);
+                });
+                listWrap.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeNoAssetModal() {
+            document.getElementById('no-asset-modal').classList.add('hidden');
         }
 
         // Validate file size and type for add file modal

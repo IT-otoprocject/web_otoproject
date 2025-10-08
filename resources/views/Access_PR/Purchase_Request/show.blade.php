@@ -833,6 +833,11 @@
                             </a>
 
                             <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                                <a href="{{ route('purchase-request.print', $purchaseRequest) }}" target="_blank"
+                                    class="inline-flex items-center px-4 py-2 border border-indigo-300 dark:border-indigo-600 rounded-lg text-sm font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                    <i class="fas fa-print mr-2"></i>
+                                    Print
+                                </a>
                                 @if($purchaseRequest->user_id === auth()->id() && $purchaseRequest->status === 'DRAFT')
                                 <a href="{{ route('purchase-request.edit', $purchaseRequest) }}"
                                     class="inline-flex items-center px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg text-sm font-medium text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">

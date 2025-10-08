@@ -146,6 +146,9 @@ Route::get('/spk/{spk_id}/items/json', [SpkController::class, 'itemsJson'])->nam
 // Routes untuk Purchase Request
 Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::resource('purchase-request', App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class);
+    // Cetak/Print Purchase Request ke PDF
+    Route::get('purchase-request/{purchaseRequest}/print', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'print'])
+        ->name('purchase-request.print');
     Route::post('purchase-request/{purchaseRequest}/approve', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
     Route::post('purchase-request/{purchaseRequest}/reject', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'reject'])->name('purchase-request.reject');
     Route::post('purchase-request/{purchaseRequest}/update-status', [App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class, 'updateStatus'])->name('purchase-request.update-status');

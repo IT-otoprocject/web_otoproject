@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseRequestController extends Controller
 {
@@ -207,6 +208,40 @@ class PurchaseRequestController extends Controller
             'canApprove',
             'canUpdateStatus'
         ));
+    }
+
+    // Generate PDF untuk Purchase Request
+    public function print(PurchaseRequest $purchaseRequest)
+    {
+        $purchaseRequest->load(['user', 'items', 'location']);
+
+        $user = Auth::user();
+        if (!$purchaseRequest->canBeViewedByUser($user)) {
+            abort(403, 'Unauthorized');
+        }
+
+        $approvalStatus = $purchaseRequest->getApprovalStatus();
+
+        // Hitung total estimasi (fallback jika field total_estimated_price kosong)
+        $calculatedTotal = $purchaseRequest->items->sum(function($item) {
+            return ($item->quantity ?? 0) * ($item->estimated_price ?? 0);
+        });
+        $total = $purchaseRequest->total_estimated_price ?? $calculatedTotal;
+
+        $pdf = Pdf::loadView('Access_PR.Purchase_Request.print', [
+            'purchaseRequest' => $purchaseRequest,
+            'approvalStatus' => $approvalStatus,
+            'total' => $total,
+        ])->setPaper('a4');
+
+        // Sanitize filename: remove characters not allowed in Content-Disposition (e.g. '/' and '\\')
+        $baseName = $purchaseRequest->pr_number ?: ('PR-' . $purchaseRequest->id);
+        $safeBase = preg_replace('/[^A-Za-z0-9._-]+/', '_', $baseName);
+        if (!$safeBase) {
+            $safeBase = 'PR_' . $purchaseRequest->id;
+        }
+        $filename = 'PR_' . $safeBase . '.pdf';
+        return $pdf->stream($filename);
     }
 
     public function approve(Request $request, PurchaseRequest $purchaseRequest)

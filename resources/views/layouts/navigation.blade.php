@@ -41,7 +41,7 @@
                         
                         {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                         @hasAccess('pr')
-                            @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*'))
+                            @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*') || request()->routeIs('payment-methods.*'))
                                 <x-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
                                     {{ __('Purchase Request') }}
                                 </x-nav-link>
@@ -50,7 +50,8 @@
                                 @php
                                     $canAccessPrCategories = Auth::user()->hasAccess('pr_categories');
                                     $canAccessMasterLocation = Auth::user()->hasAccess('master_location');
-                                    $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation;
+                                    $canAccessPaymentMethods = Auth::user()->hasAccess('payment_method');
+                                    $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation || $canAccessPaymentMethods;
                                 @endphp
                                 
                                 @if ($showConfiguration)
@@ -58,7 +59,7 @@
                                         <x-dropdown align="left" width="48">
                                             <x-slot name="trigger">
                                                 <button class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none 
-                                                    {{ request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*') 
+                                                    {{ request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*') || request()->routeIs('payment-methods.*') 
                                                         ? 'border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 focus:border-indigo-700' 
                                                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700' 
                                                     }} text-base lg:text-lg">
@@ -83,6 +84,13 @@
                                                     <x-dropdown-link :href="route('master-locations.index')" class="flex items-center">
                                                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                                                         {{ __('Master Location') }}
+                                                    </x-dropdown-link>
+                                                @endif
+
+                                                @if ($canAccessPaymentMethods)
+                                                    <x-dropdown-link :href="route('payment-methods.index')" class="flex items-center">
+                                                        <i class="fas fa-credit-card mr-2 text-emerald-600"></i>
+                                                        {{ __('Payment Methods') }}
                                                     </x-dropdown-link>
                                                 @endif
                                             </x-slot>
@@ -181,7 +189,7 @@
                 
                 {{-- PR Module Navigation - hanya muncul ketika sudah masuk ke modul PR --}}
                 @hasAccess('pr')
-                    @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*'))
+                    @if (request()->routeIs('purchase-request.*') || request()->routeIs('pr-categories.*') || request()->routeIs('master-locations.*') || request()->routeIs('payment-methods.*'))
                         <x-responsive-nav-link :href="route('purchase-request.index')" :active="request()->routeIs('purchase-request.*')" class="text-base lg:text-lg">
                             {{ __('Purchase Request') }}
                         </x-responsive-nav-link>
@@ -190,7 +198,8 @@
                         @php
                             $canAccessPrCategories = Auth::user()->hasAccess('pr_categories');
                             $canAccessMasterLocation = Auth::user()->hasAccess('master_location');
-                            $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation;
+                            $canAccessPaymentMethods = Auth::user()->hasAccess('payment_method');
+                            $showConfiguration = $canAccessPrCategories || $canAccessMasterLocation || $canAccessPaymentMethods;
                         @endphp
                         
                         @if ($showConfiguration)
@@ -208,6 +217,13 @@
                                     <x-responsive-nav-link :href="route('master-locations.index')" :active="request()->routeIs('master-locations.*')" class="text-sm pl-4">
                                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                                         {{ __('Master Location') }}
+                                    </x-responsive-nav-link>
+                                @endif
+
+                                @if ($canAccessPaymentMethods)
+                                    <x-responsive-nav-link :href="route('payment-methods.index')" :active="request()->routeIs('payment-methods.*')" class="text-sm pl-4">
+                                        <i class="fas fa-credit-card mr-2 text-emerald-600"></i>
+                                        {{ __('Payment Methods') }}
                                     </x-responsive-nav-link>
                                 @endif
                             </div>

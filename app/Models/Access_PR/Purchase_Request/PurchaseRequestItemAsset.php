@@ -17,8 +17,13 @@ class PurchaseRequestItemAsset extends Model
         'item_description',
         'base_code',
         'asset_code',
+    'asset_pajak',
         'sequence_no',
         'created_by',
+    ];
+
+    protected $casts = [
+        'asset_pajak' => 'boolean',
     ];
 
     public function purchaseRequest()

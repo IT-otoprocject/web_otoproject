@@ -242,19 +242,10 @@
                         @if(isset($gaAssetPendingCount) && $gaAssetPendingCount > 0)
                         <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
                             <p class="text-yellow-800 dark:text-yellow-200 text-sm">
-                                <i class="fas fa-barcode mr-1"></i>
-                                Ada <strong>{{ $gaAssetPendingCount }}</strong> PR yang memerlukan <strong>Generate Nomor Asset</strong> (purchasing selesai dan ada item asset).
+                                <i class="fas fa-tasks mr-1"></i>
+                                Ada <strong>{{ $gaAssetPendingCount }}</strong> PR yang memerlukan <strong>Action HCGA</strong>: pilih Generate Nomor Asset atau tandai <strong>Non-Asset GA</strong> per item (purchasing selesai).
                             </p>
-                            <p class="text-yellow-700 dark:text-yellow-300 text-xs mt-1">Buka detail PR tersebut, isi kode dasar (mis. A1), lalu klik Generate.</p>
-                        </div>
-                        @endif
-                        @if(isset($gaAssetPendingCount) && $gaAssetPendingCount > 0)
-                        <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
-                            <p class="text-yellow-800 dark:text-yellow-200 text-sm">
-                                <i class="fas fa-barcode mr-1"></i>
-                                Ada <strong>{{ $gaAssetPendingCount }}</strong> PR yang memerlukan <strong>Generate Nomor Asset</strong> karena purchasing sudah selesai dan terdapat item bertipe asset.
-                            </p>
-                            <p class="text-yellow-700 dark:text-yellow-300 text-xs mt-1">Buka detail PR tersebut untuk mengisi kode dasar, lalu klik Generate.</p>
+                            <p class="text-yellow-700 dark:text-yellow-300 text-xs mt-1">Buka detail PR, pilih item: isi kode dasar (mis. A1) lalu Generate, atau klik Non-Asset GA.</p>
                         </div>
                         @endif
                     </div>
@@ -338,13 +329,13 @@
                                             </span>
                                             @endif
                                             @if(auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager','spv','staff']))
-                                                @if(isset($pr->needs_asset_numbers) && $pr->needs_asset_numbers)
+                                                @if(isset($pr->needs_ga_action) && $pr->needs_ga_action)
                                                 <span class="inline-block px-2 py-1 bg-yellow-500 text-white text-xs rounded animate-pulse border border-yellow-600">
-                                                    <i class="fas fa-barcode mr-1"></i>Generate Asset
+                                                    <i class="fas fa-tasks mr-1"></i>Action HCGA
                                                 </span>
-                                                @elseif(isset($pr->has_asset_numbers) && $pr->has_asset_numbers)
+                                                @elseif(isset($pr->has_any_assets) && $pr->has_any_assets)
                                                 <span class="inline-block px-2 py-1 bg-green-600 text-white text-xs rounded">
-                                                    <i class="fas fa-barcode mr-1"></i>Asset Ada
+                                                    <i class="fas fa-barcode mr-1"></i>Nomor Asset Ada
                                                 </span>
                                                 @endif
                                             @endif
@@ -387,11 +378,11 @@
                                             </a>
 
                                             @if(auth()->user()->divisi === 'HCGA' && in_array(auth()->user()->level, ['manager','spv','staff']))
-                                                @if(isset($pr->needs_asset_numbers) && $pr->needs_asset_numbers)
+                                                @if(isset($pr->needs_ga_action) && $pr->needs_ga_action)
                                                 <a href="{{ route('purchase-request.show', $pr) }}#asset-section"
                                                    class="inline-block px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors duration-200"
-                                                   title="Generate Nomor Asset">
-                                                    <i class="fas fa-magic"></i>
+                                                   title="Action HCGA">
+                                                    <i class="fas fa-tasks"></i>
                                                 </a>
                                                 @endif
                                             @endif

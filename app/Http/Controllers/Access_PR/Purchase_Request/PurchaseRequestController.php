@@ -50,25 +50,56 @@ class PurchaseRequestController extends Controller
             );
         }
 
-        // For GA users, compute PRs that need asset number generation
+        // For GA users, compute PRs pending GA decision (generate or mark non-asset GA)
         $gaAssetPendingCount = 0;
         $isGA = ($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']));
         if ($isGA) {
-            // Attach computed flags per PR (needsAssetNumbers, hasAssetNumbers)
+            // Attach computed flags per PR
             foreach ($purchaseRequests as $pr) {
-                // Sum required assets = sum of quantities for asset items
-                $required = $pr->items->where('is_asset', true)->sum(function($it){ return (int) $it->quantity; });
-                // Current generated assets for this PR
-                $current = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_id', $pr->id)->count();
-                $pr->required_asset_count = $required;
-                $pr->current_asset_count = $current;
-                $pr->needs_asset_numbers = ($required > 0) && ($current < $required) && $pr->areAllItemsCompleted();
-                $pr->has_asset_numbers = $current > 0;
-                if ($pr->needs_asset_numbers) { $gaAssetPendingCount++; }
+                // Items that still require GA decision: no item-level GA flag and no pr_item_assets records
+                $pendingItems = $pr->items->filter(function($it) use ($pr) {
+                    $hasAssets = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $it->id)->exists();
+                    return is_null($it->is_asset_hcga) && !$hasAssets;
+                });
+                $pr->ga_pending_item_count = $pendingItems->count();
+                $pr->has_any_assets = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_id', $pr->id)->exists();
+                $pr->needs_ga_action = ($pr->ga_pending_item_count > 0) && $pr->areAllItemsCompleted();
+                if ($pr->needs_ga_action) { $gaAssetPendingCount++; }
             }
         }
 
         return view('Access_PR.Purchase_Request.index', compact('purchaseRequests', 'gaAssetPendingCount'));
+    }
+
+    // GA marks specific items as non-asset at GA level (without generating numbers)
+    public function markItemsNonAssetGA(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $user = Auth::user();
+        if (!($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']))) {
+            return back()->with('error', 'Hanya tim GA yang dapat menentukan status asset/non-asset GA.');
+        }
+        if (!$purchaseRequest->areAllItemsCompleted()) {
+            return back()->with('error', 'Keputusan GA hanya dapat diinput setelah purchasing selesai.');
+        }
+
+        $request->validate([
+            'non_asset_ga_item_ids' => 'required|array',
+            'non_asset_ga_item_ids.*' => 'integer|exists:purchase_request_items,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $itemIds = $request->input('non_asset_ga_item_ids', []);
+            $items = $purchaseRequest->items()->whereIn('id', $itemIds)->get();
+            foreach ($items as $item) {
+                $item->update(['is_asset_hcga' => false]);
+            }
+            DB::commit();
+            return back()->with('success', 'Barang dipilih telah ditandai Non-Asset (GA).');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyimpan Non-Asset GA: ' . $e->getMessage());
+        }
     }
 
     public function create()
@@ -398,7 +429,7 @@ class PurchaseRequestController extends Controller
     public function updateStatus(Request $request, PurchaseRequest $purchaseRequest)
     {
         $request->validate([
-            'update_type' => 'required|in:ITEMS_PROCESSED,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,CLOSED',
+            'update_type' => 'required|in:ITEMS_PROCESSED,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,COMPLAIN,CLOSED',
             'description' => 'required|string|max:1000',
             'data' => 'nullable|array'
         ]);
@@ -641,7 +672,7 @@ class PurchaseRequestController extends Controller
         $request->validate([
             'item_ids' => 'required|array',
             'item_ids.*' => 'exists:purchase_request_items,id',
-            'item_status' => 'required|in:PENDING,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,TERSEDIA_DI_GA,CLOSED',
+            'item_status' => 'required|in:PENDING,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,COMPLAIN,TERSEDIA_DI_GA,CLOSED',
             'purchasing_notes' => 'nullable|string|max:1000'
         ]);
 
@@ -1170,18 +1201,22 @@ class PurchaseRequestController extends Controller
             return back()->with('error', 'Nomor asset hanya dapat diinput setelah purchasing selesai.');
         }
 
-        // Validate payload: base_code per item id
+        // Validate payload: base_code per item id (optional; GA can choose any items)
         $request->validate([
-            'asset_bases' => 'required|array',
+            'asset_bases' => 'nullable|array',
             'asset_bases.*' => 'nullable|string|max:20|regex:/^[A-Za-z0-9\-_]+$/',
         ], [
             'asset_bases.*.regex' => 'Kode dasar asset hanya boleh huruf, angka, dash (-), underscore (_).',
         ]);
 
-        $items = $purchaseRequest->items()->where('is_asset', true)->get();
-        if ($items->isEmpty()) {
-            return back()->with('error', 'Tidak ada item bertipe asset pada PR ini.');
+        $baseInputs = $request->input('asset_bases', []);
+        if (empty($baseInputs)) {
+            return back()->with('info', 'Tidak ada nomor asset yang diinput.');
         }
+
+        // Fetch only items that GA provided base codes for (no longer limited to FAT asset selection)
+        $itemIds = array_keys($baseInputs);
+        $items = $purchaseRequest->items()->whereIn('id', $itemIds)->get();
 
         DB::beginTransaction();
         try {
@@ -1203,6 +1238,11 @@ class PurchaseRequestController extends Controller
                     ->first();
                 $startSeq = $last ? ($last->sequence_no + 1) : 1;
 
+                // Optionally convert GA decision from Non-Asset GA to Asset GA upon generate (confirmed from UI)
+                if ($request->boolean("convert_non_asset_ga.".$item->id)) {
+                    $item->update(['is_asset_hcga' => true]);
+                }
+
                 // Generate only the remaining quantities for this item
                 $toGenerate = max(0, $qty - $existingForItem);
                 if ($toGenerate === 0) { continue; }
@@ -1218,6 +1258,7 @@ class PurchaseRequestController extends Controller
                         'item_description' => $item->description,
                         'base_code' => $base,
                         'asset_code' => $assetCode,
+                        'asset_pajak' => (bool) ($item->is_asset ?? false),
                         'sequence_no' => $seq,
                         'created_by' => $user->id,
                     ]);
@@ -1225,7 +1266,7 @@ class PurchaseRequestController extends Controller
             }
 
             DB::commit();
-            return back()->with('success', 'Nomor asset berhasil digenerate untuk item asset.');
+            return back()->with('success', 'Nomor asset berhasil direkam.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal generate nomor asset: ' . $e->getMessage());

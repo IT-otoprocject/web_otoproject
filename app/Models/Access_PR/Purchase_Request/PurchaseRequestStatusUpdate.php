@@ -44,6 +44,7 @@ class PurchaseRequestStatusUpdate extends Model
             'PO_CREATED' => 'PO ke Vendor',
             'GOODS_RECEIVED' => 'Barang Diterima',
             'GOODS_RETURNED' => 'Barang Dikembalikan',
+            'COMPLAIN' => 'Complain',
             'TERSEDIA_DI_GA' => 'Tersedia di GA',
             'CLOSED' => 'Selesai'
         ];

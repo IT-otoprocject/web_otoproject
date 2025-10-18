@@ -18,11 +18,14 @@ class PurchaseRequestItem extends Model
         'notes',
     'item_status',
     'purchasing_notes',
-    'is_asset'
+    'is_asset',
+    'is_asset_hcga'
     ];
 
     protected $casts = [
-        'estimated_price' => 'decimal:2'
+        'estimated_price' => 'decimal:2',
+        'is_asset' => 'boolean',
+        'is_asset_hcga' => 'boolean',
     ];
 
     // Get item status labels
@@ -35,6 +38,7 @@ class PurchaseRequestItem extends Model
             'PO_CREATED' => 'PO ke Vendor',
             'GOODS_RECEIVED' => 'Barang Diterima',
             'GOODS_RETURNED' => 'Barang Dikembalikan',
+            'COMPLAIN' => 'Complain',
             'TERSEDIA_DI_GA' => 'Tersedia di GA',
             'REJECTED' => 'Ditolak',
             'CLOSED' => 'Selesai'

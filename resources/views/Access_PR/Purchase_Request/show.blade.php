@@ -306,15 +306,23 @@
                                                     'PO_CREATED' => 'bg-purple-100 text-purple-800',
                                                     'GOODS_RECEIVED' => 'bg-green-100 text-green-800',
                                                     'GOODS_RETURNED' => 'bg-red-100 text-red-800',
+                                                    'COMPLAIN' => 'bg-orange-100 text-orange-800',
                                                     'TERSEDIA_DI_GA' => 'bg-emerald-100 text-emerald-800',
                                                     'REJECTED' => 'bg-red-500 text-white font-medium',
                                                     'CLOSED' => 'bg-gray-100 text-gray-800',
                                                     default => 'bg-gray-100 text-gray-800'
                                                 };
                                             @endphp
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
-                                                {{ $item->item_status_label ?? 'Pending' }}
-                                            </span>
+                                            <div class="flex items-center flex-wrap gap-2">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
+                                                    {{ $item->item_status_label ?? 'Pending' }}
+                                                </span>
+                                                @if($item->is_asset)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-amber-400 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-200">
+                                                        Asset Pajak
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                             {{ $item->purchasing_notes ?? '-' }}
@@ -322,21 +330,28 @@
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->notes ?? '-' }}</td>
                                         @if($gaShowCol)
                                         <td class="px-4 py-3 text-sm">
-                                            @if($item->is_asset)
-                                                @php
-                                                    $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
-                                                    $assetCount = count($assetCodes);
-                                                    $alreadyGenerated = $assetCount > 0;
-                                                    $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
-                                                @endphp
-                                                @php
-                                                    $canGenerateMore = $assetCount < $item->quantity;
-                                                    $btnLabel = !$alreadyGenerated ? 'Generate' : ($canGenerateMore ? 'Lanjut' : 'Lihat');
-                                                    $btnColor = $canGenerateMore ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
-                                                    $dataCanGenerate = ($canGenerateMore && $canClickGenerate) ? '1' : '0';
-                                                @endphp
+                                            @php
+                                                $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
+                                                $assetCount = count($assetCodes);
+                                                $alreadyGenerated = $assetCount > 0;
+                                                // Allow GA to click when purchasing is complete or if already has records (to view)
+                                                $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
+                                                $canGenerateMore = $assetCount < $item->quantity;
+                                                $btnLabel = !$alreadyGenerated ? 'Generate' : ($canGenerateMore ? 'Lanjut' : 'Lihat');
+                                                $btnColor = $canGenerateMore ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
+                                                $dataCanGenerate = ($canGenerateMore && $canClickGenerate) ? '1' : '0';
+                                            @endphp
+                                            @php 
+                                                $isNonAssetGA = ($item->is_asset_hcga === false);
+                                                if ($isNonAssetGA) { 
+                                                    // Override to conversion intent UI
+                                                    $btnLabel = 'Ubah jadi Asset';
+                                                    $btnColor = 'bg-yellow-600 hover:bg-yellow-700';
+                                                }
+                                            @endphp
+                                            <div class="flex items-center gap-2">
                                                 <button type="button"
-                                                    class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $btnColor }} {{ $canClickGenerate ? '' : 'opacity-60 pointer-events-none' }}"
+                                                    class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $btnColor }} {{ $canClickGenerate ? '' : 'opacity-60' }}"
                                                     data-item-id="{{ $item->id }}"
                                                     data-item-name="{{ $item->description }}"
                                                     data-qty="{{ $item->quantity }}"
@@ -344,12 +359,28 @@
                                                     data-assets="{{ $alreadyGenerated ? implode(', ', $assetCodes) : '' }}"
                                                     data-existing-count="{{ $assetCount }}"
                                                     data-purchasing-complete="{{ $isPurchasingCompleteInline ? '1' : '0' }}"
+                                                    data-is-non-asset-ga="{{ $isNonAssetGA ? '1' : '0' }}"
                                                     onclick="openNoAssetModal(this)">
                                                     <i class="fas fa-barcode mr-1"></i> {{ $btnLabel }}
                                                 </button>
-                                            @else
-                                                <span class="text-xs text-gray-400">-</span>
-                                            @endif
+
+                                                @if($isPurchasingCompleteInline && !$alreadyGenerated && !$isNonAssetGA)
+                                                <form action="{{ route('purchase-request.mark-non-asset-ga', $purchaseRequest) }}" method="POST" class="inline-block"
+                                                      onsubmit="return confirm('Tandai item ini sebagai Non-Asset GA?')">
+                                                    @csrf
+                                                    <input type="hidden" name="non_asset_ga_item_ids[]" value="{{ $item->id }}">
+                                                    <button type="submit" class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white bg-gray-600 hover:bg-gray-700">
+                                                        <i class="fas fa-ban mr-1"></i> Non-Asset GA
+                                                    </button>
+                                                </form>
+                                                @endif
+
+                                                @if($isNonAssetGA)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                                        Non-Asset GA
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                         @endif
                                     </tr>
@@ -458,24 +489,57 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }} mt-1">
                                                 {{ $item->item_status_label ?? 'Pending' }}
                                             </span>
-                                            @if($isGAUserInline && ($item->is_asset ?? false))
+                                            @if($item->is_asset)
+                                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-700">
+                                                    Asset Pajak
+                                                </span>
+                                            @endif
+                        @if($isGAUserInline)
                                                 @php
-                                                    $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
-                                                    $assetCount = count($assetCodes);
-                                                    $alreadyGenerated = $assetCount > 0;
-                                                    $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
+                            $assetCodes = method_exists($item, 'assets') ? $item->assets->pluck('asset_code')->toArray() : \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $item->id)->pluck('asset_code')->toArray();
+                            $assetCount = count($assetCodes);
+                            $alreadyGenerated = $assetCount > 0;
+                            $canClickGenerate = $isPurchasingCompleteInline || $alreadyGenerated;
                                                 @endphp
-                                                <div class="mt-2">
+                                                @php
+                                                    $canGenerateMoreCard = $assetCount < $item->quantity;
+                                                    $dataCanGenerateCard = ($canGenerateMoreCard && $isPurchasingCompleteInline) ? '1' : '0';
+                                                    $isNonAssetGA = ($item->is_asset_hcga === false);
+                                                @endphp
+                                                <div class="mt-2 flex items-center gap-2">
+                                                    @php 
+                                                        $btnLabelCard = $alreadyGenerated ? 'Lihat No Asset' : 'No Asset';
+                                                        $btnColorCard = $alreadyGenerated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700';
+                                                        if ($isNonAssetGA) { $btnLabelCard = 'Ubah jadi Asset'; $btnColorCard = 'bg-yellow-600 hover:bg-yellow-700'; }
+                                                    @endphp
                                                     <button type="button"
-                                                        class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $alreadyGenerated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700' }} {{ $canClickGenerate ? '' : 'opacity-60 pointer-events-none' }}"
+                                                        class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white {{ $btnColorCard }} {{ $canClickGenerate ? '' : 'opacity-60' }}"
                                                         data-item-id="{{ $item->id }}"
                                                         data-item-name="{{ $item->description }}"
                                                         data-qty="{{ $item->quantity }}"
-                                                        data-can-generate="{{ $alreadyGenerated ? '0' : '1' }}"
+                                                        data-can-generate="{{ $dataCanGenerateCard }}"
                                                         data-assets="{{ $alreadyGenerated ? implode(', ', $assetCodes) : '' }}"
+                                                        data-is-non-asset-ga="{{ $isNonAssetGA ? '1' : '0' }}"
                                                         onclick="openNoAssetModal(this)">
-                                                        <i class="fas fa-barcode mr-1"></i> {{ $alreadyGenerated ? 'Lihat No Asset' : 'No Asset' }}
+                                                        <i class="fas fa-barcode mr-1"></i> {{ $btnLabelCard }}
                                                     </button>
+
+                                                    @if($isPurchasingCompleteInline && !$alreadyGenerated && !$isNonAssetGA)
+                                                    <form action="{{ route('purchase-request.mark-non-asset-ga', $purchaseRequest) }}" method="POST" class="inline-block"
+                                                          onsubmit="return confirm('Tandai item ini sebagai Non-Asset GA?')">
+                                                        @csrf
+                                                        <input type="hidden" name="non_asset_ga_item_ids[]" value="{{ $item->id }}">
+                                                        <button type="submit" class="inline-flex items-center px-2.5 py-1.5 rounded text-xs text-white bg-gray-600 hover:bg-gray-700">
+                                                            <i class="fas fa-ban mr-1"></i> Non-Asset GA
+                                                        </button>
+                                                    </form>
+                                                    @endif
+
+                                                    @if($isNonAssetGA)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                                        Non-Asset GA
+                                                    </span>
+                                                    @endif
                                                 </div>
                                             @endif
                                         </div>
@@ -1156,6 +1220,7 @@
                                 <option value="PO_CREATED">PO ke Vendor</option>
                                 <option value="GOODS_RECEIVED">Barang Diterima</option>
                                 <option value="GOODS_RETURNED">Barang Dikembalikan</option>
+                                <option value="COMPLAIN">Complain</option>
                                 <option value="CLOSED">Completed</option>
                             </select>
                         </div>
@@ -1387,6 +1452,7 @@
             const qty = btn.getAttribute('data-qty');
             const canGenerate = btn.getAttribute('data-can-generate') === '1';
             const assetsStr = btn.getAttribute('data-assets') || '';
+            const isNonAssetGA = btn.getAttribute('data-is-non-asset-ga') === '1';
 
             // Populate header
             document.getElementById('noAssetItemName').textContent = itemName;
@@ -1411,6 +1477,23 @@
                 form.classList.remove('pointer-events-none', 'opacity-60');
                 listWrap.classList.add('hidden');
                 document.getElementById('noAssetTitle').textContent = 'Generate No Asset';
+
+                // Attach submit confirm if converting from Non-Asset GA to Asset GA
+                form.onsubmit = (e) => {
+                    // remove any previous hidden input
+                    const prev = form.querySelector(`input[name="convert_non_asset_ga[${itemId}]"]`);
+                    if (prev) prev.remove();
+                    if (isNonAssetGA) {
+                        const proceed = confirm('Item ini sudah ditandai Non-Asset GA. Ubah menjadi Asset GA dan generate nomor?');
+                        if (!proceed) { e.preventDefault(); return false; }
+                        const hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = `convert_non_asset_ga[${itemId}]`;
+                        hidden.value = '1';
+                        form.appendChild(hidden);
+                    }
+                    return true;
+                };
             } else {
                 // View mode only
                 formRow.classList.add('hidden');

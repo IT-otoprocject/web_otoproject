@@ -673,7 +673,8 @@ class PurchaseRequestController extends Controller
             'item_ids' => 'required|array',
             'item_ids.*' => 'exists:purchase_request_items,id',
             'item_status' => 'required|in:PENDING,VENDOR_SEARCH,PRICE_COMPARISON,PO_CREATED,GOODS_RECEIVED,GOODS_RETURNED,COMPLAIN,TERSEDIA_DI_GA,CLOSED',
-            'purchasing_notes' => 'nullable|string|max:1000'
+            'purchasing_notes' => 'nullable|string|max:1000',
+            'payment_method_id' => 'nullable|exists:payment_methods,id'
         ]);
 
         $user = Auth::user();
@@ -701,12 +702,25 @@ class PurchaseRequestController extends Controller
                 return back()->with('error', 'Tidak ada item yang bisa diupdate. Item yang dipilih mungkin sudah selesai, tersedia di GA, atau sudah final.');
             }
 
+            // If marking as GOODS_RECEIVED, require a valid active payment method
+            $selectedPaymentMethodId = null;
+            if ($request->item_status === 'GOODS_RECEIVED') {
+                $request->validate([
+                    'payment_method_id' => 'required|exists:payment_methods,id'
+                ]);
+                $selectedPaymentMethodId = (int) $request->payment_method_id;
+            }
+
             // Update selected items
             foreach ($items as $item) {
-                $item->update([
+                $update = [
                     'item_status' => $request->item_status,
                     'purchasing_notes' => $request->purchasing_notes
-                ]);
+                ];
+                if ($selectedPaymentMethodId) {
+                    $update['payment_method_id'] = $selectedPaymentMethodId;
+                }
+                $item->update($update);
             }
 
             // Create detailed description for bulk update
@@ -717,6 +731,12 @@ class PurchaseRequestController extends Controller
             $statusLabel = PurchaseRequestItem::getItemStatusLabels()[$request->item_status] ?? $request->item_status;
             
             $description = "Bulk update status menjadi \"{$statusLabel}\" untuk " . count($items) . " item:\n" . $itemDescriptions;
+            if ($selectedPaymentMethodId) {
+                $pmName = optional(\App\Models\Access_PR\PaymentMethod::find($selectedPaymentMethodId))->name;
+                if ($pmName) {
+                    $description .= "\n\nPayment Method: {$pmName}";
+                }
+            }
             if ($request->purchasing_notes) {
                 $description .= "\n\nCatatan Purchasing: " . $request->purchasing_notes;
             }
@@ -731,7 +751,8 @@ class PurchaseRequestController extends Controller
                     'item_descriptions' => $items->pluck('description')->toArray(),
                     'purchasing_notes' => $request->purchasing_notes,
                     'bulk_update' => true,
-                    'updated_items_count' => count($items)
+                    'updated_items_count' => count($items),
+                    'payment_method_id' => $selectedPaymentMethodId
                 ],
                 'updated_by' => $user->id
             ]);

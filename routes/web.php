@@ -169,6 +169,10 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::resource('master-locations', App\Http\Controllers\Access_PR\MasterLocationController::class);
     Route::post('master-locations/{masterLocation}/toggle-status', [App\Http\Controllers\Access_PR\MasterLocationController::class, 'toggleStatus'])->name('master-locations.toggle-status');
     Route::get('api/master-locations', [App\Http\Controllers\Access_PR\MasterLocationController::class, 'getLocations'])->name('api.master-locations');
+
+    // Routes untuk Payment Methods (Configuration PR)
+    Route::resource('payment-methods', App\Http\Controllers\Access_PR\PaymentMethodController::class)->except(['show']);
+    Route::post('payment-methods/{paymentMethod}/toggle-status', [App\Http\Controllers\Access_PR\PaymentMethodController::class, 'toggleStatus'])->name('payment-methods.toggle-status');
 });
 
 require __DIR__ . '/auth.php';

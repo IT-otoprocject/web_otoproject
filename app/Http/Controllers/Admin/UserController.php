@@ -154,6 +154,7 @@ class UserController extends Controller
             'pr' => 'Purchase Request',
             'pr_categories' => 'Rules Kategori PR',
             'master_location' => 'Master Location',
+            'payment_method' => 'Payment Methods (PR)',
             'spk_management' => 'SPK Management', 
             'inventory' => 'Inventory',
             'reports' => 'Reports',

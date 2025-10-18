@@ -270,7 +270,7 @@
                                                 $canSelectItem = !in_array($item->item_status, $completedStatuses);
                                             @endphp
                                             @if($canSelectItem)
-                                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" data-desc="{{ $item->description }}" data-qty="{{ $item->quantity }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                             @else
                                             <span class="text-xs text-gray-400 italic">Selesai</span>
                                             @endif
@@ -427,7 +427,7 @@
                                         $canSelectItem = !in_array($item->item_status, $completedStatuses);
                                     @endphp
                                     @if($canSelectItem)
-                                    <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" data-desc="{{ $item->description }}" data-qty="{{ $item->quantity }}" class="item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     @else
                                     <span class="text-xs text-gray-400 italic">Selesai</span>
                                     @endif
@@ -645,6 +645,7 @@
                                     @csrf
                                     <!-- Hidden container for selected item IDs -->
                                     <div id="selectedItemsContainer"></div>
+                                    <input type="hidden" id="hidden_payment_method_id" name="payment_method_id" value="">
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                         <div>
@@ -658,6 +659,8 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <!-- Inline payment method (kept hidden; selection via modal) -->
+                                        <div id="paymentMethodContainer" class="hidden md:col-span-1"></div>
                                         <div class="md:col-span-2">
                                             <label for="purchasing_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Keterangan dari Purchasing</label>
                                             <textarea name="purchasing_notes" id="purchasing_notes" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Masukkan keterangan (opsional)"></textarea>
@@ -1768,11 +1771,95 @@
             const itemStatus = document.getElementById('item_status').value;
             const statusLabel = document.getElementById('item_status').selectedOptions[0].text;
             
+            // If GOODS_RECEIVED, ensure payment method selected
+            if (itemStatus === 'GOODS_RECEIVED') {
+                const pmId = document.getElementById('hidden_payment_method_id').value;
+                if (!pmId) {
+                    e.preventDefault();
+                    openPaymentMethodModal(checkboxes);
+                    return false;
+                }
+            }
+            
             if (!confirm(`Apakah Anda yakin ingin mengupdate ${checkboxes.length} item menjadi status "${statusLabel}"?`)) {
                 e.preventDefault();
                 return false;
             }
         });
+
+        // Toggle payment method container visibility when status changes
+        document.getElementById('item_status')?.addEventListener('change', function() {
+            const isGoodsReceived = this.value === 'GOODS_RECEIVED';
+            const pmContainer = document.getElementById('paymentMethodContainer');
+            if (pmContainer) {
+                pmContainer.classList.toggle('hidden', !isGoodsReceived);
+            }
+        });
+
+        // Payment method modal logic
+        function openPaymentMethodModal(checkboxes) {
+            let modal = document.getElementById('payment-method-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'payment-method-modal';
+                modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50';
+                modal.innerHTML = `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                            <i class="fas fa-credit-card mr-2 text-emerald-600"></i>
+                            Pilih Payment Method
+                        </h3>
+                        <div id="pm-items" class="max-h-40 overflow-auto mb-4 p-2 bg-gray-50 dark:bg-gray-700 rounded"></div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
+                            <select id="pm-select" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                <option value="">Pilih Metode Pembayaran</option>
+                                @foreach(\App\Models\Access_PR\PaymentMethod::where('is_active', true)->orderBy('name')->get() as $pm)
+                                    <option value="{{ $pm->id }}">{{ $pm->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" id="pm-cancel" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded">Batal</button>
+                            <button type="button" id="pm-apply" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded">Terapkan</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (ev) => { if (ev.target === modal) closePaymentMethodModal(); });
+                document.getElementById('pm-cancel').addEventListener('click', closePaymentMethodModal);
+                document.getElementById('pm-apply').addEventListener('click', applyPaymentMethodSelection);
+            }
+
+            // Render selected items
+            const container = document.getElementById('pm-items');
+            container.innerHTML = '';
+            checkboxes.forEach(cb => {
+                const row = document.createElement('div');
+                row.className = 'text-sm text-gray-700 dark:text-gray-200 py-1';
+                row.textContent = `• ${cb.dataset.desc || 'Item'} (Qty: ${cb.dataset.qty || '-'})`;
+                container.appendChild(row);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePaymentMethodModal() {
+            const modal = document.getElementById('payment-method-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function applyPaymentMethodSelection() {
+            const select = document.getElementById('pm-select');
+            const val = select?.value;
+            if (!val) {
+                alert('Pilih metode pembayaran terlebih dahulu.');
+                return;
+            }
+            document.getElementById('hidden_payment_method_id').value = val;
+            closePaymentMethodModal();
+            // Resubmit form after selection
+            document.getElementById('bulkUpdateForm').requestSubmit();
+        }
 
         // GA approval quantity input toggle
         function toggleQuantityInput(itemId) {

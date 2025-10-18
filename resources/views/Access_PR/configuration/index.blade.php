@@ -87,6 +87,37 @@
                         </div>
                         @endif
 
+                        <!-- Payment Methods Configuration -->
+                        @if(Auth::user()->hasAccess('payment_method'))
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/30 rounded-lg border border-emerald-200 dark:border-emerald-800 hover:shadow-lg transition-shadow duration-200">
+                            <div class="p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="h-12 w-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-credit-card text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                            Payment Methods
+                                        </h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Kelola metode pembayaran PR
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        Tambah, edit, hapus metode pembayaran
+                                    </span>
+                                    <a href="{{ route('payment-methods.index') }}" 
+                                       class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-md transition-colors duration-200">
+                                        <i class="fas fa-cog mr-2"></i>
+                                        Kelola
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Placeholder for future configurations -->
                         <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60">
                             <div class="p-6">

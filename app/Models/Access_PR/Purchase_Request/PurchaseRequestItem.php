@@ -19,7 +19,8 @@ class PurchaseRequestItem extends Model
     'item_status',
     'purchasing_notes',
     'is_asset',
-    'is_asset_hcga'
+    'is_asset_hcga',
+    'payment_method_id'
     ];
 
     protected $casts = [
@@ -60,5 +61,10 @@ class PurchaseRequestItem extends Model
     public function assets()
     {
         return $this->hasMany(PurchaseRequestItemAsset::class, 'purchase_request_item_id');
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(\App\Models\Access_PR\PaymentMethod::class, 'payment_method_id');
     }
 }

@@ -214,7 +214,7 @@ class PurchaseRequestController extends Controller
 
     public function show(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['user', 'items', 'statusUpdates.updatedBy', 'location', 'category']);
+    $purchaseRequest->load(['user', 'items.paymentMethod', 'statusUpdates.updatedBy', 'location', 'category']);
         
         // Check authorization menggunakan method helper dari model
         $user = Auth::user();

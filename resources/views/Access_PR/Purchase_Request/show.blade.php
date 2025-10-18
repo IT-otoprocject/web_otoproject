@@ -233,6 +233,13 @@
                             // Flags for GA and completion, reused in desktop & mobile rows
                             $isGAUserInline = Auth::user()->divisi === 'HCGA';
                             $isPurchasingCompleteInline = $purchaseRequest->areAllItemsCompleted();
+                            // Payment method visibility access
+                            $canSeePaymentMethod = (
+                                Auth::user()->level === 'admin' ||
+                                in_array(Auth::user()->level, ['ceo','cfo']) ||
+                                (Auth::user()->divisi === 'PURCHASING' && in_array(Auth::user()->level, ['manager','spv','staff'])) ||
+                                (Auth::user()->divisi === 'FAT' && in_array(Auth::user()->level, ['manager','spv']))
+                            );
                         @endphp
 
                         <!-- Desktop View -->
@@ -253,6 +260,9 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Harga Barang</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status Barang</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan Purchasing</th>
+                                        @if($canSeePaymentMethod)
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Method</th>
+                                        @endif
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Catatan</th>
                                         @php $gaShowCol = Auth::user()->divisi === 'HCGA'; @endphp
                                         @if($gaShowCol)
@@ -327,6 +337,12 @@
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                             {{ $item->purchasing_notes ?? '-' }}
                                         </td>
+                                        @if($canSeePaymentMethod)
+                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                            @php $pmName = optional($item->paymentMethod)->name; @endphp
+                                            {!! $pmName ? e($pmName) : '<span class="text-gray-400">-</span>' !!}
+                                        </td>
+                                        @endif
                                         <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $item->notes ?? '-' }}</td>
                                         @if($gaShowCol)
                                         <td class="px-4 py-3 text-sm">
@@ -385,11 +401,11 @@
                                         @endif
                                     </tr>
                                     @endforeach
-                                    @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0 || $purchaseRequest->total_estimated_price)
+                    @if($purchaseRequest->items->whereNotNull('estimated_price')->count() > 0 || $purchaseRequest->total_estimated_price)
                                     <tr class="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
                                         @php
                                             // align the label cells so that the numeric total sits under Total Harga Barang column
-                                            $leadingCols =  ($canUpdateStatus ? 6 : 5); // until before Harga Est. Satuan
+                        $leadingCols =  ($canUpdateStatus ? 6 : 5); // until before Harga Est. Satuan
                                         @endphp
                                         <td colspan="{{ $leadingCols }}" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Total Estimasi</td>
                                         <td class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">
@@ -404,7 +420,8 @@
                                         </td>
                                         @php
                                             // fill the rest of the row with empty cells matching remaining columns after Total Harga Barang
-                                            $trailingCols =  ($gaShowCol ? 4 : 3); // Status, Catatan Purchasing, Catatan, [No Asset optional]
+                                            // Columns: Status, Catatan Purchasing, [Payment Method optional], Catatan, [No Asset optional]
+                                            $trailingCols =  ($gaShowCol ? 4 : 3) + ($canSeePaymentMethod ? 1 : 0);
                                         @endphp
                                         <td colspan="{{ $trailingCols }}"></td>
                                     </tr>
@@ -543,6 +560,12 @@
                                                 </div>
                                             @endif
                                         </div>
+                                        @if($canSeePaymentMethod && optional($item->paymentMethod)->name)
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Payment Method:</span>
+                                            <p class="text-sm text-gray-900 dark:text-gray-100">{{ $item->paymentMethod->name }}</p>
+                                        </div>
+                                        @endif
                                         @if($item->purchasing_notes)
                                         <div>
                                             <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Catatan Purchasing:</span>

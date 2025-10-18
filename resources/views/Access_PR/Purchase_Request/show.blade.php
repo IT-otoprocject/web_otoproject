@@ -957,8 +957,6 @@
             </div>
         </div>
     </div>
-    </div>
-
     <!-- Approve Modal -->
     @if($canApprove)
     <div id="approve-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
@@ -1000,7 +998,7 @@
                                                value="{{ $item->id }}" 
                                                class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 item-checkbox-ga"
                                                id="item_{{ $item->id }}"
-                                               onchange="toggleQuantityInput({{ $item->id }})">
+                                               >
                                         <div class="flex-1 min-w-0">
                                             <label for="item_{{ $item->id }}" class="cursor-pointer">
                                                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -1721,6 +1719,26 @@
                     }
                 });
             }
+
+            // Bind GA checkbox quantity toggle (replaces inline onchange)
+            document.querySelectorAll('.item-checkbox-ga').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const id = cb.id.replace('item_', '');
+                    if (id) {
+                        toggleQuantityInput(id);
+                    }
+                });
+            });
+
+            // Bind simplified purchasing action change (replaces inline onchange)
+            document.querySelectorAll('[id^="simple_action_"]').forEach(sel => {
+                sel.addEventListener('change', () => {
+                    const id = sel.id.replace('simple_action_', '');
+                    if (id) {
+                        toggleSimplePurchasingAction(id);
+                    }
+                });
+            });
         });
 
         // Bulk item update functionality
@@ -2014,7 +2032,6 @@
                                     <!-- Action Select -->
                                     <div class="lg:col-span-1">
                                         <select name="actions[{{ $item->id }}]" id="simple_action_{{ $item->id }}" 
-                                            onchange="toggleSimplePurchasingAction({{ $item->id }})"
                                             class="w-full text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
                                             <option value="">-- Pilih Action --</option>
                                             <option value="approve">Proses (Full)</option>

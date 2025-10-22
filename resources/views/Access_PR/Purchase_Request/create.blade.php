@@ -112,7 +112,7 @@
 
                                     <div>
                                         <label for="due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Jatuh Tempo (untuk PR pembayaran)
+                                            Tanggal Kebutuhan
                                         </label>
                                         <input type="date" 
                                                name="due_date" 
@@ -535,10 +535,16 @@
         </div>
     </div>
 
+    <!-- Hidden data for JavaScript -->
+    <div id="approval-levels-data" data-approval-levels="{{ json_encode($approvalLevels ?? []) }}" style="display: none;"></div>
+
     <!-- Scripts -->
     <script>
         let itemIndex = 1;
-        const approvalLevels = @json($approvalLevels ?? []);
+        
+        // Get approval levels from data attribute
+        const approvalLevelsData = document.getElementById('approval-levels-data');
+        const approvalLevels = JSON.parse(approvalLevelsData.getAttribute('data-approval-levels') || '{}');
 
         // Debug form submission
         document.addEventListener('DOMContentLoaded', function() {

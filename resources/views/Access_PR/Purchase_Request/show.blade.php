@@ -728,7 +728,7 @@
                             </h3>
                             @php
                                 $currentFileCount = count($purchaseRequest->attachments ?? []);
-                                $isOwner = Auth::user()->id === $purchaseRequest->user_id;
+                                $isOwner = Auth::user()->id == $purchaseRequest->user_id; // loose comparison untuk handle string vs int
                                 $isAdmin = Auth::user()->level === 'admin';
                                 $statusOk = !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']);
                                 $fileCountOk = $currentFileCount < 5;
@@ -800,7 +800,7 @@
                                                     <i class="fas fa-download mr-1"></i>
                                                     Download
                                                 </a>
-                                                @if((Auth::user()->id === $purchaseRequest->user_id || Auth::user()->level === 'admin') && !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']))
+                                                @if((Auth::user()->id == $purchaseRequest->user_id || Auth::user()->level === 'admin') && !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']))
                                                     <button type="button"
                                                         class="delete-file-btn inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-800 dark:text-red-200 text-xs rounded transition-colors"
                                                         data-file-index="{{ $index }}"
@@ -819,7 +819,7 @@
                                 <i class="fas fa-inbox text-gray-400 text-3xl mb-3"></i>
                                 <p class="text-gray-500 dark:text-gray-400 mb-4">Belum ada file lampiran.</p>
                                 @php
-                                    $canAddFirstFile = (Auth::user()->id === $purchaseRequest->user_id || Auth::user()->level === 'admin') 
+                                    $canAddFirstFile = (Auth::user()->id == $purchaseRequest->user_id || Auth::user()->level === 'admin') 
                                                      && !in_array($purchaseRequest->status, ['COMPLETED', 'CANCELLED']);
                                 @endphp
                                 
@@ -928,7 +928,7 @@
                                     <i class="fas fa-print mr-2"></i>
                                     Print
                                 </a>
-                                @if($purchaseRequest->user_id === auth()->id() && $purchaseRequest->status === 'DRAFT')
+                                @if($purchaseRequest->user_id == auth()->id() && $purchaseRequest->status === 'DRAFT')
                                 <a href="{{ route('purchase-request.edit', $purchaseRequest) }}"
                                     class="inline-flex items-center px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg text-sm font-medium text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
                                     <i class="fas fa-edit mr-2"></i>

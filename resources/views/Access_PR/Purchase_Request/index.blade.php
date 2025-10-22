@@ -395,7 +395,7 @@
                                             </a>
                                             @endif
 
-                                            @if($pr->user_id === auth()->id() && $pr->status === 'DRAFT')
+                                            @if($pr->user_id == auth()->id() && $pr->status === 'DRAFT')
                                             <a href="{{ route('purchase-request.edit', $pr) }}"
                                                 class="inline-block px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors duration-200"
                                                 title="Edit">
@@ -404,7 +404,7 @@
                                             @endif
 
                                             @if(in_array(auth()->user()->level, ['admin']) ||
-                                            ($pr->user_id === auth()->id() && $pr->status === 'DRAFT'))
+                                            ($pr->user_id == auth()->id() && $pr->status === 'DRAFT'))
                                             <form action="{{ route('purchase-request.destroy', $pr) }}"
                                                 method="POST"
                                                 class="inline"

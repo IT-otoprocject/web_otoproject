@@ -545,9 +545,9 @@ class PurchaseRequestController extends Controller
 
     public function destroy(PurchaseRequest $purchaseRequest)
     {
-        // Only admin or creator (if draft) can delete
+        // Only admin or creator (if draft) can delete (menggunakan loose comparison)
         if (!in_array(Auth::user()->level, ['admin']) && 
-            !($purchaseRequest->user_id === Auth::id() && $purchaseRequest->status === 'DRAFT')) {
+            !($purchaseRequest->user_id == Auth::id() && $purchaseRequest->status === 'DRAFT')) {
             abort(403, 'Unauthorized');
         }
 
@@ -559,8 +559,8 @@ class PurchaseRequestController extends Controller
 
     public function addAttachment(Request $request, PurchaseRequest $purchaseRequest)
     {
-        // Check authorization - only owner or admin can add attachments
-        if (Auth::user()->id !== $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
+        // Check authorization - only owner or admin can add attachments (loose comparison)
+        if (Auth::user()->id != $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
             abort(403, 'Unauthorized');
         }
 
@@ -617,8 +617,8 @@ class PurchaseRequestController extends Controller
 
     public function deleteAttachment(Request $request, PurchaseRequest $purchaseRequest)
     {
-        // Check authorization - only owner or admin can delete attachments
-        if (Auth::user()->id !== $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
+        // Check authorization - only owner or admin can delete attachments (loose comparison)
+        if (Auth::user()->id != $purchaseRequest->user_id && Auth::user()->level !== 'admin') {
             abort(403, 'Unauthorized');
         }
 

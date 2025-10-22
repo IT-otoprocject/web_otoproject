@@ -370,8 +370,8 @@ class PurchaseRequest extends Model
     // Check if user should have access to view this PR
     public function canBeViewedByUser($user)
     {
-        // User bisa lihat PR mereka sendiri
-        if ($this->user_id === $user->id) {
+        // User bisa lihat PR mereka sendiri (menggunakan loose comparison untuk handle string vs int)
+        if ($this->user_id == $user->id) {
             return true;
         }
         

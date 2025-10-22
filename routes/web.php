@@ -52,8 +52,17 @@ Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
 // Admin routes with middleware
 Route::middleware(['auth', 'system_access:user_management'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', AdminUserController::class);
+    // Custom routes must come BEFORE resource routes to avoid conflicts
+    Route::get('users/template', [AdminUserController::class, 'downloadTemplate'])->name('users.template');
+    Route::get('users/import', [AdminUserController::class, 'importPage'])->name('users.import');
+    Route::post('users/import/test', [AdminUserController::class, 'importTest'])->name('users.import.test');
+    Route::post('users/import/run', [AdminUserController::class, 'importRun'])->name('users.import.run');
+    Route::get('users/bulk-edit', [AdminUserController::class, 'bulkEdit'])->name('users.bulk-edit');
+    Route::post('users/bulk-update', [AdminUserController::class, 'bulkUpdate'])->name('users.bulk-update');
     Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+    
+    // Resource routes (must be last to avoid conflicts)
+    Route::resource('users', AdminUserController::class);
 });
 
 // Test route for checking system access
@@ -175,4 +184,9 @@ Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::post('payment-methods/{paymentMethod}/toggle-status', [App\Http\Controllers\Access_PR\PaymentMethodController::class, 'toggleStatus'])->name('payment-methods.toggle-status');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
+
+// Include test routes for debugging
+if (app()->environment(['local', 'testing'])) {
+    require __DIR__.'/test.php';
+}

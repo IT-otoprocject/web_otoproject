@@ -10,12 +10,19 @@
                 </h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage system users and their permissions</p>
             </div>
+            <div class="flex items-center gap-2">
+            <a href="{{ route('admin.users.template') }}" class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow">
+                <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v1h16V5a2 2 0 00-2-2H4z"></path><path fill-rule="evenodd" d="M18 9H2v6a2 2 0 002 2h12a2 2 0 002-2V9zM9 11a1 1 0 112 0v3a1 1 0 11-2 0v-3z" clip-rule="evenodd"></path></svg>
+                Download Template
+            </a>
+            <a href="{{ route('admin.users.import') }}" class="inline-flex items-center px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow">Import Users</a>
             <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
                 </svg>
                 Add New User
             </a>
+            </div>
         </div>
     </x-slot>
 
@@ -100,10 +107,12 @@
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage all system users and their access permissions</p>
                 </div>
 
+                <form action="{{ route('admin.users.bulk-edit') }}" method="GET">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
+                                <th class="px-6 py-3"><input type="checkbox" onclick="document.querySelectorAll('.select-user').forEach(cb=>cb.checked=this.checked)"></th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">User</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Level & Divisi</th>
@@ -116,6 +125,7 @@
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($users as $user)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                <td class="px-6 py-4"><input type="checkbox" class="select-user" name="ids[]" value="{{ $user->id }}"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                     <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">{{ $user->id }}</span>
                                 </td>
@@ -252,6 +262,13 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-6 py-3 flex items-center justify-between bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">
+                    <div class="text-xs text-gray-600 dark:text-gray-300">Select users above and click Bulk Edit</div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow">
+                        Bulk Edit
+                    </button>
+                </div>
+                </form>
 
                 @if($users->hasPages())
                 <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">

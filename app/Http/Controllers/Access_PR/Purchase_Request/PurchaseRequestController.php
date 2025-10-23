@@ -134,82 +134,110 @@ class PurchaseRequestController extends Controller
             'attachments.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048' // max 2MB per file
         ]);
 
-        DB::beginTransaction();
-        try {
-            // Calculate total estimated price (quantity × unit price for each item)
-            $totalEstimatedPrice = collect($request->items)->sum(function($item) {
-                $quantity = (float)($item['quantity'] ?? 0);
-                $unitPrice = (float)($item['estimated_price'] ?? 0);
-                return $quantity * $unitPrice;
-            });
+        // Retry mechanism untuk handle duplicate PR number
+        $maxRetries = 3;
+        $purchaseRequest = null;
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            DB::beginTransaction();
+            try {
+                // Calculate total estimated price (quantity × unit price for each item)
+                $totalEstimatedPrice = collect($request->items)->sum(function($item) {
+                    $quantity = (float)($item['quantity'] ?? 0);
+                    $unitPrice = (float)($item['estimated_price'] ?? 0);
+                    return $quantity * $unitPrice;
+                });
 
-            // Get approval flow from selected category
-            $category = \App\Models\Access_PR\PrCategory::findOrFail($request->category_id);
-            $approvalFlow = $category->approval_rules;
+                // Get approval flow from selected category
+                $category = \App\Models\Access_PR\PrCategory::findOrFail($request->category_id);
+                $approvalFlow = $category->approval_rules;
 
-            // Get location for PR number generation
-            $location = \App\Models\MasterLocation::findOrFail($request->location_id);
+                // Get location for PR number generation
+                $location = \App\Models\MasterLocation::findOrFail($request->location_id);
 
-            // Generate PR Number based on location code
-            $prNumber = PurchaseRequest::generatePRNumber($location->code);
-            
-            // Create Purchase Request
-            $purchaseRequest = PurchaseRequest::create([
-                'pr_number' => $prNumber,
-                'user_id' => Auth::id(),
-                'category_id' => $request->category_id,
-                'request_date' => Carbon::now()->toDateString(),
-                'due_date' => $request->due_date,
-                'description' => $request->description,
-                'location_id' => $request->location_id,
-                'status' => 'SUBMITTED',
-                'approval_flow' => array_values($approvalFlow), // Reindex array
-                'approvals' => [],
-                'notes' => $request->notes,
-                'total_estimated_price' => $totalEstimatedPrice
-            ]);
-
-            // Create Purchase Request Items
-            foreach ($request->items as $item) {
-                PurchaseRequestItem::create([
-                    'purchase_request_id' => $purchaseRequest->id,
-                    'description' => $item['description'],
-                    'quantity' => $item['quantity'],
-                    'unit' => $item['unit'],
-                    'estimated_price' => $item['estimated_price'],
-                    'notes' => $item['notes']
+                // Generate PR Number based on location code (di dalam transaction)
+                $prNumber = PurchaseRequest::generatePRNumber($location->code);
+                
+                // Create Purchase Request
+                $purchaseRequest = PurchaseRequest::create([
+                    'pr_number' => $prNumber,
+                    'user_id' => Auth::id(),
+                    'category_id' => $request->category_id,
+                    'request_date' => Carbon::now()->toDateString(),
+                    'due_date' => $request->due_date,
+                    'description' => $request->description,
+                    'location_id' => $request->location_id,
+                    'status' => 'SUBMITTED',
+                    'approval_flow' => array_values($approvalFlow), // Reindex array  
+                    'approvals' => [],
+                    'notes' => $request->notes,
+                    'total_estimated_price' => $totalEstimatedPrice
                 ]);
-            }
 
-            // Handle file attachments
-            if ($request->hasFile('attachments')) {
-                $attachmentPaths = [];
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('purchase-requests/attachments', 'public');
-                    $attachmentPaths[] = [
-                        'original_name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'size' => $file->getSize(),
-                        'mime_type' => $file->getMimeType()
-                    ];
+                // Create Purchase Request Items
+                foreach ($request->items as $item) {
+                    PurchaseRequestItem::create([
+                        'purchase_request_id' => $purchaseRequest->id,
+                        'description' => $item['description'],
+                        'quantity' => $item['quantity'],
+                        'unit' => $item['unit'],
+                        'estimated_price' => $item['estimated_price'],
+                        'notes' => $item['notes']
+                    ]);
+                }
+
+                // Handle file attachments
+                if ($request->hasFile('attachments')) {
+                    $attachmentPaths = [];
+                    foreach ($request->file('attachments') as $file) {
+                        $path = $file->store('purchase-requests/attachments', 'public');
+                        $attachmentPaths[] = [
+                            'original_name' => $file->getClientOriginalName(),
+                            'path' => $path,
+                            'size' => $file->getSize(),
+                            'mime_type' => $file->getMimeType()
+                        ];
+                    }
+                    
+                    // Update purchase request with attachment info
+                    $purchaseRequest->update([
+                        'attachments' => $attachmentPaths
+                    ]);
+                }
+
+                DB::commit();
+                
+                // Success, break from retry loop
+                break;
+                
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollback();
+                
+                // Check if it's a duplicate key error
+                if ($e->getCode() == 23000 && str_contains($e->getMessage(), 'purchase_requests_pr_number_unique')) {
+                    if ($attempt < $maxRetries) {
+                        // Wait a bit before retrying
+                        usleep(rand(10000, 50000)); // 10-50ms random delay
+                        continue;
+                    }
                 }
                 
-                // Update purchase request with attachment info
-                $purchaseRequest->update([
-                    'attachments' => $attachmentPaths
-                ]);
-            }
-
-            DB::commit();
-            
-            return redirect()->route('purchase-request.show', $purchaseRequest)
-                ->with('success', 'Purchase Request berhasil dibuat dengan nomor: ' . $prNumber . 
-                    ($totalEstimatedPrice > 5000000 ? ' (CEO approval tersedia opsional karena total > Rp 5.000.000)' : ''));
+                // For other errors or max retries reached, return error
+                return back()->withInput()->with('error', 'Gagal membuat Purchase Request: ' . $e->getMessage());
                 
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withInput()->with('error', 'Gagal membuat Purchase Request: ' . $e->getMessage());
+            } catch (\Exception $e) {
+                DB::rollback();
+                return back()->withInput()->with('error', 'Gagal membuat Purchase Request: ' . $e->getMessage());
+            }
         }
+        
+        if (!$purchaseRequest) {
+            return back()->withInput()->with('error', 'Gagal membuat Purchase Request setelah beberapa kali percobaan.');
+        }
+        
+        return redirect()->route('purchase-request.show', $purchaseRequest)
+            ->with('success', 'Purchase Request berhasil dibuat dengan nomor: ' . $purchaseRequest->pr_number . 
+                ($purchaseRequest->total_estimated_price > 5000000 ? ' (CEO approval tersedia opsional karena total > Rp 5.000.000)' : ''));
     }
 
     public function show(PurchaseRequest $purchaseRequest)

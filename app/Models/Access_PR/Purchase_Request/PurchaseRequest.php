@@ -4,7 +4,9 @@ namespace App\Models\Access_PR\Purchase_Request;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\PRNumberSequence;
 use Carbon\Carbon;
 
 class PurchaseRequest extends Model
@@ -154,8 +156,8 @@ class PurchaseRequest extends Model
         return $this->hasMany(PurchaseRequestStatusUpdate::class);
     }
 
-    // Generate PR Number dengan format PO/DDMMYY1
-    public static function generatePRNumber($location = 'HQ')
+    // Generate PR Number dengan format PO/DDMMYY1 (dengan race condition protection)
+    public static function generatePRNumber($location = 'HQ', $maxRetries = 3)
     {
         $day = date('d');    // 2 digit day
         $month = date('m');  // 2 digit month  
@@ -163,26 +165,53 @@ class PurchaseRequest extends Model
         
         $prefix = 'PO';
         $dateFormat = $day . $month . $year;
-        
-        // Get last PR number for today (based on request date)
         $today = date('Y-m-d');
-        $lastPR = self::whereDate('request_date', $today)
-                     ->where('pr_number', 'LIKE', $prefix . '/' . $dateFormat . '%')
-                     ->orderBy('pr_number', 'desc')
-                     ->first();
         
-        if ($lastPR) {
-            // Extract sequence number dari format PO/DDMMYY123
-            // Find the last occurrence of the date pattern and get everything after it
-            $datePattern = $prefix . '/' . $dateFormat;
-            $sequencePart = str_replace($datePattern, '', $lastPR->pr_number);
-            $lastSequence = (int) $sequencePart;
-            $newSequence = $lastSequence + 1;
-        } else {
-            $newSequence = 1; // Mulai dari 1 untuk hari baru
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            try {
+                // Use sequence table untuk atomic increment
+                $sequence = PRNumberSequence::getNextSequence($prefix, $today);
+                $prNumber = $prefix . '/' . $dateFormat . $sequence;
+                
+                // Double check jika nomor sudah ada di purchase_requests table
+                // (untuk extra safety, walaupun seharusnya tidak mungkin)
+                $exists = self::where('pr_number', $prNumber)->exists();
+                if (!$exists) {
+                    return $prNumber;
+                }
+                
+                // Jika masih ada duplicate (sangat jarang), retry
+                if ($attempt < $maxRetries - 1) {
+                    usleep(rand(5000, 15000)); // 5-15ms delay
+                    continue;
+                }
+                
+            } catch (\Exception $e) {
+                if ($attempt < $maxRetries - 1) {
+                    usleep(rand(10000, 30000)); // 10-30ms delay
+                    continue;
+                }
+            }
         }
         
-        return $prefix . '/' . $dateFormat . $newSequence;
+        // Ultimate fallback - menggunakan timestamp dan random
+        return $prefix . '/' . $dateFormat . time() . rand(100, 999);
+    }
+
+    // Debug method untuk melihat existing PR numbers hari ini
+    public static function debugTodayPRNumbers()
+    {
+        $today = date('Y-m-d');
+        $day = date('d');
+        $month = date('m');
+        $year = date('y');
+        $dateFormat = $day . $month . $year;
+        
+        return self::whereDate('request_date', $today)
+                   ->where('pr_number', 'LIKE', 'PO/' . $dateFormat . '%')
+                   ->orderBy('pr_number', 'desc')
+                   ->pluck('pr_number')
+                   ->toArray();
     }
 
     // Get approval status dengan format tanggal yang lebih baik

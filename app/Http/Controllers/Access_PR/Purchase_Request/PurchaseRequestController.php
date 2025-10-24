@@ -281,11 +281,13 @@ class PurchaseRequestController extends Controller
 
         $approvalStatus = $purchaseRequest->getApprovalStatus();
 
-        // Hitung total estimasi (fallback jika field total_estimated_price kosong)
-        $calculatedTotal = $purchaseRequest->items->sum(function($item) {
+        // Hitung total estimasi hanya untuk item yang tidak ditolak
+        $calculatedTotal = $purchaseRequest->items->filter(function($item) {
+            return $item->item_status !== 'REJECTED';
+        })->sum(function($item) {
             return ($item->quantity ?? 0) * ($item->estimated_price ?? 0);
         });
-        $total = $purchaseRequest->total_estimated_price ?? $calculatedTotal;
+        $total = $calculatedTotal;
 
         $pdf = Pdf::loadView('Access_PR.Purchase_Request.print', [
             'purchaseRequest' => $purchaseRequest,

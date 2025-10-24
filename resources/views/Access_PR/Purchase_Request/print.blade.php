@@ -172,14 +172,20 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($purchaseRequest->items as $index => $item)
+                @php
+                    $printableItems = $purchaseRequest->items->filter(function($item) {
+                        return $item->item_status !== 'REJECTED';
+                    });
+                    $itemNumber = 1;
+                @endphp
+                @foreach($printableItems as $item)
                     @php
                         $qty = $item->quantity ?? 0;
                         $price = $item->estimated_price ?? 0;
                         $itemTotal = $qty * $price;
                     @endphp
                     <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $itemNumber++ }}</td>
                         <td>{{ $item->description }}</td>
                         <td class="text-center">{{ number_format($qty) }}</td>
                         <td class="text-center">{{ $item->unit ?? '-' }}</td>

@@ -70,13 +70,13 @@ class MasterLocation extends Model
      */
     public static function getActiveLocations()
     {
-        return static::active()->orderByName()->get();
+        return static::active()->orderBy('code')->get();
     }
 
     public static function getLocationOptions()
     {
         return static::active()
-            ->orderByName()
+            ->orderBy('code')
             ->get()
             ->pluck('full_location', 'id')
             ->toArray();

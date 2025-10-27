@@ -224,7 +224,8 @@
                             <div class="space-y-4">
                                 <div>
                                     <label for="attachments" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Upload File (foto/PDF, maksimal 2MB per file)
+                                        Upload File (foto/PDF, maksimal 5 file, 2MB per file)
+                                        <span id="file-counter" class="text-blue-600 dark:text-blue-400 ml-2"></span>
                                     </label>
                                     <input type="file" 
                                            name="attachments[]" 
@@ -233,8 +234,12 @@
                                            accept=".jpg,.jpeg,.png,.pdf"
                                            multiple
                                            onchange="validateFileSize(this)">
+                                    
+                                    <!-- Hidden container for file data (fallback for browsers that don't support DataTransfer) -->
+                                    <div id="hidden-files-container" style="display: none;"></div>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                        Format yang didukung: JPG, JPEG, PNG, PDF. Maksimal 2MB per file.
+                                        Format yang didukung: JPG, JPEG, PNG, PDF. Maksimal 5 file, 2MB per file.<br>
+                                        <span class="text-blue-600 dark:text-blue-400">💡 Tip: Pilih file akan menambah ke daftar yang sudah ada. Klik ✕ untuk menghapus file individual.</span>
                                     </p>
                                     @error('attachments')
                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -343,7 +348,7 @@
                                                     @enderror
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
                                                     <input type="number" 
                                                            name="items[{{ $index }}][estimated_price]" 
                                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.estimated_price') border-red-500 @enderror" 
@@ -355,9 +360,9 @@
                                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                                     @enderror
                                                 </div>
-                                                <div class="flex items-end">
+                                                <div class="flex items-start">
                                                     <button type="button" 
-                                                            class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" 
+                                                            class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 mt-6" 
                                                             onclick="removeItem(this)">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -407,7 +412,7 @@
                                                        placeholder="pcs, kg, dll">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
                                                 <input type="text" 
                                                        name="items[0][estimated_price]" 
                                                        class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
@@ -415,9 +420,9 @@
                                                        oninput="formatPriceInput(this)"
                                                        onchange="calculateTotal()">
                                             </div>
-                                            <div class="flex items-end">
+                                            <div class="flex items-start">
                                                 <button type="button" 
-                                                        class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" 
+                                                        class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 mt-6" 
                                                         onclick="removeItem(this)">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -559,7 +564,58 @@
             console.log('Form found:', form);
             
             form.addEventListener('submit', function(e) {
-                console.log('Form submission started');
+                console.log('=== FORM SUBMISSION DEBUG ===');
+                console.log('Current files count:', currentFiles.length);
+                console.log('Current files:', currentFiles.map(f => ({name: f.name, size: f.size})));
+                
+                // Always use AJAX if we have files to ensure they're properly sent
+                if (currentFiles.length > 0) {
+                    console.log('Using AJAX submission for multiple files');
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    
+                    // Ensure all current files are added to FormData
+                    formData.delete('attachments[]'); // Remove any existing
+                    currentFiles.forEach((file, index) => {
+                        formData.append('attachments[]', file);
+                        console.log(`Adding file ${index}: ${file.name} (${file.size} bytes)`);
+                    });
+                    
+                    console.log('Submitting via AJAX with', currentFiles.length, 'files');
+                    
+                    // Submit via AJAX
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Response received:', response.status);
+                        if (response.ok) {
+                            // Laravel redirect after successful POST
+                            if (response.redirected) {
+                                console.log('Redirecting to:', response.url);
+                                window.location.href = response.url;
+                            } else {
+                                // Handle success without redirect
+                                return response.text().then(html => {
+                                    console.log('Success without redirect, reloading page');
+                                    window.location.reload();
+                                });
+                            }
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('AJAX Error:', error);
+                        alert('Terjadi kesalahan saat menyimpan data: ' + error.message);
+                    });
+                    
+                    return false;
+                } else {
+                    console.log('No files - using standard form submission');
+                }
                 
                 // Convert formatted prices back to plain numbers before submission
                 const priceInputs = document.querySelectorAll('.price-input');
@@ -573,10 +629,17 @@
                 
                 // Add more debugging
                 const formData = new FormData(this);
-                console.log('Form data:');
+                console.log('Form data entries:');
+                let attachmentCount = 0;
                 for (let [key, value] of formData.entries()) {
-                    console.log(key, value);
+                    if (key === 'attachments[]') {
+                        attachmentCount++;
+                        console.log(`${key}: ${value.name} (${value.size} bytes)`);
+                    } else {
+                        console.log(key, typeof value === 'string' ? value : value.constructor.name);
+                    }
                 }
+                console.log('Total attachments in FormData:', attachmentCount);
                 
                 // Validate category selection
                 const selectedCategory = document.getElementById('selected_category_id').value;
@@ -659,7 +722,7 @@
                                    placeholder="pcs, kg, dll">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi Harga Satuan</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
                             <input type="text" 
                                    name="items[${itemIndex}][estimated_price]" 
                                    class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
@@ -667,9 +730,9 @@
                                    oninput="formatPriceInput(this)"
                                    onchange="calculateTotal()">
                         </div>
-                        <div class="flex items-end">
+                        <div class="flex items-start">
                             <button type="button" 
-                                    class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200" 
+                                    class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 mt-6" 
                                     onclick="removeItem(this)">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -761,43 +824,76 @@
             input.value = formattedValue;
         }
 
-        // Validate file size and type
+        // Store current files for accumulative selection
+        let currentFiles = [];
+        let fileIdCounter = 0;
+
+        // Validate file size and type - Accumulative approach
         function validateFileSize(input) {
-            const files = input.files;
+            const newFiles = Array.from(input.files);
             const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+            const maxFiles = 5; // Maximum 5 files
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
             const previewContainer = document.getElementById('file-preview');
             const clearContainer = document.getElementById('clear-files-container');
             
-            previewContainer.innerHTML = ''; // Clear previous previews
-            
-            if (files.length === 0) {
-                clearContainer.classList.add('hidden');
+            if (newFiles.length === 0) {
                 return;
             }
             
-            let validFiles = [];
+            let validNewFiles = [];
+            let rejectedFiles = [];
             
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+            // Process each new file
+            for (let i = 0; i < newFiles.length; i++) {
+                const file = newFiles[i];
+                
+                // Check for duplicate file names
+                const isDuplicate = currentFiles.some(existingFile => 
+                    existingFile.name === file.name && existingFile.size === file.size
+                );
+                
+                if (isDuplicate) {
+                    rejectedFiles.push(`${file.name} (sudah ada)`);
+                    continue;
+                }
+                
+                // Check if adding this file would exceed limit
+                if (currentFiles.length + validNewFiles.length >= maxFiles) {
+                    rejectedFiles.push(`${file.name} (melebihi batas ${maxFiles} file)`);
+                    continue;
+                }
                 
                 // Check file type
                 if (!allowedTypes.includes(file.type)) {
-                    alert(`File ${file.name} tidak didukung. Hanya JPG, JPEG, PNG, dan PDF yang diperbolehkan.`);
+                    rejectedFiles.push(`${file.name} (format tidak didukung)`);
                     continue;
                 }
                 
                 // Check file size
                 if (file.size > maxSize) {
-                    alert(`File ${file.name} terlalu besar. Maksimal ukuran file adalah 2MB.`);
+                    rejectedFiles.push(`${file.name} (ukuran > 2MB)`);
                     continue;
                 }
                 
-                validFiles.push(file);
+                // File is valid, add unique ID for tracking
+                file._uniqueId = fileIdCounter++;
+                validNewFiles.push(file);
+            }
+            
+            // Show rejected files warning
+            if (rejectedFiles.length > 0) {
+                alert(`File berikut ditolak:\n${rejectedFiles.join('\n')}`);
+            }
+            
+            // Add valid new files to current files
+            validNewFiles.forEach(file => {
+                currentFiles.push(file);
                 
                 // Create file preview
                 const filePreview = document.createElement('div');
                 filePreview.className = 'flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-md border';
+                filePreview.setAttribute('data-file-id', file._uniqueId);
                 
                 const fileIcon = file.type.includes('image') ? '🖼️' : '📄';
                 const fileSize = (file.size / 1024 / 1024).toFixed(2);
@@ -814,7 +910,7 @@
                         <span class="text-green-500 text-sm">✓ Valid</span>
                         <button type="button" 
                                 class="text-red-600 hover:text-red-800 text-sm"
-                                onclick="removeFile(this, ${i})"
+                                onclick="removeFile(this)"
                                 title="Hapus file ini">
                             <i class="fas fa-times"></i>
                         </button>
@@ -822,16 +918,63 @@
                 `;
                 
                 previewContainer.appendChild(filePreview);
-            }
+            });
             
-            if (validFiles.length > 0) {
+            // Update file input with all current files and UI
+            updateFileInput();
+            input.value = ''; // Clear the input to allow selecting same files again
+            
+            if (currentFiles.length > 0) {
                 clearContainer.classList.remove('hidden');
-            } else {
-                clearContainer.classList.add('hidden');
-                input.value = ''; // Clear input if no valid files
             }
             
-            return validFiles.length > 0;
+            // Show success message
+            if (validNewFiles.length > 0) {
+                console.log(`✅ ${validNewFiles.length} file berhasil ditambahkan. Total: ${currentFiles.length}/5`);
+            }
+            
+            return validNewFiles.length > 0;
+        }
+
+        // Update file input with current files using DataTransfer
+        function updateFileInput() {
+            const input = document.getElementById('attachments');
+            
+            // Try DataTransfer first (for modern browsers)
+            if (window.DataTransfer) {
+                try {
+                    const dataTransfer = new DataTransfer();
+                    
+                    currentFiles.forEach(file => {
+                        dataTransfer.items.add(file);
+                    });
+                    
+                    input.files = dataTransfer.files;
+                    console.log(`✅ DataTransfer success: ${currentFiles.length} files attached to input`);
+                    updateFileCounter();
+                    return;
+                } catch (error) {
+                    console.warn('DataTransfer failed:', error);
+                }
+            }
+            
+            // Fallback: We'll handle this in form submission
+            console.log(`⚠️ DataTransfer not available. Will use AJAX fallback for ${currentFiles.length} files`);
+            updateFileCounter();
+        }
+
+        // Update file counter display
+        function updateFileCounter() {
+            const counter = document.getElementById('file-counter');
+            const fileCount = currentFiles.length;
+            
+            if (fileCount > 0) {
+                counter.textContent = `(${fileCount}/5 file dipilih)`;
+                counter.classList.remove('hidden');
+            } else {
+                counter.textContent = '';
+                counter.classList.add('hidden');
+            }
         }
 
         // Clear all files
@@ -840,23 +983,34 @@
             const previewContainer = document.getElementById('file-preview');
             const clearContainer = document.getElementById('clear-files-container');
             
+            currentFiles = [];
             input.value = '';
             previewContainer.innerHTML = '';
             clearContainer.classList.add('hidden');
+            updateFileCounter();
         }
 
-        // Remove individual file (note: this is just UI, the actual file removal needs backend handling)
-        function removeFile(button, index) {
-            button.closest('.flex').remove();
+        // Remove individual file
+        function removeFile(button) {
+            const filePreview = button.closest('.flex');
+            const fileId = parseInt(filePreview.getAttribute('data-file-id'));
+            
+            // Remove from currentFiles array
+            currentFiles = currentFiles.filter(file => file._uniqueId !== fileId);
+            
+            // Remove from UI
+            filePreview.remove();
+            
+            // Update file input
+            updateFileInput();
             
             // Check if there are still files in preview
-            const previewContainer = document.getElementById('file-preview');
             const clearContainer = document.getElementById('clear-files-container');
-            
-            if (previewContainer.children.length === 0) {
+            if (currentFiles.length === 0) {
                 clearContainer.classList.add('hidden');
-                document.getElementById('attachments').value = '';
             }
+            
+            console.log(`✅ File dihapus. Sisa: ${currentFiles.length}/5`);
         }
 
         // Modal functions
@@ -910,6 +1064,7 @@
         // Initialize calculations on page load
         document.addEventListener('DOMContentLoaded', function() {
             calculateTotal(); // Calculate initial total
+            updateFileCounter(); // Initialize file counter
             
             // Add event listeners to existing estimated price inputs
             const existingInputs = document.querySelectorAll('input[name*="[estimated_price]"]');

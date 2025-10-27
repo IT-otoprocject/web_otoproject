@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -119,6 +120,8 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
+
+
         $request->validate([
             'category_id' => 'required|exists:pr_categories,id',
             'due_date' => 'nullable|date|after:today',
@@ -130,8 +133,12 @@ class PurchaseRequestController extends Controller
             'items.*.unit' => 'nullable|string|max:50',
             'items.*.estimated_price' => 'nullable|numeric|min:0',
             'items.*.notes' => 'nullable|string|max:500',
-            'attachments' => 'nullable|array',
+            'attachments' => 'nullable|array|max:5', // max 5 files
             'attachments.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048' // max 2MB per file
+        ], [
+            'attachments.max' => 'Maksimal 5 file yang dapat diupload.',
+            'attachments.*.mimes' => 'File harus berformat JPG, JPEG, PNG, atau PDF.',
+            'attachments.*.max' => 'Setiap file maksimal berukuran 2MB.',
         ]);
 
         // Retry mechanism untuk handle duplicate PR number
@@ -189,20 +196,33 @@ class PurchaseRequestController extends Controller
                 // Handle file attachments
                 if ($request->hasFile('attachments')) {
                     $attachmentPaths = [];
-                    foreach ($request->file('attachments') as $file) {
+                    $fileCount = count($request->file('attachments'));
+                    Log::info("Processing {$fileCount} attachments for PR {$purchaseRequest->id}");
+                    
+                    foreach ($request->file('attachments') as $index => $file) {
                         $path = $file->store('purchase-requests/attachments', 'public');
-                        $attachmentPaths[] = [
+                        $attachmentInfo = [
                             'original_name' => $file->getClientOriginalName(),
                             'path' => $path,
                             'size' => $file->getSize(),
                             'mime_type' => $file->getMimeType()
                         ];
+                        $attachmentPaths[] = $attachmentInfo;
+                        Log::info("File {$index}: {$file->getClientOriginalName()} -> {$path}");
                     }
                     
                     // Update purchase request with attachment info
                     $purchaseRequest->update([
                         'attachments' => $attachmentPaths
                     ]);
+                    
+                    Log::info("PR {$purchaseRequest->id} updated with " . count($attachmentPaths) . " attachments");
+                    
+                    // Verify the update
+                    $purchaseRequest->refresh();
+                    Log::info("Verification - PR {$purchaseRequest->id} now has: " . count($purchaseRequest->attachments ?? []) . " attachments");
+                } else {
+                    Log::info("No attachments received for PR {$purchaseRequest->id}");
                 }
 
                 DB::commit();
@@ -243,6 +263,8 @@ class PurchaseRequestController extends Controller
     public function show(PurchaseRequest $purchaseRequest)
     {
     $purchaseRequest->load(['user', 'items.paymentMethod', 'statusUpdates.updatedBy', 'location', 'category']);
+        
+
         
         // Check authorization menggunakan method helper dari model
         $user = Auth::user();

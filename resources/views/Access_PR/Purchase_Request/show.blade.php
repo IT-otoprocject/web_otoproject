@@ -717,6 +717,7 @@
                     <!-- File Attachments Section -->
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-6 mb-6">
 
+
                         
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-0 flex items-center">
@@ -755,6 +756,8 @@
                                 <span class="text-sm text-gray-500">Hanya pemilik PR yang dapat menambah file</span>
                             @endif
                         </div>
+                        
+
                         
                         @if($purchaseRequest->attachments && count($purchaseRequest->attachments) > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

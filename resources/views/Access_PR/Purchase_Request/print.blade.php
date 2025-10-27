@@ -95,8 +95,12 @@
                 <tr>
                     <td class="muted">Lokasi</td>
                     <td>{{ $purchaseRequest->location->name ?? 'N/A' }}</td>
-                    <td class="muted">Jatuh Tempo</td>
-                    <td>{{ $purchaseRequest->due_date ? optional($purchaseRequest->due_date)->format('d/m/Y') : '-' }}</td>
+                    <td class="muted">Company</td>
+                    <td>{{ $purchaseRequest->location->company ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td class="muted">Tanggal Kebutuhan</td>
+                    <td colspan="3">{{ $purchaseRequest->due_date ? optional($purchaseRequest->due_date)->format('d/m/Y') : '-' }}</td>
                 </tr>
             </tbody>
         </table>

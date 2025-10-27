@@ -70,6 +70,12 @@
                                     <span class="w-32 text-sm font-medium text-gray-600 dark:text-gray-400">Lokasi</span>
                                     <span class="text-sm text-gray-900 dark:text-gray-100">: {{ $purchaseRequest->location->name ?? 'N/A' }}</span>
                                 </div>
+                                @if($purchaseRequest->location)
+                                <div class="flex">
+                                    <span class="w-32 text-sm font-medium text-gray-600 dark:text-gray-400">Company</span>
+                                    <span class="text-sm text-gray-900 dark:text-gray-100">: {{ $purchaseRequest->location->company ?? 'N/A' }}</span>
+                                </div>
+                                @endif
                                 @if($purchaseRequest->due_date)
                                 <div class="flex">
                                     <span class="w-32 text-sm font-medium text-gray-600 dark:text-gray-400">Tanggal Kebutuhan</span>

@@ -9,6 +9,43 @@
         </h2>
     </x-slot>
 
+    <style>
+        .search-highlight {
+            background-color: #fef3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .search-input-container {
+            position: relative;
+        }
+        
+        .search-input-container input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+        
+        .search-results-info {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+        }
+        
+        .dark .search-results-info {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            border: 1px solid #3b82f6;
+        }
+        
+        .search-tips {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .search-stats {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
+
     @if (session('success'))
     <div id="notifPopup" class="notif-popup">
         <p>{{ session('success') }}</p>
@@ -256,19 +293,66 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <!-- Filter buttons could go here -->
-                        <div>
-                            <button type="button" class="btn btn-secondary">
-                                <i class="fas fa-filter"></i> Filter
-                            </button>
+                        <!-- Filter info and statistics -->
+                        <div class="flex items-center space-x-4">
+                            @if(request('search'))
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded px-3 py-2">
+                                <i class="fas fa-search text-blue-500 mr-2"></i>
+                                <span class="text-blue-700 dark:text-blue-300 text-sm">
+                                    Pencarian: <strong>"{{ request('search') }}"</strong>
+                                </span>
+                                <span class="text-blue-600 dark:text-blue-400 text-xs ml-2">
+                                    ({{ $purchaseRequests->total() }} hasil)
+                                </span>
+                            </div>
+                            @endif
+                            
+                            <div class="text-gray-600 dark:text-gray-400 text-sm">
+                                Total: {{ $purchaseRequests->total() }} PR
+                            </div>
                         </div>
 
-                        <!-- Search Bar -->
-                        <form method="GET" action="{{ route('purchase-request.index') }}" class="search-bar">
-                            <input type="text" name="search" class="form-control" placeholder="Cari No. PR, Pemohon, atau Deskripsi" value="{{ request('search') }}">
-                            <button type="submit" class="btn btn-primary">Cari</button>
-                        </form>
+                        <!-- Enhanced Search Bar -->
+                        <div class="flex items-center space-x-2">
+                            <form id="search-form" method="GET" action="{{ route('purchase-request.index') }}" class="flex items-center space-x-2">
+                                <div class="relative">
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control pr-10" 
+                                           placeholder="Cari No. PR, Pemohon, Deskripsi, Item..." 
+                                           value="{{ request('search') }}"
+                                           style="min-width: 300px;">
+                                    @if(request('search'))
+                                    <a href="{{ route('purchase-request.index') }}" 
+                                       class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                       title="Hapus pencarian">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                    @else
+                                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    @endif
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search mr-1"></i>Cari
+                                </button>
+                                @if(request('search'))
+                                <a href="{{ route('purchase-request.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-1"></i>Reset
+                                </a>
+                                @endif
+                            </form>
+                        </div>
                     </div>
+
+                    <!-- Search Tips -->
+                    @if(request('search'))
+                    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Tips pencarian:</strong> Gunakan kata kunci seperti nomor PR, nama pemohon, email, divisi, deskripsi PR, atau deskripsi item untuk hasil yang lebih spesifik.
+                    </div>
+                    @endif
 
                     <!-- Tabel Data PR -->
                     @if ($purchaseRequests->isNotEmpty())
@@ -423,10 +507,40 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="border-collapse border border-gray-300 dark:border-gray-600 text-center py-8">
-                                        <div class="text-gray-500 dark:text-gray-400">
-                                            <i class="fas fa-inbox fa-3x mb-4"></i>
-                                            <p>Belum ada Purchase Request</p>
+                                    <td colspan="7" class="border-collapse border border-gray-300 dark:border-gray-600 text-center py-12">
+                                        <div class="empty-state rounded-lg mx-4 my-4 p-8">
+                                            @if(request('search'))
+                                            <div class="text-gray-500 dark:text-gray-400">
+                                                <i class="fas fa-search-minus fa-4x mb-4 text-gray-300 dark:text-gray-600"></i>
+                                                <h3 class="text-lg font-semibold mb-2">Tidak Ada Hasil</h3>
+                                                <p class="mb-4">Tidak ditemukan Purchase Request yang sesuai dengan pencarian "<strong>{{ request('search') }}</strong>"</p>
+                                                <div class="space-y-2 text-sm">
+                                                    <p>💡 <strong>Saran:</strong></p>
+                                                    <ul class="text-left max-w-md mx-auto space-y-1">
+                                                        <li>• Periksa ejaan kata kunci</li>
+                                                        <li>• Gunakan kata kunci yang lebih umum</li>
+                                                        <li>• Coba cari dengan nomor PR atau nama pemohon</li>
+                                                        <li>• Gunakan sebagian kata saja</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mt-6">
+                                                    <a href="{{ route('purchase-request.index') }}" 
+                                                       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                                        <i class="fas fa-times mr-2"></i>Hapus Filter
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            @else
+                                            <div class="text-gray-500 dark:text-gray-400">
+                                                <i class="fas fa-inbox fa-4x mb-4 text-gray-300 dark:text-gray-600"></i>
+                                                <h3 class="text-lg font-semibold mb-2">Belum Ada Purchase Request</h3>
+                                                <p class="mb-6">Belum ada Purchase Request yang dibuat. Mulai dengan membuat PR pertama Anda.</p>
+                                                <a href="{{ route('purchase-request.create') }}" 
+                                                   class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                                    <i class="fas fa-plus mr-2"></i>Buat PR Baru
+                                                </a>
+                                            </div>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -520,6 +634,81 @@
                     infoBox.style.display = 'none';
                 }
             }
+
+            // Enhanced search functionality
+            const searchForm = document.getElementById('search-form');
+            const searchInput = searchForm ? searchForm.querySelector('input[name="search"]') : null;
+            
+            if (searchInput && searchForm) {
+                // Auto-focus on search input when pressing '/' key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === '/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                        searchInput.focus();
+                    }
+                });
+
+                // Clear search with Escape key
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        searchInput.blur();
+                    }
+                });
+
+                // Submit form on Enter - now properly targeted
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchForm.submit();
+                    }
+                });
+
+                // Add loading state to search button
+                searchForm.addEventListener('submit', function(e) {
+                    const submitBtn = searchForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mencari...';
+                        
+                        // Reset button state if form submission fails
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Cari';
+                        }, 5000);
+                    }
+                });
+            }
+        });
+
+        // Clear search function
+        function clearSearch() {
+            const searchForm = document.getElementById('search-form');
+            const searchInput = searchForm ? searchForm.querySelector('input[name="search"]') : null;
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+        }
+
+        // Highlight search terms in results
+        function highlightSearchTerms() {
+            const searchTerm = '{{ request("search") }}';
+            if (searchTerm) {
+                const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const elements = document.querySelectorAll('td');
+                
+                elements.forEach(element => {
+                    if (element.textContent && !element.querySelector('input') && !element.querySelector('button')) {
+                        element.innerHTML = element.innerHTML.replace(regex, '<mark class="search-highlight">$1</mark>');
+                    }
+                });
+            }
+        }
+
+        // Call highlight function after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            highlightSearchTerms();
         });
     </script>
 </x-app-layout>

@@ -18,9 +18,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->get('search');
         
         // Admin, purchasing, FAT manager, dan CFO bisa lihat semua PR
         if ($user->level === 'admin' || 
@@ -28,21 +29,70 @@ class PurchaseRequestController extends Controller
             ($user->divisi === 'FAT' && in_array($user->level, ['manager', 'spv'])) ||
             ($user->level === 'cfo') ||
             ($user->level === 'admin' && (stripos($user->name, 'CFO') !== false || stripos($user->name, 'Chief Financial') !== false))) {
-            $purchaseRequests = PurchaseRequest::with(['user', 'items', 'location', 'category'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            
+            $query = PurchaseRequest::with(['user', 'items', 'location', 'category'])
+                ->orderBy('created_at', 'desc');
+            
+            // Apply search filter if search term exists
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('pr_number', 'LIKE', '%' . $search . '%')
+                      ->orWhere('description', 'LIKE', '%' . $search . '%')
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('email', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('divisi', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('items', function($itemQuery) use ($search) {
+                          $itemQuery->where('description', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('notes', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('category', function($categoryQuery) use ($search) {
+                          $categoryQuery->where('name', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('location', function($locationQuery) use ($search) {
+                          $locationQuery->where('name', 'LIKE', '%' . $search . '%');
+                      });
+                });
+            }
+            
+            $purchaseRequests = $query->paginate(15)->withQueryString();
         } else {
             // Untuk user lain, gunakan method helper untuk filter
-            $allPRs = PurchaseRequest::with(['user', 'items', 'location', 'category'])
-                ->orderBy('created_at', 'desc')
-                ->get()
+            $query = PurchaseRequest::with(['user', 'items', 'location', 'category'])
+                ->orderBy('created_at', 'desc');
+            
+            // Apply search filter if search term exists
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('pr_number', 'LIKE', '%' . $search . '%')
+                      ->orWhere('description', 'LIKE', '%' . $search . '%')
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('name', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('email', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('divisi', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('items', function($itemQuery) use ($search) {
+                          $itemQuery->where('description', 'LIKE', '%' . $search . '%')
+                                   ->orWhere('notes', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('category', function($categoryQuery) use ($search) {
+                          $categoryQuery->where('name', 'LIKE', '%' . $search . '%');
+                      })
+                      ->orWhereHas('location', function($locationQuery) use ($search) {
+                          $locationQuery->where('name', 'LIKE', '%' . $search . '%');
+                      });
+                });
+            }
+            
+            $allPRs = $query->get()
                 ->filter(function($pr) use ($user) {
                     return $pr->canBeViewedByUser($user);
                 });
             
             // Convert collection to paginator
             $perPage = 15;
-            $currentPage = request()->get('page', 1);
+            $currentPage = $request->get('page', 1);
             $currentItems = $allPRs->slice(($currentPage - 1) * $perPage, $perPage)->values();
             
             $purchaseRequests = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -50,7 +100,7 @@ class PurchaseRequestController extends Controller
                 $allPRs->count(),
                 $perPage,
                 $currentPage,
-                ['path' => request()->url(), 'query' => request()->query()]
+                ['path' => $request->url(), 'query' => $request->query()]
             );
         }
 

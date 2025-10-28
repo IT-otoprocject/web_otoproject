@@ -351,11 +351,12 @@
                                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
                                                     <input type="number" 
                                                            name="items[{{ $index }}][estimated_price]" 
-                                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.estimated_price') border-red-500 @enderror" 
+                                                           class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.estimated_price') border-red-500 @enderror" 
                                                            step="0.01" 
                                                            min="0"
                                                            value="{{ $item['estimated_price'] ?? '' }}"
-                                                           onchange="calculateTotal()">
+                                                           onchange="calculateTotal()"
+                                                           oninput="formatPriceInput(this)">
                                                     @error('items.'.$index.'.estimated_price')
                                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                                     @enderror
@@ -568,6 +569,28 @@
                 console.log('Current files count:', currentFiles.length);
                 console.log('Current files:', currentFiles.map(f => ({name: f.name, size: f.size})));
                 
+                // Convert formatted prices back to plain numbers before submission (IMPORTANT: Do this first!)
+                const priceInputs = document.querySelectorAll('input[name*="[estimated_price]"], .price-input');
+                priceInputs.forEach(function(input) {
+                    if (input.value && input.value.toString().includes('.')) {
+                        // Store original formatted value for logging
+                        const originalValue = input.value;
+                        // Remove thousand separators (dots) but preserve decimal separator (comma)
+                        // Indonesian format: 500.000,50 -> 500000.50
+                        let numericValue = input.value.toString()
+                            .replace(/\./g, '') // Remove thousand separators (dots)
+                            .replace(/,/g, '.'); // Convert decimal separator (comma to dot)
+                        input.value = numericValue;
+                        console.log('Price converted:', input.name, 'from', originalValue, 'to', numericValue);
+                    } else if (input.value && input.value.toString().includes(',')) {
+                        // Only comma present (decimal separator)
+                        const originalValue = input.value;
+                        const numericValue = input.value.toString().replace(/,/g, '.');
+                        input.value = numericValue;
+                        console.log('Price converted (decimal only):', input.name, 'from', originalValue, 'to', numericValue);
+                    }
+                });
+                
                 // Always use AJAX if we have files to ensure they're properly sent
                 if (currentFiles.length > 0) {
                     console.log('Using AJAX submission for multiple files');
@@ -616,16 +639,6 @@
                 } else {
                     console.log('No files - using standard form submission');
                 }
-                
-                // Convert formatted prices back to plain numbers before submission
-                const priceInputs = document.querySelectorAll('.price-input');
-                priceInputs.forEach(function(input) {
-                    if (input.value) {
-                        // Remove thousand separators and convert to plain number
-                        const numericValue = input.value.replace(/[.,]/g, '');
-                        input.value = numericValue;
-                    }
-                });
                 
                 // Add more debugging
                 const formData = new FormData(this);
@@ -810,18 +823,31 @@
 
         // Format price input with thousand separators
         function formatPriceInput(input) {
-            // Remove all non-numeric characters except decimal point
-            let value = input.value.replace(/[^\d]/g, '');
+            // Get the raw value and remove existing formatting
+            let value = input.value.replace(/[^\d,]/g, ''); // Keep digits and comma (decimal separator)
             
-            // Convert to number and format with thousand separators
             if (value === '') {
                 input.value = '';
                 return;
             }
             
-            // Add thousand separators
-            const formattedValue = parseInt(value).toLocaleString('id-ID');
-            input.value = formattedValue;
+            // Split by comma to handle decimal part
+            let parts = value.split(',');
+            let integerPart = parts[0];
+            let decimalPart = parts[1];
+            
+            // Format integer part with thousand separators (dots)
+            if (integerPart) {
+                const formattedInteger = parseInt(integerPart).toLocaleString('id-ID');
+                
+                // Reconstruct the value
+                if (decimalPart !== undefined) {
+                    // If there was a comma in the original input, preserve decimal part
+                    input.value = formattedInteger + ',' + decimalPart;
+                } else {
+                    input.value = formattedInteger;
+                }
+            }
         }
 
         // Store current files for accumulative selection

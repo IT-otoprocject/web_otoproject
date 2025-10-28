@@ -22,9 +22,12 @@ class PurchaseRequestController extends Controller
     {
         $user = Auth::user();
         
-        // Admin dan purchasing bisa lihat semua PR
+        // Admin, purchasing, FAT manager, dan CFO bisa lihat semua PR
         if ($user->level === 'admin' || 
-            ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']))) {
+            ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff'])) ||
+            ($user->divisi === 'FAT' && in_array($user->level, ['manager', 'spv'])) ||
+            ($user->level === 'cfo') ||
+            ($user->level === 'admin' && (stripos($user->name, 'CFO') !== false || stripos($user->name, 'Chief Financial') !== false))) {
             $purchaseRequests = PurchaseRequest::with(['user', 'items', 'location', 'category'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);

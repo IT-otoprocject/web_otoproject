@@ -404,9 +404,12 @@ class PurchaseRequest extends Model
             return true;
         }
         
-        // Admin dan purchasing bisa lihat semua
+        // Admin, purchasing, FAT manager, dan CFO bisa lihat semua
         if (in_array($user->level, ['admin']) || 
-            ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']))) {
+            ($user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff'])) ||
+            ($user->divisi === 'FAT' && in_array($user->level, ['manager', 'spv'])) ||
+            ($user->level === 'cfo') ||
+            ($user->level === 'admin' && (stripos($user->name, 'CFO') !== false || stripos($user->name, 'Chief Financial') !== false))) {
             return true;
         }
         
@@ -433,14 +436,6 @@ class PurchaseRequest extends Model
             $approvalFlow = $this->approval_flow ?? [];
             if (in_array('dept_head', $approvalFlow) && 
                 $user->divisi === $this->user->divisi) {
-                return true;
-            }
-        }
-        
-        // Finance Department (FAT) bisa lihat PR yang dalam flow approval finance
-        if ($user->divisi === 'FAT' && in_array($user->level, ['manager', 'spv'])) {
-            $approvalFlow = $this->approval_flow ?? [];
-            if (in_array('finance_dept', $approvalFlow)) {
                 return true;
             }
         }

@@ -184,11 +184,14 @@ class PurchaseRequestController extends Controller
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit' => 'nullable|string|max:50',
-            'items.*.estimated_price' => 'nullable|numeric|min:0',
+            'items.*.estimated_price' => 'required|numeric|min:0',
             'items.*.notes' => 'nullable|string|max:500',
             'attachments' => 'nullable|array|max:5', // max 5 files
             'attachments.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048' // max 2MB per file
         ], [
+            'items.*.estimated_price.required' => 'Est. Harga Satuan wajib diisi untuk setiap item.',
+            'items.*.estimated_price.numeric' => 'Est. Harga Satuan harus berupa angka.',
+            'items.*.estimated_price.min' => 'Est. Harga Satuan tidak boleh kurang dari 0.',
             'attachments.max' => 'Maksimal 5 file yang dapat diupload.',
             'attachments.*.mimes' => 'File harus berformat JPG, JPEG, PNG, atau PDF.',
             'attachments.*.max' => 'Setiap file maksimal berukuran 2MB.',
@@ -600,8 +603,12 @@ class PurchaseRequestController extends Controller
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit' => 'nullable|string|max:50',
-            'items.*.estimated_price' => 'nullable|numeric|min:0',
+            'items.*.estimated_price' => 'required|numeric|min:0',
             'items.*.notes' => 'nullable|string|max:500'
+        ], [
+            'items.*.estimated_price.required' => 'Est. Harga Satuan wajib diisi untuk setiap item.',
+            'items.*.estimated_price.numeric' => 'Est. Harga Satuan harus berupa angka.',
+            'items.*.estimated_price.min' => 'Est. Harga Satuan tidak boleh kurang dari 0.',
         ]);
 
         DB::beginTransaction();

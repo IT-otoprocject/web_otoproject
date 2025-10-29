@@ -348,7 +348,9 @@
                                                     @enderror
                                                 </div>
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Est. Harga Satuan <span class="text-red-500">*</span>
+                                                    </label>
                                                     <input type="number" 
                                                            name="items[{{ $index }}][estimated_price]" 
                                                            class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('items.'.$index.'.estimated_price') border-red-500 @enderror" 
@@ -356,7 +358,8 @@
                                                            min="0"
                                                            value="{{ $item['estimated_price'] ?? '' }}"
                                                            onchange="calculateTotal()"
-                                                           oninput="formatPriceInput(this)">
+                                                           oninput="formatPriceInput(this)"
+                                                           required>
                                                     @error('items.'.$index.'.estimated_price')
                                                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                                                     @enderror
@@ -413,13 +416,16 @@
                                                        placeholder="pcs, kg, dll">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Est. Harga Satuan <span class="text-red-500">*</span>
+                                                </label>
                                                 <input type="text" 
                                                        name="items[0][estimated_price]" 
                                                        class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                                        placeholder="0"
                                                        oninput="formatPriceInput(this)"
-                                                       onchange="calculateTotal()">
+                                                       onchange="calculateTotal()"
+                                                       required>
                                             </div>
                                             <div class="flex items-start">
                                                 <button type="button" 
@@ -669,15 +675,23 @@
                 const itemRows = document.querySelectorAll('.item-row');
                 console.log('Item rows found:', itemRows.length);
                 let hasValidItem = false;
+                let missingEstimatedPrice = [];
                 
                 itemRows.forEach(function(row, index) {
                     const description = row.querySelector('textarea[name*="[description]"]');
                     const quantity = row.querySelector('input[name*="[quantity]"]');
+                    const estimatedPrice = row.querySelector('input[name*="[estimated_price]"]');
                     
                     console.log(`Item ${index}:`, {
                         description: description ? description.value : 'not found',
-                        quantity: quantity ? quantity.value : 'not found'
+                        quantity: quantity ? quantity.value : 'not found',
+                        estimatedPrice: estimatedPrice ? estimatedPrice.value : 'not found'
                     });
+                    
+                    // Check if estimated price is missing or empty
+                    if (estimatedPrice && (!estimatedPrice.value || estimatedPrice.value.trim() === '' || parseFloat(estimatedPrice.value.replace(/[.,]/g, '')) <= 0)) {
+                        missingEstimatedPrice.push(index + 1);
+                    }
                     
                     if (description && description.value.trim() !== '' && quantity && quantity.value > 0) {
                         hasValidItem = true;
@@ -685,6 +699,15 @@
                 });
                 
                 console.log('Has valid item:', hasValidItem);
+                console.log('Missing estimated price for items:', missingEstimatedPrice);
+                
+                // Check if any items are missing estimated price
+                if (missingEstimatedPrice.length > 0) {
+                    e.preventDefault();
+                    console.log('Missing estimated price for items:', missingEstimatedPrice);
+                    alert(`Est. Harga Satuan wajib diisi untuk item ke-${missingEstimatedPrice.join(', ')}`);
+                    return false;
+                }
                 
                 if (!hasValidItem) {
                     e.preventDefault();
@@ -735,13 +758,16 @@
                                    placeholder="pcs, kg, dll">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Est. Harga Satuan</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Est. Harga Satuan <span class="text-red-500">*</span>
+                            </label>
                             <input type="text" 
                                    name="items[${itemIndex}][estimated_price]" 
                                    class="price-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                    placeholder="0"
                                    oninput="formatPriceInput(this)"
-                                   onchange="calculateTotal()">
+                                   onchange="calculateTotal()"
+                                   required>
                         </div>
                         <div class="flex items-start">
                             <button type="button" 

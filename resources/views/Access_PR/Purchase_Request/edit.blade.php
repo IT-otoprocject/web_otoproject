@@ -205,13 +205,14 @@
                                                         @enderror
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label class="form-label">Estimasi Harga Satuan</label>
+                                                        <label class="form-label">Estimasi Harga Satuan <span class="text-danger">*</span></label>
                                                         <input type="number" 
                                                                name="items[{{ $index }}][estimated_price]" 
                                                                class="form-control @error('items.'.$index.'.estimated_price') is-invalid @enderror" 
                                                                step="0.01" 
                                                                min="0"
-                                                               value="{{ $item['estimated_price'] ?? '' }}">
+                                                               value="{{ $item['estimated_price'] ?? '' }}"
+                                                               required>
                                                         @error('items.'.$index.'.estimated_price')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
@@ -267,13 +268,14 @@
                                                                value="{{ $item->unit }}">
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label class="form-label">Estimasi Harga Satuan</label>
+                                                        <label class="form-label">Estimasi Harga Satuan <span class="text-danger">*</span></label>
                                                         <input type="number" 
                                                                name="items[{{ $index }}][estimated_price]" 
                                                                class="form-control" 
                                                                step="0.01" 
                                                                min="0"
-                                                               value="{{ $item->estimated_price }}">
+                                                               value="{{ $item->estimated_price }}"
+                                                               required>
                                                     </div>
                                                     <div class="col-md-1">
                                                         <label class="form-label">&nbsp;</label>
@@ -348,8 +350,8 @@
                             <input type="text" name="items[${itemIndex}][unit]" class="form-control" placeholder="pcs, kg, dll">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Estimasi Harga Satuan</label>
-                            <input type="number" name="items[${itemIndex}][estimated_price]" class="form-control" step="0.01" min="0">
+                            <label class="form-label">Estimasi Harga Satuan <span class="text-danger">*</span></label>
+                            <input type="number" name="items[${itemIndex}][estimated_price]" class="form-control" step="0.01" min="0" required>
                         </div>
                         <div class="col-md-1">
                             <label class="form-label">&nbsp;</label>

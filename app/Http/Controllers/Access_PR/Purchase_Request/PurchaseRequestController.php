@@ -30,8 +30,7 @@ class PurchaseRequestController extends Controller
             ($user->level === 'cfo') ||
             ($user->level === 'admin' && (stripos($user->name, 'CFO') !== false || stripos($user->name, 'Chief Financial') !== false))) {
             
-            $query = PurchaseRequest::with(['user', 'items', 'location', 'category'])
-                ->orderBy('created_at', 'desc');
+            $query = PurchaseRequest::with(['user', 'items', 'location', 'category']);
             
             // Apply search filter if search term exists
             if ($search) {
@@ -56,11 +55,41 @@ class PurchaseRequestController extends Controller
                 });
             }
             
-            $purchaseRequests = $query->paginate(15)->withQueryString();
+            // Get all PRs first for notification counting and sorting
+            $allPRs = $query->get();
+            
+            // Sort PRs: yang perlu action paling awal, kemudian berdasarkan created_at desc
+            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
+            $sortedPRs = $allPRs->sortBy([
+                function($pr) use ($user, $isPurchasing) {
+                    // Return 0 for PRs that need action (akan tampil paling awal)
+                    // Return 1 for PRs that don't need action
+                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                    return ($needsApprovalAction || $needsPurchasingAction) ? 0 : 1;
+                },
+                function($pr) {
+                    // Secondary sort: newest first (DESC), so return negative timestamp
+                    return -$pr->created_at->timestamp;
+                }
+            ])->values();
+            
+            // Convert collection to paginator
+            $perPage = 15;
+            $currentPage = $request->get('page', 1);
+            $currentItems = $sortedPRs->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            
+            $purchaseRequests = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                $sortedPRs->count(),
+                $perPage,
+                $currentPage,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+            
         } else {
             // Untuk user lain, gunakan method helper untuk filter
-            $query = PurchaseRequest::with(['user', 'items', 'location', 'category'])
-                ->orderBy('created_at', 'desc');
+            $query = PurchaseRequest::with(['user', 'items', 'location', 'category']);
             
             // Apply search filter if search term exists
             if ($search) {
@@ -90,26 +119,65 @@ class PurchaseRequestController extends Controller
                     return $pr->canBeViewedByUser($user);
                 });
             
+            // Sort PRs: yang perlu action paling awal, kemudian berdasarkan created_at desc
+            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
+            $sortedPRs = $allPRs->sortBy([
+                function($pr) use ($user, $isPurchasing) {
+                    // Return 0 for PRs that need action (akan tampil paling awal)
+                    // Return 1 for PRs that don't need action
+                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                    return ($needsApprovalAction || $needsPurchasingAction) ? 0 : 1;
+                },
+                function($pr) {
+                    // Secondary sort: newest first (DESC), so return negative timestamp
+                    return -$pr->created_at->timestamp;
+                }
+            ])->values();
+            
             // Convert collection to paginator
             $perPage = 15;
             $currentPage = $request->get('page', 1);
-            $currentItems = $allPRs->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            $currentItems = $sortedPRs->slice(($currentPage - 1) * $perPage, $perPage)->values();
             
             $purchaseRequests = new \Illuminate\Pagination\LengthAwarePaginator(
                 $currentItems,
-                $allPRs->count(),
+                $sortedPRs->count(),
                 $perPage,
                 $currentPage,
                 ['path' => $request->url(), 'query' => $request->query()]
             );
         }
 
+        // Calculate notification counts from ALL PRs (not just paginated ones)
+        if (isset($allPRs)) {
+            $allPRsForNotification = $allPRs;
+        } elseif (isset($sortedPRs)) {
+            $allPRsForNotification = $sortedPRs;
+        } else {
+            $allPRsForNotification = collect();
+        }
+        
+        // Count PRs that need approval by current user (from ALL data)
+        $pendingApprovalsCount = $allPRsForNotification->filter(function($pr) use ($user) {
+            return $pr->canBeApprovedByUser($user);
+        })->count();
+
+        // Count PRs that are APPROVED and need purchasing action (from ALL data)
+        $approvedPRsCount = 0;
+        $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
+        if ($isPurchasing) {
+            $approvedPRsCount = $allPRsForNotification->filter(function($pr) {
+                return $pr->status === 'APPROVED';
+            })->count();
+        }
+
         // For GA users, compute PRs pending GA decision (generate or mark non-asset GA)
         $gaAssetPendingCount = 0;
         $isGA = ($user->divisi === 'HCGA' && in_array($user->level, ['manager', 'spv', 'staff']));
         if ($isGA) {
-            // Attach computed flags per PR
-            foreach ($purchaseRequests as $pr) {
+            // Calculate GA pending count from ALL PRs
+            foreach ($allPRsForNotification as $pr) {
                 // Items that still require GA decision: no item-level GA flag and no pr_item_assets records
                 $pendingItems = $pr->items->filter(function($it) use ($pr) {
                     $hasAssets = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $it->id)->exists();
@@ -120,9 +188,21 @@ class PurchaseRequestController extends Controller
                 $pr->needs_ga_action = ($pr->ga_pending_item_count > 0) && $pr->areAllItemsCompleted();
                 if ($pr->needs_ga_action) { $gaAssetPendingCount++; }
             }
+            
+            // Also attach computed flags to paginated PRs for display
+            foreach ($purchaseRequests as $pr) {
+                // Items that still require GA decision: no item-level GA flag and no pr_item_assets records
+                $pendingItems = $pr->items->filter(function($it) use ($pr) {
+                    $hasAssets = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_item_id', $it->id)->exists();
+                    return is_null($it->is_asset_hcga) && !$hasAssets;
+                });
+                $pr->ga_pending_item_count = $pendingItems->count();
+                $pr->has_any_assets = \App\Models\Access_PR\Purchase_Request\PurchaseRequestItemAsset::where('purchase_request_id', $pr->id)->exists();
+                $pr->needs_ga_action = ($pr->ga_pending_item_count > 0) && $pr->areAllItemsCompleted();
+            }
         }
 
-        return view('Access_PR.Purchase_Request.index', compact('purchaseRequests', 'gaAssetPendingCount'));
+        return view('Access_PR.Purchase_Request.index', compact('purchaseRequests', 'gaAssetPendingCount', 'pendingApprovalsCount', 'approvedPRsCount', 'isPurchasing'));
     }
 
     // GA marks specific items as non-asset at GA level (without generating numbers)

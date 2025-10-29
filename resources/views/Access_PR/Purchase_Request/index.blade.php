@@ -62,20 +62,6 @@
         <div class="max-w-[90%] lg:max-w-[1700px] mx-auto sm:px-6 lg:px-8">
 
             @php
-            // Count PRs that need approval by current user
-            $pendingApprovalsCount = $purchaseRequests->filter(function($pr) {
-            return $pr->canBeApprovedByUser(auth()->user());
-            })->count();
-
-            // Count PRs that are APPROVED and need purchasing action
-            $approvedPRsCount = 0;
-            $isPurchasing = auth()->user()->divisi === 'PURCHASING' && in_array(auth()->user()->level, ['manager', 'spv', 'staff']);
-            if ($isPurchasing) {
-            $approvedPRsCount = $purchaseRequests->filter(function($pr) {
-            return $pr->status === 'APPROVED';
-            })->count();
-            }
-
             // Get user's approval role for display
             $user = auth()->user();
             $approvalRole = '';
@@ -139,11 +125,20 @@
                                 <span class="inline-block px-2 py-1 bg-red-600 text-white text-xs rounded animate-pulse border border-red-700 mx-1">
                                     <i class="fas fa-bell mr-1"></i>Perlu Action
                                 </span>
-                                di kolom Approval Level.
+                                di kolom Approval Level dan <strong>ditampilkan paling awal</strong> di daftar.
                             </p>
+                            <div class="bg-red-100 dark:bg-red-800/50 p-3 rounded-lg mt-3">
+                                <p class="text-red-800 dark:text-red-200 text-sm font-medium">
+                                    <i class="fas fa-sort-amount-down mr-1"></i> Urutan Tampilan:
+                                </p>
+                                <p class="text-red-700 dark:text-red-300 text-xs mt-1">
+                                    1. PR yang perlu action Anda (paling atas) <br>
+                                    2. PR lainnya (diurutkan berdasarkan tanggal terbaru)
+                                </p>
+                            </div>
                             <p class="text-red-500 dark:text-red-300 text-xs mt-2 italic">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Notifikasi ini akan muncul kembali setiap kali Anda login untuk mengingatkan adanya PR yang perlu disetujui.
+                                Jumlah ini mencakup <strong>semua halaman</strong>, tidak hanya halaman saat ini. Notifikasi ini akan muncul kembali setiap kali Anda login.
                             </p>
                         </div>
                     </div>
@@ -178,6 +173,7 @@
                                 PR dengan status <span class="inline-block px-2 py-1 bg-green-500 text-white text-xs rounded mx-1">APPROVED</span>
                                 perlu diproses hingga status
                                 <span class="inline-block px-2 py-1 bg-blue-500 text-white text-xs rounded mx-1">COMPLETED</span>
+                                dan <strong>ditampilkan paling awal</strong> di daftar.
                             </p>
                             <div class="bg-green-100 dark:bg-green-800/50 p-3 rounded-lg mt-3">
                                 <h4 class="text-green-800 dark:text-green-200 font-semibold text-sm mb-2">
@@ -193,7 +189,7 @@
                             </div>
                             <p class="text-green-500 dark:text-green-300 text-xs mt-2 italic">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Notifikasi ini akan muncul kembali setiap kali Anda login untuk mengingatkan adanya PR yang perlu diproses.
+                                Jumlah ini mencakup <strong>semua halaman</strong>, tidak hanya halaman saat ini. Notifikasi ini akan muncul kembali setiap kali Anda login untuk mengingatkan adanya PR yang perlu diproses.
                             </p>
                         </div>
                     </div>

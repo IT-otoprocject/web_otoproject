@@ -58,21 +58,30 @@ class PurchaseRequestController extends Controller
             // Get all PRs first for notification counting and sorting
             $allPRs = $query->get();
             
-            // Sort PRs: yang perlu action paling awal, kemudian berdasarkan created_at desc
+            // Sort PRs: yang perlu action paling awal (diurutkan terbaru), kemudian yang tidak perlu action (diurutkan terbaru)
             $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
-            $sortedPRs = $allPRs->sortBy([
-                function($pr) use ($user, $isPurchasing) {
-                    // Return 0 for PRs that need action (akan tampil paling awal)
-                    // Return 1 for PRs that don't need action
-                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
-                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
-                    return ($needsApprovalAction || $needsPurchasingAction) ? 0 : 1;
-                },
-                function($pr) {
-                    // Secondary sort: newest first (DESC), so return negative timestamp
-                    return -$pr->created_at->timestamp;
+            
+            // Separate PRs into two groups
+            $needActionPRs = collect();
+            $noActionPRs = collect();
+            
+            foreach ($allPRs as $pr) {
+                $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                
+                if ($needsApprovalAction || $needsPurchasingAction) {
+                    $needActionPRs->push($pr);
+                } else {
+                    $noActionPRs->push($pr);
                 }
-            ])->values();
+            }
+            
+            // Sort each group by created_at DESC (newest first)
+            $needActionPRs = $needActionPRs->sortByDesc('created_at');
+            $noActionPRs = $noActionPRs->sortByDesc('created_at');
+            
+            // Merge the groups: need action first, then no action
+            $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
             
             // Convert collection to paginator
             $perPage = 15;
@@ -119,21 +128,30 @@ class PurchaseRequestController extends Controller
                     return $pr->canBeViewedByUser($user);
                 });
             
-            // Sort PRs: yang perlu action paling awal, kemudian berdasarkan created_at desc
+            // Sort PRs: yang perlu action paling awal (diurutkan terbaru), kemudian yang tidak perlu action (diurutkan terbaru)
             $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
-            $sortedPRs = $allPRs->sortBy([
-                function($pr) use ($user, $isPurchasing) {
-                    // Return 0 for PRs that need action (akan tampil paling awal)
-                    // Return 1 for PRs that don't need action
-                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
-                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
-                    return ($needsApprovalAction || $needsPurchasingAction) ? 0 : 1;
-                },
-                function($pr) {
-                    // Secondary sort: newest first (DESC), so return negative timestamp
-                    return -$pr->created_at->timestamp;
+            
+            // Separate PRs into two groups
+            $needActionPRs = collect();
+            $noActionPRs = collect();
+            
+            foreach ($allPRs as $pr) {
+                $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                
+                if ($needsApprovalAction || $needsPurchasingAction) {
+                    $needActionPRs->push($pr);
+                } else {
+                    $noActionPRs->push($pr);
                 }
-            ])->values();
+            }
+            
+            // Sort each group by created_at DESC (newest first)
+            $needActionPRs = $needActionPRs->sortByDesc('created_at');
+            $noActionPRs = $noActionPRs->sortByDesc('created_at');
+            
+            // Merge the groups: need action first, then no action
+            $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
             
             // Convert collection to paginator
             $perPage = 15;

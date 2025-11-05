@@ -132,7 +132,7 @@
                                     <i class="fas fa-sort-amount-down mr-1"></i> Urutan Tampilan:
                                 </p>
                                 <p class="text-red-700 dark:text-red-300 text-xs mt-1">
-                                    1. PR yang perlu action Anda (paling atas) <br>
+                                    1. PR yang perlu action Anda (paling atas, diurutkan tanggal terbaru) <br>
                                     2. PR lainnya (diurutkan berdasarkan tanggal terbaru)
                                 </p>
                             </div>

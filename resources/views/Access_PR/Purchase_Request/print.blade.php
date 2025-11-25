@@ -96,7 +96,14 @@
                     <td class="muted">Lokasi</td>
                     <td>{{ $purchaseRequest->location->name ?? 'N/A' }}</td>
                     <td class="muted">Company</td>
-                    <td>{{ $purchaseRequest->location->company ?? 'N/A' }}</td>
+                    <td>
+                        @php
+                            // Ambil company dari approval finance department jika ada
+                            $financeApproval = $purchaseRequest->approvals['finance_dept'] ?? null;
+                            $selectedCompany = $financeApproval['fat_department'] ?? $purchaseRequest->location->company ?? 'N/A';
+                        @endphp
+                        {{ $selectedCompany }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="muted">Tanggal Kebutuhan</td>
@@ -149,10 +156,14 @@
                         <td>
                             @if(!empty($status['notes']))
                                 Catatan: {{ $status['notes'] }}
-                                @if(!empty($status['approved_by_name']))<br>@endif
+                                @if(!empty($status['approved_by_name']) || ($level === 'finance_dept' && isset($status['fat_department'])))<br>@endif
                             @endif
                             @if(!empty($status['approved_by_name']))
                                 Oleh: {{ $status['approved_by_name'] }}
+                                @if($level === 'finance_dept' && isset($status['fat_department']))<br>@endif
+                            @endif
+                            @if($level === 'finance_dept' && isset($status['fat_department']))
+                                <strong>Company Dipilih:</strong> {{ $status['fat_department'] }}
                             @endif
                         </td>
                     </tr>

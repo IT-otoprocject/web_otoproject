@@ -263,6 +263,11 @@ class PurchaseRequest extends Model
                 'formatted_date' => $formattedDate,
                 'status_text' => $statusText
             ];
+            
+            // Tambahkan informasi fat_department untuk finance_dept level
+            if ($level === 'finance_dept' && isset($approvals[$level]['fat_department'])) {
+                $status[$level]['fat_department'] = $approvals[$level]['fat_department'];
+            }
         }
         
         return $status;

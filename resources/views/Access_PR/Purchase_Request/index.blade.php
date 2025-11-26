@@ -291,6 +291,19 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <!-- Filter info and statistics -->
                         <div class="flex items-center space-x-4">
+                            <!-- Filter Button -->
+                            <button type="button" 
+                                    class="btn {{ request('status_filter') || request('approval_filter') || request('show_needs_action') === 'false' ? 'btn-warning' : 'btn-outline-secondary' }} border border-gray-300 dark:border-gray-600"
+                                    onclick="openFilterModal()" 
+                                    title="Filter data berdasarkan status dan approval level">
+                                <i class="fas fa-filter mr-1"></i>Filter
+                                @if(request('status_filter') || request('approval_filter') || request('show_needs_action') === 'false')
+                                <span class="ml-1 px-1 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
+                                    Aktif
+                                </span>
+                                @endif
+                            </button>
+                            
                             @if(request('search'))
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded px-3 py-2">
                                 <i class="fas fa-search text-blue-500 mr-2"></i>
@@ -330,6 +343,12 @@
                                     </div>
                                     @endif
                                 </div>
+                                
+                                <!-- Hidden filter inputs -->
+                                <input type="hidden" name="status_filter" id="status-filter-input" value="{{ request('status_filter') }}">
+                                <input type="hidden" name="approval_filter" id="approval-filter-input" value="{{ request('approval_filter') }}">
+                                <input type="hidden" name="show_needs_action" id="show-needs-action-input" value="{{ request('show_needs_action', 'true') }}">
+                                
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search mr-1"></i>Cari
                                 </button>
@@ -349,6 +368,204 @@
                         <strong>Tips pencarian:</strong> Gunakan kata kunci seperti nomor PR, nama pemohon, email, divisi, deskripsi PR, atau deskripsi item untuk hasil yang lebih spesifik.
                     </div>
                     @endif
+
+                    <!-- Filter Info Display -->
+                    @if(request('status_filter') || request('approval_filter') || request('show_needs_action') === 'false')
+                    <div class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-filter text-amber-600"></i>
+                                <span class="text-amber-800 dark:text-amber-200 font-medium">Filter Aktif:</span>
+                                
+                                @if(request('status_filter'))
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                    Status: {{ ucfirst(str_replace('_', ' ', request('status_filter'))) }}
+                                </span>
+                                @endif
+                                
+                                @if(request('approval_filter'))
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                                    Approval: {{ ucwords(str_replace('_', ' ', request('approval_filter'))) }}
+                                </span>
+                                @endif
+                                
+                                @if(request('show_needs_action') === 'false')
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
+                                    Semua Data (Termasuk yang tidak perlu action)
+                                </span>
+                                @endif
+                            </div>
+                            <a href="{{ route('purchase-request.index', ['search' => request('search')]) }}" 
+                               class="text-amber-600 hover:text-amber-800 text-sm">
+                                <i class="fas fa-times mr-1"></i>Hapus Filter
+                            </a>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Filter Modal -->
+                    <div id="filterModal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="background-color: rgba(0,0,0,0.5);">
+                        <div class="flex items-center justify-center min-h-screen px-4">
+                            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full mx-4">
+                                <!-- Modal Header -->
+                                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600 rounded-t-2xl">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Purchase Request
+                                    </h3>
+                                    <button type="button" onclick="closeFilterModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal Body -->
+                                <div class="p-6">
+                                    <form id="filter-form">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- Status Filter -->
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                                                    <i class="fas fa-tag mr-2 text-green-500"></i>Filter Status
+                                                </h4>
+                                                <div class="space-y-2">
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="" class="mr-2" {{ !request('status_filter') ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Semua Status</span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="draft" class="mr-2" {{ request('status_filter') === 'draft' ? 'checked' : '' }}>
+                                                        <span class="inline-flex items-center">
+                                                            <span class="px-2 py-1 bg-gray-500 text-white text-xs rounded-full mr-2">DRAFT</span>
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Draft</span>
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="submitted" class="mr-2" {{ request('status_filter') === 'submitted' ? 'checked' : '' }}>
+                                                        <span class="inline-flex items-center">
+                                                            <span class="px-2 py-1 bg-yellow-500 text-white text-xs rounded-full mr-2">SUBMITTED</span>
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Submitted</span>
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="approved" class="mr-2" {{ request('status_filter') === 'approved' ? 'checked' : '' }}>
+                                                        <span class="inline-flex items-center">
+                                                            <span class="px-2 py-1 bg-green-500 text-white text-xs rounded-full mr-2">APPROVED</span>
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Approved</span>
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="rejected" class="mr-2" {{ request('status_filter') === 'rejected' ? 'checked' : '' }}>
+                                                        <span class="inline-flex items-center">
+                                                            <span class="px-2 py-1 bg-red-500 text-white text-xs rounded-full mr-2">REJECTED</span>
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Rejected</span>
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="status_filter" value="completed" class="mr-2" {{ request('status_filter') === 'completed' ? 'checked' : '' }}>
+                                                        <span class="inline-flex items-center">
+                                                            <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded-full mr-2">COMPLETED</span>
+                                                            <span class="text-sm text-gray-700 dark:text-gray-300">Completed</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Approval Level Filter -->
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                                                    <i class="fas fa-user-check mr-2 text-purple-500"></i>Filter Approval Level
+                                                </h4>
+                                                <div class="space-y-2">
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="" class="mr-2" {{ !request('approval_filter') ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">Semua Level</span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="department_head" class="mr-2" {{ request('approval_filter') === 'department_head' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-user-tie mr-1 text-blue-500"></i>Department Head
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="ga_approval" class="mr-2" {{ request('approval_filter') === 'ga_approval' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-building mr-1 text-green-500"></i>GA Approval
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="finance_department" class="mr-2" {{ request('approval_filter') === 'finance_department' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-calculator mr-1 text-yellow-500"></i>Finance Department
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="ceo_approval" class="mr-2" {{ request('approval_filter') === 'ceo_approval' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-crown mr-1 text-yellow-600"></i>CEO Approval
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="cfo_approval" class="mr-2" {{ request('approval_filter') === 'cfo_approval' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-chart-line mr-1 text-red-500"></i>CFO Approval
+                                                        </span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="approval_filter" value="fully_approved" class="mr-2" {{ request('approval_filter') === 'fully_approved' ? 'checked' : '' }}>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                            <i class="fas fa-check-double mr-1 text-green-600"></i>Fully Approved
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Show Needs Action Toggle -->
+                                        <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">
+                                                        <i class="fas fa-bell mr-2 text-red-500"></i>Prioritas Data yang Perlu Action
+                                                    </h4>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                                                        Aktif: Tampilkan data yang perlu action di urutan teratas.<br>
+                                                        Nonaktif: Tampilkan semua data tanpa prioritas khusus.
+                                                    </p>
+                                                </div>
+                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox" name="show_needs_action" value="true" class="sr-only peer" {{ request('show_needs_action', 'true') === 'true' ? 'checked' : '' }}>
+                                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                    <span id="toggle-label" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                        Aktif
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Modal Footer -->
+                                <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-600 rounded-b-2xl">
+                                    <button type="button" 
+                                            onclick="resetFilters()" 
+                                            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-xl transition-colors">
+                                        <i class="fas fa-undo mr-1"></i>Reset Filter
+                                    </button>
+                                    <div class="space-x-2">
+                                        <button type="button" 
+                                                onclick="closeFilterModal()" 
+                                                class="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300 rounded-xl transition-colors">
+                                            Batal
+                                        </button>
+                                        <button type="button" 
+                                                onclick="applyFilters()" 
+                                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-colors">
+                                            <i class="fas fa-filter mr-1"></i>Terapkan Filter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Tabel Data PR -->
                     @if ($purchaseRequests->isNotEmpty())
@@ -560,6 +777,66 @@
     </div>
 
     <script>
+        // Force refresh - Version 1.0.2 - DIRECT FIX
+        console.log('Script loaded at:', new Date().toLocaleTimeString());
+        
+        // DIRECT IMMEDIATE FUNCTION FOR TOGGLE
+        window.addEventListener('load', function() {
+            console.log('Window fully loaded, setting up toggle immediately');
+            setupToggle();
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up toggle via DOMContentLoaded');
+            setTimeout(setupToggle, 100);
+            setTimeout(setupToggle, 500);
+            setTimeout(setupToggle, 1000);
+        });
+        
+        function setupToggle() {
+            const actionCheckbox = document.querySelector('input[type="checkbox"][name="show_needs_action"]');
+            const toggleLabel = document.getElementById('toggle-label');
+            
+            console.log('Setup toggle - checkbox:', !!actionCheckbox, 'label:', !!toggleLabel);
+            
+            if (actionCheckbox && toggleLabel) {
+                // Simple function to update text
+                function updateText() {
+                    console.log('Checkbox checked status:', actionCheckbox.checked);
+                    console.log('Checkbox value:', actionCheckbox.value);
+                    console.log('Checkbox type:', actionCheckbox.type);
+                    
+                    const newText = actionCheckbox.checked ? 'Aktif' : 'Nonaktif';
+                    toggleLabel.textContent = newText;
+                    console.log('Toggle text updated to:', newText);
+                }
+                
+                // Set initial state
+                updateText();
+                
+                // Add event listeners
+                actionCheckbox.addEventListener('change', function(e) {
+                    console.log('Change event triggered');
+                    updateText();
+                });
+                
+                actionCheckbox.addEventListener('click', function(e) {
+                    console.log('Click event triggered');
+                    setTimeout(updateText, 10);
+                });
+                
+                // Also listen for click events on the toggle container
+                const toggleContainer = toggleLabel.closest('.relative');
+                if (toggleContainer) {
+                    toggleContainer.addEventListener('click', function(e) {
+                        console.log('Container clicked');
+                        // Small delay to allow checkbox state to update
+                        setTimeout(updateText, 50);
+                    });
+                }
+            }
+        }
+        
         function dismissNotification() {
             const notification = document.getElementById('approvalNotification');
             if (notification) {
@@ -705,6 +982,110 @@
         // Call highlight function after DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             highlightSearchTerms();
+        });
+
+        // Filter Modal Functions
+        function openFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+                
+                // Focus on modal for accessibility
+                modal.querySelector('.bg-white').focus();
+            }
+        }
+
+        function closeFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scroll
+            }
+        }
+
+        function resetFilters() {
+            const form = document.getElementById('filter-form');
+            if (form) {
+                // Reset all radio buttons to default (first option)
+                const statusRadios = form.querySelectorAll('input[name="status_filter"]');
+                const approvalRadios = form.querySelectorAll('input[name="approval_filter"]');
+                const actionCheckbox = form.querySelector('input[type="checkbox"][name="show_needs_action"]');
+                
+                if (statusRadios.length > 0) statusRadios[0].checked = true;
+                if (approvalRadios.length > 0) approvalRadios[0].checked = true;
+                if (actionCheckbox) actionCheckbox.checked = true;
+                
+                // Update toggle display
+                setupToggle();
+            }
+        }
+
+        function applyFilters() {
+            const form = document.getElementById('filter-form');
+            const searchForm = document.getElementById('search-form');
+            
+            if (form && searchForm) {
+                // Get selected values
+                const statusFilter = form.querySelector('input[name="status_filter"]:checked');
+                const approvalFilter = form.querySelector('input[name="approval_filter"]:checked');
+                const actionCheckbox = form.querySelector('input[type="checkbox"][name="show_needs_action"]');
+                
+                // Update hidden inputs in search form
+                document.getElementById('status-filter-input').value = statusFilter ? statusFilter.value : '';
+                document.getElementById('approval-filter-input').value = approvalFilter ? approvalFilter.value : '';
+                document.getElementById('show-needs-action-input').value = actionCheckbox && actionCheckbox.checked ? 'true' : 'false';
+                
+                // Submit the search form
+                searchForm.submit();
+            }
+        }
+
+        function updateToggleDisplay() {
+            // Simple call to setupToggle to refresh the display
+            setupToggle();
+        }
+
+        // Filter Modal Functions
+        function openFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                // Setup toggle when modal opens
+                setTimeout(setupToggle, 200);
+                
+                // Focus on modal for accessibility
+                const modalContent = modal.querySelector('.bg-white') || modal.querySelector('.relative');
+                if (modalContent) modalContent.focus();
+            }
+        }
+
+        function closeFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scroll
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('filterModal');
+            if (modal && e.target === modal) {
+                closeFilterModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('filterModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeFilterModal();
+                }
+            }
         });
     </script>
 </x-app-layout>

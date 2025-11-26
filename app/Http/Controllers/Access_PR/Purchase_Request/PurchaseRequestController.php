@@ -22,6 +22,9 @@ class PurchaseRequestController extends Controller
     {
         $user = Auth::user();
         $search = $request->get('search');
+        $statusFilter = $request->get('status_filter');
+        $approvalFilter = $request->get('approval_filter');
+        $showNeedsAction = $request->get('show_needs_action', 'true') === 'true';
         
         // Admin, purchasing, FAT manager, dan CFO bisa lihat semua PR
         if ($user->level === 'admin' || 
@@ -31,6 +34,11 @@ class PurchaseRequestController extends Controller
             ($user->level === 'admin' && (stripos($user->name, 'CFO') !== false || stripos($user->name, 'Chief Financial') !== false))) {
             
             $query = PurchaseRequest::with(['user', 'items', 'location', 'category']);
+            
+            // Apply status filter
+            if ($statusFilter) {
+                $query->where('status', strtoupper($statusFilter));
+            }
             
             // Apply search filter if search term exists
             if ($search) {
@@ -55,33 +63,62 @@ class PurchaseRequestController extends Controller
                 });
             }
             
-            // Get all PRs first for notification counting and sorting
+            // Get all PRs first for filtering and notification counting
             $allPRs = $query->get();
             
-            // Sort PRs: yang perlu action paling awal (diurutkan terbaru), kemudian yang tidak perlu action (diurutkan terbaru)
-            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
-            
-            // Separate PRs into two groups
-            $needActionPRs = collect();
-            $noActionPRs = collect();
-            
-            foreach ($allPRs as $pr) {
-                $needsApprovalAction = $pr->canBeApprovedByUser($user);
-                $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
-                
-                if ($needsApprovalAction || $needsPurchasingAction) {
-                    $needActionPRs->push($pr);
-                } else {
-                    $noActionPRs->push($pr);
-                }
+            // Apply approval level filter
+            if ($approvalFilter) {
+                $allPRs = $allPRs->filter(function($pr) use ($approvalFilter) {
+                    $currentLevel = $pr->getCurrentApprovalLevel();
+                    
+                    switch ($approvalFilter) {
+                        case 'department_head':
+                            return $currentLevel === 'department_head';
+                        case 'ga_approval':
+                            return $currentLevel === 'ga_approval';
+                        case 'finance_department':
+                            return $currentLevel === 'finance_department';
+                        case 'ceo_approval':
+                            return $currentLevel === 'ceo_approval';
+                        case 'cfo_approval':
+                            return $currentLevel === 'cfo_approval';
+                        case 'fully_approved':
+                            return is_null($currentLevel) || $currentLevel === 'tersedia_di_ga';
+                        default:
+                            return true;
+                    }
+                });
             }
             
-            // Sort each group by created_at DESC (newest first)
-            $needActionPRs = $needActionPRs->sortByDesc('created_at');
-            $noActionPRs = $noActionPRs->sortByDesc('created_at');
+            // Sort PRs based on show_needs_action setting
+            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
             
-            // Merge the groups: need action first, then no action
-            $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
+            if ($showNeedsAction) {
+                // Original logic: yang perlu action paling awal
+                $needActionPRs = collect();
+                $noActionPRs = collect();
+                
+                foreach ($allPRs as $pr) {
+                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                    
+                    if ($needsApprovalAction || $needsPurchasingAction) {
+                        $needActionPRs->push($pr);
+                    } else {
+                        $noActionPRs->push($pr);
+                    }
+                }
+                
+                // Sort each group by created_at DESC (newest first)
+                $needActionPRs = $needActionPRs->sortByDesc('created_at');
+                $noActionPRs = $noActionPRs->sortByDesc('created_at');
+                
+                // Merge the groups: need action first, then no action
+                $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
+            } else {
+                // Simple sort by created_at DESC without action priority
+                $sortedPRs = $allPRs->sortByDesc('created_at')->values();
+            }
             
             // Convert collection to paginator
             $perPage = 15;
@@ -97,8 +134,13 @@ class PurchaseRequestController extends Controller
             );
             
         } else {
-            // Untuk user lain, gunakan method helper untuk filter
+            // Untuk user lain, gunakan method helper untuk filter dengan access control
             $query = PurchaseRequest::with(['user', 'items', 'location', 'category']);
+            
+            // Apply status filter
+            if ($statusFilter) {
+                $query->where('status', strtoupper($statusFilter));
+            }
             
             // Apply search filter if search term exists
             if ($search) {
@@ -123,35 +165,70 @@ class PurchaseRequestController extends Controller
                 });
             }
             
+            // Apply access control filter
             $allPRs = $query->get()
                 ->filter(function($pr) use ($user) {
                     return $pr->canBeViewedByUser($user);
                 });
             
-            // Sort PRs: yang perlu action paling awal (diurutkan terbaru), kemudian yang tidak perlu action (diurutkan terbaru)
-            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
-            
-            // Separate PRs into two groups
-            $needActionPRs = collect();
-            $noActionPRs = collect();
-            
-            foreach ($allPRs as $pr) {
-                $needsApprovalAction = $pr->canBeApprovedByUser($user);
-                $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
-                
-                if ($needsApprovalAction || $needsPurchasingAction) {
-                    $needActionPRs->push($pr);
-                } else {
-                    $noActionPRs->push($pr);
-                }
+            // Apply approval level filter with access control check
+            if ($approvalFilter) {
+                $allPRs = $allPRs->filter(function($pr) use ($approvalFilter, $user) {
+                    // First check if user can view this PR
+                    if (!$pr->canBeViewedByUser($user)) {
+                        return false;
+                    }
+                    
+                    $currentLevel = $pr->getCurrentApprovalLevel();
+                    
+                    switch ($approvalFilter) {
+                        case 'department_head':
+                            return $currentLevel === 'department_head';
+                        case 'ga_approval':
+                            return $currentLevel === 'ga_approval';
+                        case 'finance_department':
+                            return $currentLevel === 'finance_department';
+                        case 'ceo_approval':
+                            return $currentLevel === 'ceo_approval';
+                        case 'cfo_approval':
+                            return $currentLevel === 'cfo_approval';
+                        case 'fully_approved':
+                            return is_null($currentLevel) || $currentLevel === 'tersedia_di_ga';
+                        default:
+                            return true;
+                    }
+                });
             }
             
-            // Sort each group by created_at DESC (newest first)
-            $needActionPRs = $needActionPRs->sortByDesc('created_at');
-            $noActionPRs = $noActionPRs->sortByDesc('created_at');
+            // Sort PRs based on show_needs_action setting
+            $isPurchasing = $user->divisi === 'PURCHASING' && in_array($user->level, ['manager', 'spv', 'staff']);
             
-            // Merge the groups: need action first, then no action
-            $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
+            if ($showNeedsAction) {
+                // Original logic: yang perlu action paling awal
+                $needActionPRs = collect();
+                $noActionPRs = collect();
+                
+                foreach ($allPRs as $pr) {
+                    $needsApprovalAction = $pr->canBeApprovedByUser($user);
+                    $needsPurchasingAction = $isPurchasing && $pr->status === 'APPROVED';
+                    
+                    if ($needsApprovalAction || $needsPurchasingAction) {
+                        $needActionPRs->push($pr);
+                    } else {
+                        $noActionPRs->push($pr);
+                    }
+                }
+                
+                // Sort each group by created_at DESC (newest first)
+                $needActionPRs = $needActionPRs->sortByDesc('created_at');
+                $noActionPRs = $noActionPRs->sortByDesc('created_at');
+                
+                // Merge the groups: need action first, then no action
+                $sortedPRs = $needActionPRs->merge($noActionPRs)->values();
+            } else {
+                // Simple sort by created_at DESC without action priority
+                $sortedPRs = $allPRs->sortByDesc('created_at')->values();
+            }
             
             // Convert collection to paginator
             $perPage = 15;

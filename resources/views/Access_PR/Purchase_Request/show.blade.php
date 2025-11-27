@@ -890,10 +890,13 @@
                         @if($purchaseRequest->statusUpdates->count() > 0)
                         <div class="space-y-4">
                             @foreach($purchaseRequest->statusUpdates->sortByDesc('created_at') as $update)
-                            <div class="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 border-blue-500">
+                            <div class="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 
+                                @if($update->update_type === 'CFO_QUANTITY_ADJUSTMENT') border-yellow-500 @else border-blue-500 @endif">
                                 <div class="flex-shrink-0 mt-1">
-                                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-sm"></i>
+                                    <div class="w-8 h-8 
+                                        @if($update->update_type === 'CFO_QUANTITY_ADJUSTMENT') bg-yellow-100 dark:bg-yellow-900 @else bg-blue-100 dark:bg-blue-900 @endif 
+                                        rounded-full flex items-center justify-center">
+                                        <i class="@if($update->update_type === 'CFO_QUANTITY_ADJUSTMENT') fas fa-edit text-yellow-600 dark:text-yellow-400 @else fas fa-info-circle text-blue-600 dark:text-blue-400 @endif text-sm"></i>
                                     </div>
                                 </div>
                                 <div class="flex-grow">
@@ -906,6 +909,38 @@
                                         </span>
                                     </div>
                                     <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ $update->description }}</p>
+                                    
+                                    @if($update->update_type === 'CFO_QUANTITY_ADJUSTMENT' && isset($update->data['quantity_changes']))
+                                    <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md border border-yellow-200 dark:border-yellow-700">
+                                        <h5 class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                                            <i class="fas fa-list mr-1"></i>Detail Perubahan Quantity:
+                                        </h5>
+                                        <div class="space-y-1">
+                                            @foreach($update->data['quantity_changes'] as $change)
+                                            <div class="text-xs text-yellow-700 dark:text-yellow-300 flex justify-between items-center">
+                                                <span class="font-medium flex-1">{{ $change['description'] }}</span>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="font-mono">
+                                                        {{ number_format($change['old_quantity']) }} 
+                                                        <i class="fas fa-arrow-right mx-1"></i>
+                                                        {{ number_format($change['new_quantity']) }} {{ $change['unit'] ?? '' }}
+                                                    </span>
+                                                    @if(isset($change['status']))
+                                                        @if($change['status'] === 'REJECTED')
+                                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-[10px] font-medium">DITOLAK</span>
+                                                        @elseif($change['status'] === 'INCREASED')
+                                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-[10px] font-medium">DITAMBAH</span>
+                                                        @elseif($change['status'] === 'REDUCED')
+                                                            <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-[10px] font-medium">DIKURANGI</span>
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+                                    
                                     <p class="text-xs text-gray-500 dark:text-gray-400">
                                         oleh {{ $update->updatedBy->name }}
                                     </p>
@@ -1048,7 +1083,57 @@
 
                         @php
                             $isFATApproval = $currentApprovalLevel === 'finance_dept' && Auth::user()->divisi === 'FAT';
+                            $isCFOApproval = $currentApprovalLevel === 'cfo' && Auth::user()->level === 'cfo';
                         @endphp
+
+                        @if($isCFOApproval)
+                        <!-- CFO Approval - Quantity Adjustment -->
+                        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                <i class="fas fa-edit mr-2 text-yellow-600"></i>
+                                Penyesuaian Quantity oleh CFO (Opsional)
+                            </h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                                Sebagai CFO, Anda dapat menyesuaikan quantity item yang dibutuhkan:
+                                <br>• <strong>0</strong> = Item ditolak
+                                <br>• <strong>Lebih dari qty asli</strong> = Item ditambah
+                                <br>• <strong>Kurang dari qty asli</strong> = Item dikurangi
+                                <br>• <strong>Kosongkan</strong> = Tidak ada perubahan
+                            </p>
+                            <div class="space-y-2 max-h-56 overflow-auto pr-1">
+                                @foreach($purchaseRequest->items as $prItem)
+                                <div class="flex items-center justify-between bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-3 py-2">
+                                    <div class="text-xs text-gray-700 dark:text-gray-200 flex-1 pr-2">
+                                        <div class="font-medium">{{ $prItem->description }}</div>
+                                        <div class="text-[11px] text-gray-500">
+                                            Qty Asli: {{ $prItem->quantity }} {{ $prItem->unit ?? '' }}
+                                            @if($prItem->estimated_price)
+                                            | Harga satuan: Rp {{ number_format($prItem->estimated_price, 0, ',', '.') }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="flex flex-col">
+                                            <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Qty Baru:
+                                            </label>
+                                            <input type="number" 
+                                                   name="cfo_quantities[{{ $prItem->id }}]" 
+                                                   min="0" 
+                                                   class="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:text-white"
+                                                   placeholder="{{ $prItem->quantity }}">
+                                        </div>
+                                        <span class="text-xs text-gray-500 mt-4">{{ $prItem->unit ?? '' }}</span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Perubahan quantity akan dicatat dalam history. Qty 0 berarti item ditolak, qty dapat ditambah dari jumlah asli.
+                            </p>
+                        </div>
+                        @endif
 
                         @if($isFATApproval)
                         <!-- FAT Approval Fields -->

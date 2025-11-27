@@ -563,8 +563,9 @@ class PurchaseRequestController extends Controller
         $user = Auth::user();
         $currentApprovalLevel = $purchaseRequest->getCurrentApprovalLevel();
         $isFATApproval = $currentApprovalLevel === 'finance_dept' && $user->divisi === 'FAT';
+        $isCFOApproval = $currentApprovalLevel === 'cfo' && $user->level === 'cfo';
         
-        // Validation rules - different for FAT approval
+        // Validation rules - different for FAT and CFO approval
         $rules = ['notes' => 'nullable|string|max:500'];
         
         if ($isFATApproval) {
@@ -573,6 +574,12 @@ class PurchaseRequestController extends Controller
             // Per-item classification: asset or non-asset
             $rules['fat_item_types'] = 'required|array';
             $rules['fat_item_types.*'] = 'required|in:asset,non_asset';
+        }
+        
+        if ($isCFOApproval) {
+            // CFO can adjust quantities (0 means rejected, can be more than original)
+            $rules['cfo_quantities'] = 'nullable|array';
+            $rules['cfo_quantities.*'] = 'nullable|integer|min:0';
         }
         
         $request->validate($rules);
@@ -587,6 +594,52 @@ class PurchaseRequestController extends Controller
         // Gunakan method yang baru untuk check authorization
         if (!$purchaseRequest->canBeApprovedByUser($user)) {
             return back()->with('error', 'Anda tidak dapat menyetujui PR ini saat ini.');
+        }
+
+        // Handle CFO quantity adjustments
+        $quantityChanges = [];
+        if ($isCFOApproval && $request->has('cfo_quantities')) {
+            $cfoQuantities = $request->input('cfo_quantities', []);
+            
+            foreach ($cfoQuantities as $itemId => $newQuantity) {
+                // Allow 0 (rejected) and any positive number (can be more than original)
+                if ($newQuantity !== null && $newQuantity !== '') {
+                    $item = $purchaseRequest->items()->find($itemId);
+                    if ($item && $item->quantity != $newQuantity && $newQuantity >= 0) {
+                        $oldQuantity = $item->quantity;
+                        $item->update(['quantity' => $newQuantity]);
+                        
+                        // Determine status based on quantity
+                        $status = '';
+                        if ($newQuantity == 0) {
+                            $status = 'REJECTED';
+                        } elseif ($newQuantity > $oldQuantity) {
+                            $status = 'INCREASED';
+                        } elseif ($newQuantity < $oldQuantity) {
+                            $status = 'REDUCED';
+                        } else {
+                            $status = 'UNCHANGED';
+                        }
+                        
+                        $quantityChanges[] = [
+                            'item_id' => $itemId,
+                            'description' => $item->description,
+                            'old_quantity' => $oldQuantity,
+                            'new_quantity' => $newQuantity,
+                            'unit' => $item->unit,
+                            'status' => $status
+                        ];
+                    }
+                }
+            }
+            
+            // Recalculate total estimated price if quantities changed
+            if (!empty($quantityChanges)) {
+                $newTotal = $purchaseRequest->items->sum(function($item) {
+                    return $item->quantity * ($item->estimated_price ?? 0);
+                });
+                $purchaseRequest->update(['total_estimated_price' => $newTotal]);
+            }
         }
 
         $approvals = $purchaseRequest->approvals ?? [];
@@ -604,6 +657,11 @@ class PurchaseRequestController extends Controller
             'approved_by_level' => $user->level,
             'notes' => $request->notes
         ];
+        
+        // Add CFO quantity changes data
+        if ($isCFOApproval && !empty($quantityChanges)) {
+            $approvalData['quantity_changes'] = $quantityChanges;
+        }
         
         // Add FAT-specific data if this is FAT approval
         if ($isFATApproval) {
@@ -661,6 +719,38 @@ class PurchaseRequestController extends Controller
         }
 
         $purchaseRequest->update($updateData);
+
+        // Create status update log for CFO quantity changes
+        if ($isCFOApproval && !empty($quantityChanges)) {
+            $changeDescription = "CFO melakukan penyesuaian quantity pada " . count($quantityChanges) . " item:\n";
+            foreach ($quantityChanges as $change) {
+                $statusText = '';
+                switch ($change['status']) {
+                    case 'REJECTED':
+                        $statusText = ' (DITOLAK)';
+                        break;
+                    case 'INCREASED':
+                        $statusText = ' (DITAMBAH)';
+                        break;
+                    case 'REDUCED':
+                        $statusText = ' (DIKURANGI)';
+                        break;
+                }
+                $changeDescription .= "• {$change['description']}: {$change['old_quantity']} → {$change['new_quantity']} {$change['unit']}{$statusText}\n";
+            }
+            
+            PurchaseRequestStatusUpdate::create([
+                'purchase_request_id' => $purchaseRequest->id,
+                'update_type' => 'CFO_QUANTITY_ADJUSTMENT',
+                'description' => $changeDescription,
+                'data' => [
+                    'quantity_changes' => $quantityChanges,
+                    'approved_by' => $user->name,
+                    'approved_at' => now()->toISOString()
+                ],
+                'updated_by' => $user->id
+            ]);
+        }
 
         if ($allApproved) {
             return back()->with('success', 'Purchase Request berhasil disetujui dan telah mencapai persetujuan final!');

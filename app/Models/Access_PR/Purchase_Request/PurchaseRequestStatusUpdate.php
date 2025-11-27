@@ -46,6 +46,7 @@ class PurchaseRequestStatusUpdate extends Model
             'GOODS_RETURNED' => 'Barang Dikembalikan',
             'COMPLAIN' => 'Complain',
             'TERSEDIA_DI_GA' => 'Tersedia di GA',
+            'CFO_QUANTITY_ADJUSTMENT' => 'Penyesuaian Quantity oleh CFO',
             'CLOSED' => 'Selesai'
         ];
     }

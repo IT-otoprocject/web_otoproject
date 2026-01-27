@@ -18,10 +18,34 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index()
+    public function index(Request $request)
     {
-    $users = User::paginate(10);
-    return view('admin.users.index', compact('users'));
+        $query = User::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('level', 'like', "%{$search}%")
+                    ->orWhere('divisi', 'like', "%{$search}%")
+                    ->orWhere('garage', 'like', "%{$search}%");
+            });
+        }
+
+        // Email domain filter
+        if ($request->filled('email_filter')) {
+            if ($request->email_filter === 'otoproject') {
+                $query->where('email', 'like', '%@otoproject.id%');
+            } elseif ($request->email_filter === 'external') {
+                $query->where('email', 'not like', '%@otoproject.id%');
+            }
+        }
+
+        $users = $query->paginate(10)->withQueryString();
+        
+        return view('admin.users.index', compact('users'));
     }
 
     /**

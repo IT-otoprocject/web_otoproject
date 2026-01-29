@@ -645,6 +645,8 @@ class UserController extends Controller
             'payment_method' => 'Payment Methods (PR)',
             'spk_management' => 'SPK Management', 
             'inventory' => 'Inventory',
+            'dokumen_manajemen' => 'Dokumen Manajemen (View)',
+            'dokumen_manajemen_admin' => 'Dokumen Manajemen Admin (CRUD)',
             'reports' => 'Reports',
             'settings' => 'Settings'
         ];

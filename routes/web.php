@@ -152,6 +152,36 @@ Route::get('/api/search-products', [App\Http\Controllers\Api\ProductSearchContro
 // Route untuk data barang (JSON) untuk kebutuhan AJAX reload produk di kerja_mekanik
 Route::get('/spk/{spk_id}/items/json', [SpkController::class, 'itemsJson'])->name('spk.items.json');
 
+// Routes untuk Document Management
+Route::middleware(['auth', 'system_access:dokumen_manajemen'])->prefix('document-management')->name('document-management.')->group(function () {
+    // Index - List all folders
+    Route::get('/', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'index'])->name('index');
+    
+    // Folder management (admin only)
+    Route::middleware(['system_access:dokumen_manajemen_admin'])->group(function () {
+        Route::get('/manage-folders', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'manageFolders'])->name('manage-folders');
+        Route::post('/folders', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'storeFolder'])->name('folders.store');
+        Route::put('/folders/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'updateFolder'])->name('folders.update');
+        Route::delete('/folders/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroyFolder'])->name('folders.destroy');
+    });
+    
+    // Show folder and its documents
+    Route::get('/folder/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'showFolder'])->name('folder');
+    
+    // Document CRUD (admin only)
+    Route::middleware(['system_access:dokumen_manajemen_admin'])->group(function () {
+        Route::get('/folder/{folder}/create', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'create'])->name('create');
+        Route::post('/documents', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'store'])->name('store');
+        Route::get('/documents/{document}/edit', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'edit'])->name('edit');
+        Route::put('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'update'])->name('update');
+        Route::delete('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Download and view (accessible to all with dokumen_manajemen access)
+    Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'download'])->name('download');
+    Route::get('/documents/{document}/view', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'view'])->name('view');
+});
+
 // Routes untuk Purchase Request
 Route::middleware(['auth', 'system_access:pr'])->group(function () {
     Route::resource('purchase-request', App\Http\Controllers\Access_PR\Purchase_Request\PurchaseRequestController::class);

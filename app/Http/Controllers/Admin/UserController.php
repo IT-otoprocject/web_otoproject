@@ -623,6 +623,7 @@ class UserController extends Controller
             }
 
             if (!empty($data)) {
+                /** @var \App\Models\User $user */
                 $user->update($data);
                 $count++;
             }

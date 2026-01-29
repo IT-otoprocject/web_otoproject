@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\DocumentManagement;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\DocumentManagement\Document;
 use App\Models\DocumentManagement\DocumentFolder;
 use Illuminate\Http\Request;
@@ -28,8 +27,12 @@ class DocumentManagementController extends Controller
     /**
      * Display documents in a specific folder
      */
-    public function showFolder(DocumentFolder $folder)
+    public function showFolder($slug)
     {
+        $folder = DocumentFolder::where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
         $documents = Document::where('folder_id', $folder->id)
             ->with('uploader')
             ->orderBy('created_at', 'desc')
@@ -45,7 +48,7 @@ class DocumentManagementController extends Controller
     /**
      * Show the form for creating a new document
      */
-    public function create(DocumentFolder $folder)
+    public function create($folderId)
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -53,6 +56,8 @@ class DocumentManagementController extends Controller
         if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
         }
+
+        $folder = DocumentFolder::findOrFail($folderId);
 
         return view('document-management.create', compact('folder'));
     }

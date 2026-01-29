@@ -54,7 +54,12 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onclick="editFolder({{ $folder->id }}, {{ json_encode($folder->name) }}, {{ json_encode($folder->description) }}, {{ $folder->is_active ? 'true' : 'false' }})" 
+                                        <button type="button"
+                                                data-folder-id="{{ $folder->id }}"
+                                                data-folder-name="{{ $folder->name }}"
+                                                data-folder-description="{{ $folder->description ?? '' }}"
+                                                data-folder-active="{{ $folder->is_active ? '1' : '0' }}"
+                                                onclick="editFolder(this.dataset.folderId, this.dataset.folderName, this.dataset.folderDescription, this.dataset.folderActive === '1')" 
                                                 class="text-yellow-600 hover:text-yellow-900 mr-3">
                                             Edit
                                         </button>

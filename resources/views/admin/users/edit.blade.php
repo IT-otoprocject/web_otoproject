@@ -92,16 +92,11 @@
                                 <select name="level" id="level" required 
                                     class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
                                     <option value="">Select User Level</option>
-                                    <option value="admin" {{ old('level', $user->level) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="ceo" {{ old('level', $user->level) == 'ceo' ? 'selected' : '' }}>CEO</option>
-                                    <option value="cfo" {{ old('level', $user->level) == 'cfo' ? 'selected' : '' }}>CFO</option>
-                                    <option value="manager" {{ old('level', $user->level) == 'manager' ? 'selected' : '' }}>Manager</option>
-                                    <option value="spv" {{ old('level', $user->level) == 'spv' ? 'selected' : '' }}>SPV</option>
-                                    <option value="staff" {{ old('level', $user->level) == 'staff' ? 'selected' : '' }}>Staff</option>
-                                    <option value="headstore" {{ old('level', $user->level) == 'headstore' ? 'selected' : '' }}>Head Store</option>
-                                    <option value="kasir" {{ old('level', $user->level) == 'kasir' ? 'selected' : '' }}>Kasir</option>
-                                    <option value="sales" {{ old('level', $user->level) == 'sales' ? 'selected' : '' }}>Sales</option>
-                                    <option value="mekanik" {{ old('level', $user->level) == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
+                                    @foreach($masterLevels as $level)
+                                        <option value="{{ $level->kode }}" {{ old('level', $user->level) == $level->kode ? 'selected' : '' }}>
+                                            {{ $level->nama }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -111,16 +106,11 @@
                                 <select name="divisi" id="divisi" 
                                     class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
                                     <option value="">Pilih Divisi</option>
-                                    <option value="FACTORY" {{ old('divisi', $user->divisi) == 'FACTORY' ? 'selected' : '' }}>Factory</option>
-                                    <option value="FAT" {{ old('divisi', $user->divisi) == 'FAT' ? 'selected' : '' }}>FAT</option>
-                                    <option value="HCGA" {{ old('divisi', $user->divisi) == 'HCGA' ? 'selected' : '' }}>HCGA</option>
-                                    <option value="RETAIL" {{ old('divisi', $user->divisi) == 'RETAIL' ? 'selected' : '' }}>Retail</option>
-                                    <option value="PDCA" {{ old('divisi', $user->divisi) == 'PDCA' ? 'selected' : '' }}>PDCA</option>
-                                    <option value="PURCHASING" {{ old('divisi', $user->divisi) == 'PURCHASING' ? 'selected' : '' }}>Purchasing</option>
-                                    <option value="R&D" {{ old('divisi', $user->divisi) == 'R&D' ? 'selected' : '' }}>R&D</option>
-                                    <option value="SALES" {{ old('divisi', $user->divisi) == 'SALES' ? 'selected' : '' }}>Sales</option>
-                                    <option value="WAREHOUSE" {{ old('divisi', $user->divisi) == 'WAREHOUSE' ? 'selected' : '' }}>Warehouse</option>
-                                    <option value="WAREHOUSE_SBY" {{ old('divisi', $user->divisi) == 'WAREHOUSE_SBY' ? 'selected' : '' }}>Warehouse Surabaya</option>
+                                    @foreach($masterDivisi as $divisi)
+                                        <option value="{{ $divisi->kode }}" {{ old('divisi', $user->divisi) == $divisi->kode ? 'selected' : '' }}>
+                                            {{ $divisi->nama }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                             </div>
@@ -131,12 +121,11 @@
                                 <select name="garage" id="garage" 
                                     class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors">
                                     <option value="">Pilih Garage</option>
-                                    <option value="Bandung" {{ old('garage', $user->garage) == 'Bandung' ? 'selected' : '' }}>Bandung</option>
-                                    <option value="Bekasi" {{ old('garage', $user->garage) == 'Bekasi' ? 'selected' : '' }}>Bekasi</option>
-                                    <option value="Bintaro" {{ old('garage', $user->garage) == 'Bintaro' ? 'selected' : '' }}>Bintaro</option>
-                                    <option value="Cengkareng" {{ old('garage', $user->garage) == 'Cengkareng' ? 'selected' : '' }}>Cengkareng</option>
-                                    <option value="Cibubur" {{ old('garage', $user->garage) == 'Cibubur' ? 'selected' : '' }}>Cibubur</option>
-                                    <option value="Surabaya" {{ old('garage', $user->garage) == 'Surabaya' ? 'selected' : '' }}>Surabaya</option>
+                                    @foreach($masterGarages as $garage)
+                                        <option value="{{ $garage->kode }}" {{ old('garage', $user->garage) == $garage->kode ? 'selected' : '' }}>
+                                            {{ $garage->nama }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>

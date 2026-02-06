@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\Configuration\ConfigurationController;
+use App\Http\Controllers\Admin\Configuration\MasterDivisiController;
+use App\Http\Controllers\Admin\Configuration\MasterUserLevelController;
+use App\Http\Controllers\Admin\Configuration\MasterGarageController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\KerjaMekanikController;
 use App\Http\Controllers\ReportSpkController; // Tambahkan controller untuk report SPK
@@ -63,6 +67,12 @@ Route::middleware(['auth', 'system_access:user_management'])->prefix('admin')->n
     
     // Resource routes (must be last to avoid conflicts)
     Route::resource('users', AdminUserController::class);
+    
+    // Configuration routes
+    Route::get('configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
+    Route::resource('configuration/divisi', MasterDivisiController::class, ['as' => 'configuration']);
+    Route::resource('configuration/user-level', MasterUserLevelController::class, ['as' => 'configuration']);
+    Route::resource('configuration/garage', MasterGarageController::class, ['as' => 'configuration']);
 });
 
 // Test route for checking system access

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Configuration\MasterDivisi;
+use App\Models\Configuration\MasterUserLevel;
+use App\Models\Configuration\MasterGarage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -54,7 +57,11 @@ class UserController extends Controller
     public function create()
     {
         $availableModules = $this->getAvailableModules();
-        return view('admin.users.create', compact('availableModules'));
+        $masterDivisi = MasterDivisi::active()->orderBy('nama')->get();
+        $masterLevels = MasterUserLevel::active()->orderBy('nama')->get();
+        $masterGarages = MasterGarage::active()->orderBy('nama')->get();
+        
+        return view('admin.users.create', compact('availableModules', 'masterDivisi', 'masterLevels', 'masterGarages'));
     }
 
     /**
@@ -108,7 +115,11 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $availableModules = $this->getAvailableModules();
-        return view('admin.users.edit', compact('user', 'availableModules'));
+        $masterDivisi = MasterDivisi::active()->orderBy('nama')->get();
+        $masterLevels = MasterUserLevel::active()->orderBy('nama')->get();
+        $masterGarages = MasterGarage::active()->orderBy('nama')->get();
+        
+        return view('admin.users.edit', compact('user', 'availableModules', 'masterDivisi', 'masterLevels', 'masterGarages'));
     }
 
     /**

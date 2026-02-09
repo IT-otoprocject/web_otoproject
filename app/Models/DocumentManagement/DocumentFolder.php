@@ -16,10 +16,13 @@ class DocumentFolder extends Model
         'icon',
         'order',
         'is_active',
+        'is_private',
+        'department',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_private' => 'boolean',
         'order' => 'integer',
     ];
 
@@ -61,5 +64,65 @@ class DocumentFolder extends Model
     public function getDocumentCountAttribute()
     {
         return $this->documents()->count();
+    }
+
+    /**
+     * Check if user can manage this folder (CRUD operations)
+     * 
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    public function canUserManage($user)
+    {
+        // If department is 'all', only dokumen_manajemen_admin can manage
+        if ($this->department === 'all') {
+            return $user->hasAccess('dokumen_manajemen_admin');
+        }
+        
+        // If has specific department
+        if ($this->department && $this->department !== 'all') {
+            // User must be from that department AND be a Manager
+            $isSameDepartment = $user->divisi && $user->divisi === $this->department;
+            $isManager = $user->level && strtolower($user->level) === 'manager';
+            
+            return $isSameDepartment && $isManager;
+        }
+
+        // If no department set, only dokumen_manajemen_admin can manage
+        return $user->hasAccess('dokumen_manajemen_admin');
+    }
+
+    /**
+     * Check if user can view this folder
+     * 
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    public function canUserView($user)
+    {
+        // Admin always can view
+        if ($user->hasAccess('dokumen_manajemen_admin')) {
+            return true;
+        }
+
+        // If folder has no department set, everyone can view
+        if (!$this->department || $this->department === '') {
+            return true;
+        }
+
+        // If department is 'all', everyone can view
+        if ($this->department === 'all') {
+            return true;
+        }
+
+        // If private and has specific department
+        if ($this->is_private && $this->department) {
+            // Only users from that department can view
+            return $user->divisi && $user->divisi === $this->department;
+        }
+
+        // If not private but has specific department
+        // Everyone can view, but only that department can CRUD (handled in canUserManage)
+        return true;
     }
 }

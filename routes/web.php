@@ -163,9 +163,16 @@ Route::get('/api/search-products', [App\Http\Controllers\Api\ProductSearchContro
 Route::get('/spk/{spk_id}/items/json', [SpkController::class, 'itemsJson'])->name('spk.items.json');
 
 // Routes untuk Document Management
-Route::middleware(['auth', 'system_access:dokumen_manajemen'])->prefix('document-management')->name('document-management.')->group(function () {
-    // Index - List all folders
+Route::middleware(['auth'])->prefix('document-management')->name('document-management.')->group(function () {
+    // Index - List all folders (accessible to all authenticated users)
     Route::get('/', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'index'])->name('index');
+    
+    // Show folder and its documents (accessible to all authenticated users)
+    Route::get('/folder/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'showFolder'])->name('folder');
+    
+    // Download and view (accessible to all authenticated users)
+    Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'download'])->name('download');
+    Route::get('/documents/{document}/view', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'view'])->name('view');
     
     // Folder management (admin only)
     Route::middleware(['system_access:dokumen_manajemen_admin'])->group(function () {
@@ -175,9 +182,6 @@ Route::middleware(['auth', 'system_access:dokumen_manajemen'])->prefix('document
         Route::delete('/folders/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroyFolder'])->name('folders.destroy');
     });
     
-    // Show folder and its documents
-    Route::get('/folder/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'showFolder'])->name('folder');
-    
     // Document CRUD (admin only)
     Route::middleware(['system_access:dokumen_manajemen_admin'])->group(function () {
         Route::get('/folder/{folder}/create', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'create'])->name('create');
@@ -186,10 +190,6 @@ Route::middleware(['auth', 'system_access:dokumen_manajemen'])->prefix('document
         Route::put('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'update'])->name('update');
         Route::delete('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroy'])->name('destroy');
     });
-    
-    // Download and view (accessible to all with dokumen_manajemen access)
-    Route::get('/documents/{document}/download', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'download'])->name('download');
-    Route::get('/documents/{document}/view', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'view'])->name('view');
 });
 
 // Routes untuk Purchase Request

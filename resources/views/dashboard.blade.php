@@ -28,7 +28,7 @@
                 @endhasAccess
                 
                 <!-- Menu Dokumen Manajemen -->
-                @hasAccess('dokumen_manajemen')
+                @auth
                 <a href="{{ route('document-management.index') }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center hover:bg-yellow-100 dark:hover:bg-yellow-700 transition aspect-square min-w-[140px] max-w-[220px] min-h-[140px] max-h-[220px] mx-auto">
                     <div class="flex flex-col items-center justify-center">
                         <svg class="h-16 w-16 mb-4 text-yellow-500 border-4 border-red-500" style="border-radius:16px; padding: 8px;" fill="currentColor" viewBox="0 0 20 20">
@@ -37,7 +37,7 @@
                         <span class="text-lg font-semibold text-gray-900 dark:text-white">Dokumen Manajemen</span>
                     </div>
                 </a>
-                @endhasAccess
+                @endauth
                 
             </div>
         </div>

@@ -17,10 +17,22 @@ class DocumentManagementController extends Controller
      */
     public function index()
     {
-        $folders = DocumentFolder::active()
+        /** @var \App\Models\User|null $currentUser */
+        $currentUser = Auth::user();
+        
+        $query = DocumentFolder::active()
             ->ordered()
-            ->withCount('documents')
-            ->get();
+            ->withCount('documents');
+        
+        // If user is not logged in, show only non-private folders
+        if (!$currentUser) {
+            $folders = $query->where('is_private', false)->get();
+        } else {
+            // If user is logged in, filter based on access
+            $folders = $query->get()->filter(function ($folder) use ($currentUser) {
+                return $folder->canUserView($currentUser);
+            });
+        }
 
         return view('document-management.index', compact('folders'));
     }
@@ -30,14 +42,20 @@ class DocumentManagementController extends Controller
      */
     public function showFolder(DocumentFolder $folder)
     {
+        /** @var \App\Models\User|null $currentUser */
+        $currentUser = Auth::user();
+        
+        // Check if user can view this folder
+        if (!$currentUser || !$folder->canUserView($currentUser)) {
+            abort(403, 'Anda tidak memiliki akses ke folder ini');
+        }
+
         $documents = Document::where('folder_id', $folder->id)
             ->with('uploader')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        /** @var \App\Models\User|null $currentUser */
-        $currentUser = Auth::user();
-        $canManage = $currentUser ? $currentUser->hasAccess('dokumen_manajemen_admin') : false;
+        $canManage = $currentUser ? $folder->canUserManage($currentUser) : false;
 
         return view('document-management.folder', compact('folder', 'documents', 'canManage'));
     }
@@ -50,8 +68,12 @@ class DocumentManagementController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         
-        if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
+        }
+        
+        if (!$folder->canUserManage($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola folder ini');
         }
 
         return view('document-management.create', compact('folder'));
@@ -65,7 +87,7 @@ class DocumentManagementController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         
-        if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
         }
 
@@ -81,6 +103,10 @@ class DocumentManagementController extends Controller
 
         $file = $request->file('file');
         $folder = DocumentFolder::findOrFail($request->folder_id);
+        
+        if (!$folder->canUserManage($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola folder ini');
+        }
 
         // Generate unique filename
         $originalName = $file->getClientOriginalName();
@@ -114,8 +140,13 @@ class DocumentManagementController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         
-        if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
+        }
+        
+        $folder = $document->folder;
+        if (!$folder->canUserManage($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola folder ini');
         }
 
         $folders = DocumentFolder::active()->ordered()->get();
@@ -131,8 +162,13 @@ class DocumentManagementController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         
-        if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
+        }
+        
+        $folder = $document->folder;
+        if (!$folder->canUserManage($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola folder ini');
         }
 
         $request->validate([
@@ -189,11 +225,15 @@ class DocumentManagementController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         
-        if (!$user || !$user->hasAccess('dokumen_manajemen_admin')) {
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini');
         }
 
         $folder = $document->folder;
+        
+        if (!$folder->canUserManage($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola folder ini');
+        }
 
         // Delete file from storage
         if (Storage::disk('public')->exists($document->file_path)) {
@@ -253,8 +293,15 @@ class DocumentManagementController extends Controller
         $folders = DocumentFolder::withCount('documents')
             ->orderBy('order', 'asc')
             ->get();
+        
+        // Get unique divisions from users table
+        $divisions = \App\Models\User::whereNotNull('divisi')
+            ->where('divisi', '!=', '')
+            ->distinct()
+            ->orderBy('divisi')
+            ->pluck('divisi');
 
-        return view('document-management.manage-folders', compact('folders'));
+        return view('document-management.manage-folders', compact('folders', 'divisions'));
     }
 
     /**
@@ -272,6 +319,8 @@ class DocumentManagementController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:document_folders,name',
             'description' => 'nullable|string',
+            'is_private' => 'boolean',
+            'department' => 'nullable|string',
         ]);
 
         DocumentFolder::create([
@@ -281,6 +330,8 @@ class DocumentManagementController extends Controller
             'icon' => 'folder',
             'order' => DocumentFolder::max('order') + 1,
             'is_active' => true,
+            'is_private' => $request->has('is_private'),
+            'department' => $request->department,
         ]);
 
         return redirect()
@@ -304,6 +355,8 @@ class DocumentManagementController extends Controller
             'name' => 'required|string|max:255|unique:document_folders,name,' . $folder->id,
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'is_private' => 'boolean',
+            'department' => 'nullable|string',
         ]);
 
         $folder->update([
@@ -311,6 +364,8 @@ class DocumentManagementController extends Controller
             'slug' => Str::slug($request->name),
             'description' => $request->description,
             'is_active' => $request->has('is_active'),
+            'is_private' => $request->has('is_private'),
+            'department' => $request->department,
         ]);
 
         return redirect()

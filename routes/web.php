@@ -182,14 +182,12 @@ Route::middleware(['auth'])->prefix('document-management')->name('document-manag
         Route::delete('/folders/{folder}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroyFolder'])->name('folders.destroy');
     });
     
-    // Document CRUD (admin only)
-    Route::middleware(['system_access:dokumen_manajemen_admin'])->group(function () {
-        Route::get('/folder/{folder}/create', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'create'])->name('create');
-        Route::post('/documents', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'store'])->name('store');
-        Route::get('/documents/{document}/edit', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'edit'])->name('edit');
-        Route::put('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'update'])->name('update');
-        Route::delete('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroy'])->name('destroy');
-    });
+    // Document CRUD (check permission in controller via canUserManage)
+    Route::get('/folder/{folder}/create', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'create'])->name('create');
+    Route::post('/documents', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'store'])->name('store');
+    Route::get('/documents/{document}/edit', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'edit'])->name('edit');
+    Route::put('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'update'])->name('update');
+    Route::delete('/documents/{document}', [App\Http\Controllers\DocumentManagement\DocumentManagementController::class, 'destroy'])->name('destroy');
 });
 
 // Routes untuk Purchase Request

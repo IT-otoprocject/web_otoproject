@@ -74,9 +74,9 @@ class DocumentFolder extends Model
      */
     public function canUserManage($user)
     {
-        // If department is 'all', only dokumen_manajemen_admin can manage
-        if ($this->department === 'all') {
-            return $user->hasAccess('dokumen_manajemen_admin');
+        // Admin always can manage
+        if ($user->hasAccess('dokumen_manajemen_admin')) {
+            return true;
         }
         
         // If has specific department
@@ -88,8 +88,8 @@ class DocumentFolder extends Model
             return $isSameDepartment && $isManager;
         }
 
-        // If no department set, only dokumen_manajemen_admin can manage
-        return $user->hasAccess('dokumen_manajemen_admin');
+        // If department is 'all' or no department set, only admin can manage (already checked above)
+        return false;
     }
 
     /**
